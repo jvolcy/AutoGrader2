@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Spelman AutoGrader 2.0");
-        primaryStage.setScene(new Scene(root, 500, 300));
+        primaryStage.setScene(new Scene(root, 504, 300));
         primaryStage.show();
     }
 

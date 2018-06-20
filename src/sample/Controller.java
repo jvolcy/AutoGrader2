@@ -15,5 +15,10 @@ public class Controller {
         wvOutput.getEngine().load("file:///Users/jvolcy/work/Spelman/Projects/data/AGP0202.html");
     }
 
+    public void menuFileQuit()
+    {
+        System.out.println("Good bye");
+        System.exit(0);
+    }
 
 }
