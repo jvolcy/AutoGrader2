@@ -21,7 +21,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="504.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AutoGrader2.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AutoGrader2.Controller">
     <children>
         <VBox layoutX="84.0" layoutY="57.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -47,7 +47,7 @@
                                 </Menu>
                                 <Menu mnemonicParsing="false" text="Help">
                                     <items>
-                                        <MenuItem mnemonicParsing="false" text="AutoGrader 2 Help" />
+                                        <MenuItem mnemonicParsing="false" text="AutoGrader Help" />
                               <MenuItem mnemonicParsing="false" text="About" />
                                     </items>
                                 </Menu>
@@ -220,9 +220,12 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <ListView fx:id="listTestData" editable="true" layoutX="39.0" layoutY="81.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff0f0; -fx-border-style: solid; -fx-border-color: lightgray;" />
-                              <CheckBox layoutX="39.0" layoutY="47.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="134.0" text="No Test Data" />
-                              <Button layoutX="165.0" layoutY="47.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                              <ListView fx:id="listTestData" editable="true" layoutX="39.0" layoutY="128.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="153.0" prefWidth="475.0" style="-fx-background-color: #fff0f0; -fx-border-style: solid; -fx-border-color: lightgray;" />
+                              <CheckBox layoutX="39.0" layoutY="78.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="134.0" text="No Test Data" />
+                              <Button layoutX="165.0" layoutY="78.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                              <Button layoutX="39.0" layoutY="28.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="154.0" text="Source Directory" />
+                              <TextField layoutX="200.0" layoutY="28.0" prefHeight="27.0" prefWidth="311.0" />
+                              <Button layoutX="275.0" layoutY="88.0" mnemonicParsing="false" onAction="#btnTestDataRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
                            </children></AnchorPane>
                             </content>
                         </Tab>
