@@ -9,6 +9,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -17,13 +18,13 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="504.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="504.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
       <VBox layoutX="84.0" layoutY="57.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <HBox>
+            <HBox minHeight="40.0" spacing="4.0" style="-fx-border-style: solid; -fx-border-color: lightgray; -fx-border-width: 1; -fx-background-color: #e8e8f2;">
                <children>
-                  <MenuBar HBox.hgrow="ALWAYS">
+                  <MenuBar style="-fx-background-color: rgba(0,0,0,0);">
                     <menus>
                       <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                         <items>
@@ -38,7 +39,7 @@
                       </Menu>
                       <Menu mnemonicParsing="false" text="Settings">
                         <items>
-                          <MenuItem mnemonicParsing="false" text="Configure" />
+                              <MenuItem mnemonicParsing="false" text="Configure" />
                         </items>
                       </Menu>
                       <Menu mnemonicParsing="false" text="Help">
@@ -51,8 +52,6 @@
                               <Pane minWidth="70.0" />
                            </graphic>
                         </Menu>
-                        <Menu mnemonicParsing="false" style="-fx-border-style: solid; -fx-border-radius: 4; -fx-border-insets: 0; -fx-border-color: #b0b0b0; -fx-background-color: #e4e4e4;" text="Input/Setup" />
-                        <Menu fx:id="menuOutput" mnemonicParsing="false" onHidden="#menuOutput" onHiding="#menuOutput" onShowing="#menuOutput" onShown="#menuOutput" style="-fx-border-style: solid; -fx-border-radius: 4; -fx-border-insets: 0; -fx-border-color: #b0b0b0; -fx-background-color: #e4e4e4;" text="Output" />
                     </menus>
                      <HBox.margin>
                         <Insets />
@@ -61,9 +60,154 @@
                         <Insets bottom="2.0" top="2.0" />
                      </padding>
                   </MenuBar>
+                  <Button fx:id="btnInputSetup" layoutX="550.0" layoutY="11.0" minHeight="30.0" mnemonicParsing="false" onAction="#btnInputSetupClick" text="Input/Setup">
+                     <HBox.margin>
+                        <Insets top="4.0" />
+                     </HBox.margin></Button>
+                  <Button fx:id="btnOutput" layoutX="261.0" layoutY="15.0" minHeight="30.0" mnemonicParsing="false" onAction="#btnOutputClick" text="Output">
+                     <HBox.margin>
+                        <Insets top="4.0" />
+                     </HBox.margin>
+                  </Button>
                </children></HBox>
-            <TabPane fx:id="tabMain" prefHeight="200.0" prefWidth="200.0" side="BOTTOM" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <TabPane fx:id="tabMain" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
               <tabs>
+                  <Tab text="0. Configure">
+                     <content>
+                        <VBox>
+                           <children>
+                              <HBox style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Language" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <ChoiceBox fx:id="choiceBox1" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="14.0" layoutY="14.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Max Run Time, sec (0 = no limit)" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="14.0" layoutY="51.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Limit output to this many lines:" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="14.0" layoutY="14.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Include Source in Output" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <ChoiceBox fx:id="choiceBox11" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="121.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Auto Uncompress Zip Files" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <ChoiceBox fx:id="choiceBox111" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="150.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Process Recursively" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <ChoiceBox fx:id="choiceBox1111" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="14.0" layoutY="88.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Python 3 Interpreter" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="232.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="C++ Compiler" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets left="8.0" right="4.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField HBox.hgrow="ALWAYS" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
                 <Tab text="1. Input/Setup">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
@@ -86,7 +230,7 @@
                      </content></Tab>
               </tabs>
             </TabPane>
-            <HBox alignment="BOTTOM_LEFT" layoutX="10.0" layoutY="39.0" scaleShape="false">
+            <HBox alignment="BOTTOM_LEFT" layoutX="10.0" layoutY="39.0" scaleShape="false" style="-fx-background-color: #e8e8f2; -fx-border-color: lightgray; -fx-border-style: solic; -fx-border-width: 1;">
                <children>
                   <Label fx:id="lblStatus" maxWidth="120.0" minWidth="100.0" scaleShape="false" text="Ready.">
                      <HBox.margin>
