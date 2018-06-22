@@ -17,6 +17,25 @@ public interface IAGConstant {
 
     public final String YES = "Yes";
     public final String NO = "No";
+
+    public final String LANGUAGE_PYTHON3 = "Python 3";
+    public final String LANGUAGE_CPP = "C++";
+
+    //---------- AG Options Dictionary Keys ----------
+    public final class AG_CONFIG
+    {
+        public static final String LANGUAGE = "LANGUAGE";
+        public static final String MAX_RUNTIME = "MAX_RUNTIME";
+        public static final String MAX_OUTPUT_LINES = "MAX_OUTPUT_LINES";
+        public static final String INCLUDE_SOURCE = "INCLUDE_SOURCE";
+        public static final String AUTO_UNCOMPRESS = "AUTO_UNCOMPRESS";
+        public static final String PROCESS_RECURSIVELY = "PROCESS_RECURSIVELY";
+        public static final String PYTHON3_INTERPRETER = "PYTHON3_INTERPRETER";
+        public static final String CPP_COMPILER = "CPP_COMPILER";
+    }
+
+    //---------- Misc Constants ----------
+    public final String CONFIG_FILENAME = "ag2Config.json";
 }
 
 
