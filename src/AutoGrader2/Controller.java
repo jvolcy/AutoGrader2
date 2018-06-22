@@ -1,5 +1,6 @@
 package AutoGrader2;
 
+import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -11,8 +12,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 /* ======================================================================
@@ -343,7 +342,8 @@ public class Controller implements IAGConstant {
 
 
     /* ======================================================================
-     * xxx
+     * btnSourceDirectoryClick()
+     * Callback for "Source Director" button on Input/Setup Tab.
      * ===================================================================== */
     public void btnSourceDirectoryClick()
     {
@@ -358,8 +358,25 @@ public class Controller implements IAGConstant {
         txtSourceDirectory.setText(directory.getAbsolutePath());
     }
 
+
     /* ======================================================================
-     * xxx
+     * tabMainOnKeyPressed()
+     * Callback for KeyPressed event on the main tab.  We capture and
+     * consume this event to eliminate keyboard navigation through the
+     * tap pages.  Only the Settings/Input/Output buttons should be used
+     * to navigate through he pages.
+     * ===================================================================== */
+    public void tabMainOnKeyPressed(Event e)
+    {
+        /* consume key press events so that they do not go on to effect
+        navigation controls on the main tab. */
+        e.consume();
+    }
+
+
+    /* ======================================================================
+     * btnStart()
+     * Callback for 'Start' button on Input/Setup tab
      * ===================================================================== */
     public void btnStart()
     {

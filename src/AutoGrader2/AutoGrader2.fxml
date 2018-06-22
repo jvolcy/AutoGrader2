@@ -32,7 +32,7 @@
                                 <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                                     <items>
                                         <MenuItem mnemonicParsing="false" text="Open AG HTML File" />
-                                        <MenuItem mnemonicParsing="false" text="Save Output HTML" />
+                                        <MenuItem disable="true" mnemonicParsing="false" text="Save Output HTML" />
                                         <MenuItem fx:id="menuFileQuit" mnemonicParsing="false" onAction="#menuFileQuit" text="Quit">
                                             <accelerator>
                                                 <KeyCodeCombination alt="UP" code="Q" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
@@ -79,7 +79,7 @@
                             </HBox.margin>
                         </Button>
                     </children></HBox>
-                <TabPane fx:id="tabMain" focusTraversable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
+                <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
                     <tabs>
                         <Tab text="0. Configure">
                             <content>
