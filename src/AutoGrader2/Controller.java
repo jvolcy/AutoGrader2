@@ -12,15 +12,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 /* ======================================================================
  * Controller Class
  * This class is the primary store of GUI callback functions.
  * ===================================================================== */
-public class Controller implements IAGConstant {
-
-
+public class Controller implements IAGConstant
+{
     //---------- FXML GUI control references ----------
 
     //---------- Misc. Controls ----------
@@ -380,6 +381,23 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnStart()
     {
+        MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(), AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE));
+        ArrayList<Assignment> assignments = mpp.getAssignments();
+
+        System.out.print("assignments.size() = ");
+        System.out.println(assignments.size());
+
+
+        for (Assignment x : assignments)
+        {
+            /*
+            System.out.println(x.studentName);
+            System.out.println(x.assignmentDirectory);
+            System.out.println(x.assignmentFiles);
+            System.out.println(x.grade);
+            System.out.println(x.instructorComment);
+            */
+        }
 
     }
 
