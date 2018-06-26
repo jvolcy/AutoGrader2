@@ -26,6 +26,8 @@ public class AutoGrader2 extends Application implements IAGConstant
     //---------- Configuration File Path ----------
     private static String configFileName = null;
 
+    private static GradingEngine gradingEngine;
+
     /* ======================================================================
      * start()
      * This function is automatically called after the primary stage
@@ -35,7 +37,14 @@ public class AutoGrader2 extends Application implements IAGConstant
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        Parent root = FXMLLoader.load(getClass().getResource("AutoGrader2.fxml"));
+        //Parent root = FXMLLoader.load(getClass().getResource("AutoGrader2.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("AutoGrader2.fxml"));
+        Parent root = loader.load();
+
+        // Get the Controller from the FXMLLoader
+        Controller controller = loader.getController();
+        controller.setGradingEngine(gradingEngine);
+
         primaryStage.setTitle("Spelman AutoGrader 2.0");
         primaryStage.setScene(new Scene(root, MIN_STAGE_WIDTH, MIN_STAGE_HEIGHT));
         primaryStage.setMinWidth(MIN_STAGE_WIDTH);
@@ -224,6 +233,9 @@ public class AutoGrader2 extends Application implements IAGConstant
 
         //---------- setup app configurations ----------
         setupConfiguration(configFileName);
+
+        //---------- initialize the grading engine ----------
+        gradingEngine = new GradingEngine();
 
         //---------- start the GUI ----------
         launch(args);

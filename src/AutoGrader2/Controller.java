@@ -54,8 +54,8 @@ public class Controller implements IAGConstant
     public Button btnPrev;
     public Button btnNext;
 
-    //---------- AutoGrader options ----------
-    //public Dictionary<String, String> ag_config = new Hashtable<String, String>();
+    //---------- Misc members ----------
+    private GradingEngine gradingEngine;
 
     /* ======================================================================
      * initialize()
@@ -147,6 +147,17 @@ public class Controller implements IAGConstant
         btnOutput.setDisable(true);
 
     }
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public void setGradingEngine(GradingEngine e)
+    {
+        //---------- set a reference to the grading engine ----------
+        gradingEngine = e;
+
+    }
+    //----------  ----------
 
     /* ======================================================================
      * btnPrevClick()
@@ -385,10 +396,13 @@ public class Controller implements IAGConstant
                 AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
                 AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(IAGConstant.YES));
 
-        ArrayList<Assignment> assignments = mpp.getAssignments();
+        //---------- Configure the Grading Engine ----------
+        //----------  ----------
+
+        gradingEngine.assignments = mpp.getAssignments();
 
         System.out.print("assignments.size() = ");
-        System.out.println(assignments.size());
+        System.out.println(gradingEngine.assignments.size());
 
 
 
