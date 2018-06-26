@@ -381,23 +381,17 @@ public class Controller implements IAGConstant
      * ===================================================================== */
     public void btnStart()
     {
-        MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(), AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE));
+        MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
+                AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
+                AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(IAGConstant.YES));
+
         ArrayList<Assignment> assignments = mpp.getAssignments();
 
         System.out.print("assignments.size() = ");
         System.out.println(assignments.size());
 
 
-        for (Assignment x : assignments)
-        {
-            /*
-            System.out.println(x.studentName);
-            System.out.println(x.assignmentDirectory);
-            System.out.println(x.assignmentFiles);
-            System.out.println(x.grade);
-            System.out.println(x.instructorComment);
-            */
-        }
+
 
     }
 

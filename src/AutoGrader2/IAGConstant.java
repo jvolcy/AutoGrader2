@@ -21,6 +21,11 @@ public interface IAGConstant {
     public final String LANGUAGE_PYTHON3 = "Python 3";
     public final String LANGUAGE_CPP = "C++";
 
+    public final String[] PYTHON_EXTENSIONS = {"py"};
+    public final String[] CPP_EXTENSIONS = {"cpp", "c"};
+    public final String[] CPP_PROGRAMMING_FILES =  {"cpp", "c", "h", "hpp"};
+    public final String[] COMPRESSION_EXTENSIONS = {"zip"};
+
     //---------- AG Options Dictionary Keys ----------
     public final class AG_CONFIG
     {

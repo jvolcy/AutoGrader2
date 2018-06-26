@@ -39,6 +39,8 @@ public class MoodlePreprocessor implements IAGConstant
     //private static Map<String, String> assignmentDirectories = new HashMap<String, String>();
 
     private String TopAssignmentsDirectory;
+    private String language;
+    private String[] extensions;
 
     /* ======================================================================
      * MoodlePreprocessor()
@@ -46,9 +48,12 @@ public class MoodlePreprocessor implements IAGConstant
      * and the assignment language.
      * The language can be either LANGUAGE_PYTHON3 or LANGUAGE_CPP
      * ===================================================================== */
-    MoodlePreprocessor(String sourceDirectory, String language, Boolean processRecursively, Boolean autoUncompress)
+    MoodlePreprocessor(String sourceDirectory, String language, /*Boolean processRecursively,*/ Boolean autoUncompress)
     {
         TopAssignmentsDirectory = sourceDirectory;
+
+        //---------- set the language and corresponding file extensions ----------
+        setLanguage(language);
 
         //---------- Allocate assignments ArrayList ----------
         assignments = new ArrayList<Assignment>();
@@ -67,26 +72,20 @@ public class MoodlePreprocessor implements IAGConstant
 
         //---------- verify that TopAssignmentsDirectory is a valid directory ----------
         File f = new File(TopAssignmentsDirectory);
-        if (f.isDirectory() == false)
+        if ( !f.isDirectory() )
         {
             System.out.println("'" + TopAssignmentsDirectory + "' is not a valid source directory.");
             return;     //do nothing else
         }
 
-        //----------  ----------
+        /* initialize 'assignments' array list of type 'ArrayList<Assignment>' and
+        populate .studentName and .assignmentDirectory fields */
         prepareStudentDirectories();
 
+
         //----------  ----------
-        for (Assignment assignment : assignments)
-        {
-            assignment.assignmentFiles = new ArrayList<File>();
-            String[] extensions = {"zip", "py", "cpp", "h"};
-            getAssignmentFiles(assignment.assignmentFiles, assignment.assignmentDirectory, true, extensions);
-            /*for (File file : assignment.assignmentFiles)
-            {
-                System.out.println(file);
-            }*/
-        }
+        prepareAssignmentFiles();
+
 
         //----------  ----------
         //----------  ----------
@@ -100,10 +99,12 @@ public class MoodlePreprocessor implements IAGConstant
      * overloaded MoodlePreprocessor() constructor with default
      * auto-compress argument.
      * ===================================================================== */
+    /*
     MoodlePreprocessor(String sourceDirectory, String language, Boolean processRecursively)
     {
         this(sourceDirectory, language, processRecursively, true);
     }
+    */
 
     /* ======================================================================
      * overloaded MoodlePreprocessor() constructor with default recursion
@@ -111,28 +112,198 @@ public class MoodlePreprocessor implements IAGConstant
      * ===================================================================== */
     MoodlePreprocessor(String sourceDirectory, String language)
     {
-        this(sourceDirectory, language, true, true);
+        this(sourceDirectory, language, true);
     }
 
 
     /* ======================================================================
-     * extractStudentNameFromMoodleDirectoryName()
+     * setLanguage()
+     * This method sets the programming language and the file extensions
+     * list.
      * ===================================================================== */
-    private String extractStudentNameFromMoodleDirectoryName(String moodleDirectoryName)
+    private void setLanguage(String language_)
     {
-        String[] data = moodleDirectoryName.split("_");
-        if (data.length < 2)    //this is an error condition; not a valid Moodle directory name
-            return null;
 
-        return data[0];
+        //---------- set the default file extensions ----------
+        if (language_.equals(IAGConstant.LANGUAGE_CPP))
+        {
+            this.language = language_;
+            extensions = IAGConstant.CPP_EXTENSIONS;
+        }
+        else if (language_.equals(IAGConstant.LANGUAGE_PYTHON3))
+        {
+            this.language = language_;
+            extensions = IAGConstant.PYTHON_EXTENSIONS;
+        }
+        else
+        {
+            this.language = null;
+            extensions = null;
+        }
     }
-
-To do : recursion should only be happening if we don't find a source file in an upper directory!!!
-    In other words, search recursively until you find a file.
 
 
     /* ======================================================================
-     * getAssignmentFiles
+     * getFilesInDirectory()
+     * given the path to a directory, this function returns an array of
+     * all files and sub-directories found in the directoryPath
+     * ===================================================================== */
+    private ArrayList<File> getFilesInDirectory(String directoryPath, boolean omitHiddenFiles)
+    {
+        //---------- get all directories in the provided directory ----------
+        ArrayList<File> filesInFolder = new ArrayList<File>();
+
+        File folder = new File(directoryPath);
+        for (File f : folder.listFiles())
+        {
+            if (!f.isHidden())
+                filesInFolder.add(f);
+        }
+        return filesInFolder;
+    }
+
+
+    /* ======================================================================
+     * getFileExtension()
+     * returns the extension of the given filename.
+     * ===================================================================== */
+    private String getFileExtension(String fileName)
+    {
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
+
+    /* ======================================================================
+     * getFileExtension()
+     * overloaded version of the getFileExtension() method that accepts
+     * a File object as an argument and returns the string extension of the
+     * corresponding file.
+     * ===================================================================== */
+    private String getFileExtension(File f)
+    {
+        String fileName = f.getName();
+        return getFileExtension(fileName);
+    }
+
+    /* ======================================================================
+     * getFileNameWithoutExtension()
+     * returns the extension of the given filename.
+     * ===================================================================== */
+    private String stripFileExtension(String fileName)
+    {
+        int locationOfDot = fileName.lastIndexOf('.');
+        return fileName.substring(0, locationOfDot);
+    }
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+
+    /* ======================================================================
+     * findProgrammingFiles()
+     * This function returns an array list of files in the specified
+     * directory with file extension matching any of the extensions on
+     * the 'extensions' list.
+     * ===================================================================== */
+    private ArrayList<File> findFilesByExtension(String directory, String[] fileExtensions)
+    {
+        //---------- create an empty list of files ----------
+        ArrayList<File> programmingFiles = new ArrayList<File>();
+
+        //---------- retrieve a list of all non-hidden files in the directory ----------
+        ArrayList<File> progFiles = getFilesInDirectory(directory, true);
+
+        //---------- go through each file in the directory ----------
+        for (File f : progFiles)
+        {
+            //---------- we will ignore subdirectories ----------
+            if (f.isFile())
+            {
+                //---------- retrieve the extension on the file ----------
+                String f_extension = getFileExtension(f).toLowerCase();
+                //if fileExtensions.contains();
+                if (Arrays.asList(fileExtensions).contains(f_extension))
+                for (String ext : fileExtensions)
+                {
+                    //---------- if the extension on the file matches
+                    // one of the extension in the extensions list, add
+                    // it to the programming files list. ----------
+                    if (f_extension.equals(ext.toLowerCase()))
+                        programmingFiles.add(f);
+                }
+
+            }
+        }
+
+        return programmingFiles;
+    }
+
+
+    /* ======================================================================
+     * findAssignmentFiles()
+     *
+     * 1) beginning with the provided directory, search for program files
+     * (py or cpp).  If any are found, add them to the assignmentFiles list.
+     * We are done.
+     * 2) If none are found, search for a zip file.  If any are found, unzip
+     * unzip them to new folders.
+     * 3) Search for subdirectories in the assignmentDirectory.  These may
+     * already have existed or may have been created in step 2.
+     * 4) In either case, for each sub-directory found, repeat step 1
+     * with the subdirectory as the new assignmentDirectory.
+     * 5) At this point, no assignment files were found, return an empty
+     * ArrayList.
+     * ===================================================================== */
+    private void findAssignmentFiles(ArrayList<File> files, String directory)
+    {
+        ArrayList<File> programmingFiles = findFilesByExtension(directory, extensions);
+
+        //---------- Step 1 ----------
+        if (programmingFiles.size() > 0)
+        {
+            files = programmingFiles;
+            return;
+        }
+
+        //---------- Step 2: search for a zip file ----------
+        ArrayList<File> compressedFiles = findFilesByExtension(directory, COMPRESSION_EXTENSIONS);
+        for (File cFile : compressedFiles)
+        {
+            //uncompress each zip file
+            String cmd = "unzip \""+cFile.getName()+"\" -u -d \"" + stripFileExtension(cFile.getName()) + "\"";
+            System.out.println(cmd);
+
+
+
+        }
+
+//----------  ----------
+//----------  ----------
+    }
+
+
+
+    /* ======================================================================
+     * prepareAssignmentFiles()
+     *
+     * ===================================================================== */
+    private void prepareAssignmentFiles()
+    {
+        for (Assignment assignment : assignments)
+        {
+            //---------- initialize the assignmentFiles array list ----------
+            assignment.assignmentFiles = new ArrayList<File>();
+
+            //---------- call the recursive findAssignmentFiles method ----------
+            findAssignmentFiles(assignment.assignmentFiles, assignment.assignmentDirectory);
+
+       }
+
+    }
+
+
+    /* ======================================================================
+     * getAssignmentFiles()  XXXXXX
      * ===================================================================== */
     private void getAssignmentFiles(ArrayList<File> files, String directory, boolean bRecursive, String[] extensions)
     {
@@ -142,7 +313,7 @@ To do : recursion should only be happening if we don't find a source file in an 
             return;
         }
 
-        File[] filesInCurrentDirectory = getFilesInDirectory(directory);
+        ArrayList<File> filesInCurrentDirectory = getFilesInDirectory(directory, true);
         for (File file : filesInCurrentDirectory)
         {
             /* there are 3 cases to consider:
@@ -161,8 +332,7 @@ To do : recursion should only be happening if we don't find a source file in an 
             {
                 for (String extension : extensions)
                 {
-                    String fileName = file.getName();
-                    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                    String fileExtension = getFileExtension(file);
                     if ( fileExtension.equals(extension))
                     {
                         //System.out.println(file.getName());
@@ -178,25 +348,44 @@ To do : recursion should only be happening if we don't find a source file in an 
         }
     }
 
+
     /* ======================================================================
-     * getSubDirectories()
-     * given the path to a directory, this function returns an array of
-     * all files and sub-directories found in the directory
+     * extractStudentNameFromMoodleDirectoryName()
      * ===================================================================== */
-    private File[] getFilesInDirectory(String directoryPath)
+    private String extractStudentNameFromMoodleDirectoryName(String moodleDirectoryName)
     {
-        //---------- get all directories in the provided directory ----------
-        File folder = new File(directoryPath);
-        return folder.listFiles();
+        String[] data = moodleDirectoryName.split("_");
+        if (data.length < 2)    //this is an error condition; not a valid Moodle directory name
+            return null;
+
+        return data[0];
     }
 
     /* ======================================================================
      * prepareStudentDirectories()
+     * This function performs the first step to building the 'assignments'
+     * ArrayList.  The function searches the TopAssignmentsDirectory for
+     * the sub-directories of student submissions.  It is assumed that all
+     * directories under the TopAssignmentsDirectory corresponds to a
+     * student submission.  These names of these directories should be
+     * Moodle-formatted as "student name_assignment description".  This
+     * function extracts the student name from the corresponding directory
+     * names.  The function then creates a new "Assignment" object that is
+     * added to the "assignemnts" ArrayList. Finally, the .studentName and
+     * .assignmentDirectory fields of the newly created "Assignment" object
+     * is populated.
+     * In the case where the directory name does not conform to the
+     * expected Moodle naming scheme, student names of "Anonymous 1",
+     * "Anonymous 2", etc. are used.
+     * At the conclusion of this function, the "assignments" ArrayList
+     * should be populated with as many entries as there are sub-directories
+     * under the TopAssignmentsDirectory.  Each entry should have a valid
+     * .studentName and .assignmentDirectory value.
      * ===================================================================== */
     private void prepareStudentDirectories()
     {
         //---------- get all directories in the top level directory ----------
-        File[] listOfFiles = getFilesInDirectory(TopAssignmentsDirectory);
+        ArrayList<File> listOfFiles = getFilesInDirectory(TopAssignmentsDirectory, true);
 
         /* for directories that don't conform to Moodle names, we will label
         them "anonymous 1", "anonymous 2", etc... */
@@ -230,7 +419,7 @@ To do : recursion should only be happening if we don't find a source file in an 
             }
         }
 
-        System.out.println(assignments);
+        //System.out.println(assignments);
         /*
         for (String key : assignmentDirectories.keySet() )
         {
@@ -240,7 +429,8 @@ To do : recursion should only be happening if we don't find a source file in an 
     }
 
     /* ======================================================================
-     * xxx
+     * getAssignments()
+     * This function returns the list of assignments.
      * ===================================================================== */
     public ArrayList<Assignment> getAssignments()
     {
