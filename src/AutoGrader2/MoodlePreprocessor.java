@@ -261,24 +261,21 @@ public class MoodlePreprocessor implements IAGConstant
         //---------- Step 1 ----------
         if (programmingFiles.size() > 0)
         {
-            files = programmingFiles;
+            files.addAll(programmingFiles);
             return;
         }
 
-        //---------- Step 2: search for a zip file ----------
+        //---------- Step 2: search zip files ----------
         ArrayList<File> compressedFiles = findFilesByExtension(directory, COMPRESSION_EXTENSIONS);
         for (File cFile : compressedFiles)
         {
             //uncompress each zip file
             String cmd = "unzip \""+cFile.getName()+"\" -u -d \"" + stripFileExtension(cFile.getName()) + "\"";
             System.out.println(cmd);
-
-
-
         }
 
-//----------  ----------
-//----------  ----------
+        //---------- Step 3: search for sub-directories ----------
+        //----------  ----------
     }
 
 
@@ -296,7 +293,6 @@ public class MoodlePreprocessor implements IAGConstant
 
             //---------- call the recursive findAssignmentFiles method ----------
             findAssignmentFiles(assignment.assignmentFiles, assignment.assignmentDirectory);
-
        }
 
     }

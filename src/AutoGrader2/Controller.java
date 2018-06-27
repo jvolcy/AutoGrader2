@@ -146,6 +146,9 @@ public class Controller implements IAGConstant
         //disable the Output button
         btnOutput.setDisable(true);
 
+        //************* TEMP **************
+        txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
+
     }
 
     /* ======================================================================
@@ -398,11 +401,9 @@ public class Controller implements IAGConstant
 
         //---------- Configure the Grading Engine ----------
         //----------  ----------
-
         gradingEngine.assignments = mpp.getAssignments();
 
-        System.out.print("assignments.size() = ");
-        System.out.println(gradingEngine.assignments.size());
+        gradingEngine.dumpAssignments();
 
 
 
