@@ -23,7 +23,7 @@ public class GradingEngine {
     public int maxOutputLines;
     public String cppCompiler;
     public String python3Interpreter;
-    private SyntaxHighlighter syntaxHighlighter;
+    private ReportGenerator reportGenerator;
 
 
     /* ======================================================================
@@ -35,6 +35,7 @@ public class GradingEngine {
         maxRunTime = 3;     //3 seconds
         maxOutputLines = 100;   //100 lines of output max per program
         bIncludeSourceInOutput = true;
+        outputFileName = "AG_output.html";
     }
 
     /* ======================================================================
@@ -42,8 +43,6 @@ public class GradingEngine {
      * ===================================================================== */
     public void setOutputFileName(String fileName) {
         outputFileName = fileName;
-        //Assume that all assignments use the same language as assignment 0
-        syntaxHighlighter = new SyntaxHighlighter(assignments.get(0).language, outputFileName);
     }
 
     /* ======================================================================
@@ -57,7 +56,9 @@ public class GradingEngine {
      * - testDataFiles, if required
      * ===================================================================== */
     public void processFiles() {
-        syntaxHighlighter.makeHtmlHeader("Hello World",  "This is a test");
+
+        reportGenerator = new ReportGenerator("AutoGrader 2", "Assignment title goes here", assignments, outputFileName);
+        reportGenerator.generateReport();
     }
 
 

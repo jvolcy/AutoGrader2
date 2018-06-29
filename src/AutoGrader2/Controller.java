@@ -419,6 +419,7 @@ public class Controller implements IAGConstant {
         gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
 
         gradingEngine.processFiles();
+
    }
 
 }
