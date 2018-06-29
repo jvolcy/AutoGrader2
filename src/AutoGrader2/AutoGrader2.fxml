@@ -53,7 +53,7 @@
                                 </Menu>
                                 <Menu disable="true" mnemonicParsing="false">
                                     <graphic>
-                                        <Pane minWidth="100.0" />
+                                        <Pane minWidth="50.0" />
                                     </graphic>
                                 </Menu>
                             </menus>
@@ -78,6 +78,11 @@
                                 <Insets top="4.0" />
                             </HBox.margin>
                         </Button>
+                  <Button fx:id="btnConsole" focusTraversable="false" layoutX="440.0" layoutY="15.0" minHeight="30.0" mnemonicParsing="false" onAction="#btnConsoleClick" style="-fx-background-color: lightblue; -fx-border-color: gray; -fx-border-radius: 3;" text="Console">
+                     <HBox.margin>
+                        <Insets top="4.0" />
+                     </HBox.margin>
+                  </Button>
                     </children></HBox>
                 <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
                     <tabs>
@@ -256,6 +261,15 @@
                                     </children>
                                 </VBox>
                             </content></Tab>
+                  <Tab text="Console">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <ListView fx:id="listConsole" layoutX="30.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0" />
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
                     </tabs>
                 </TabPane>
                 <HBox alignment="BOTTOM_LEFT" layoutX="10.0" layoutY="39.0" scaleShape="false" style="-fx-background-color: #e8e8f2; -fx-border-color: lightgray; -fx-border-style: solid; -fx-border-width: 1;">

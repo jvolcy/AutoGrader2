@@ -13,7 +13,8 @@ public interface IAGConstant {
     public final int CONFIGURATION_TAB = 0;
     public final int SETUP_INPUT_TAB = 1;
     public final int OUTPUT_TAB = 2;
-    public final int HELP_TAB = 3;
+    public final int CONSOLE_TAB = 3;
+    public final int HELP_TAB = 4;
 
     public final String YES = "Yes";
     public final String NO = "No";
@@ -23,12 +24,11 @@ public interface IAGConstant {
 
     public final String[] PYTHON_EXTENSIONS = {"py"};
     public final String[] CPP_EXTENSIONS = {"cpp", "c"};
-    public final String[] CPP_PROGRAMMING_FILES =  {"cpp", "c", "h", "hpp"};
+    public final String[] CPP_ALL_EXTENSIONS = {"cpp", "c", "h", "hpp"};
     public final String[] COMPRESSION_EXTENSIONS = {"zip"};
 
     //---------- AG Options Dictionary Keys ----------
-    public final class AG_CONFIG
-    {
+    public final class AG_CONFIG {
         public static final String LANGUAGE = "LANGUAGE";
         public static final String MAX_RUNTIME = "MAX_RUNTIME";
         public static final String MAX_OUTPUT_LINES = "MAX_OUTPUT_LINES";

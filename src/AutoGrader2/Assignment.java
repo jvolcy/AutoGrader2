@@ -6,17 +6,16 @@ import java.util.ArrayList;
 /* ======================================================================
  * Assignment
  * ===================================================================== */
-public class Assignment
-{
+public class Assignment {
     public String studentName;
     public String assignmentDirectory;
     public ArrayList<File> assignmentFiles;
+    public String language;
     public Integer grade;
     public String instructorComment;
 
-    Assignment()
-    {
-        //set the default stdent name, grade, instructor comment etc.
+    Assignment() {
+        //set the default student name, grade, instructor comment etc.
         studentName = null;
         assignmentDirectory = null;
         grade = null;

@@ -1,5 +1,6 @@
 package AutoGrader2;
 
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -12,16 +13,13 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 /* ======================================================================
  * Controller Class
  * This class is the primary store of GUI callback functions.
  * ===================================================================== */
-public class Controller implements IAGConstant
-{
+public class Controller implements IAGConstant {
     //---------- FXML GUI control references ----------
 
     //---------- Misc. Controls ----------
@@ -54,6 +52,10 @@ public class Controller implements IAGConstant
     public Button btnPrev;
     public Button btnNext;
 
+    //---------- Console Tab ----------
+    public ListView listConsole;
+    public static ListView consolePtr;
+
     //---------- Misc members ----------
     private GradingEngine gradingEngine;
 
@@ -62,6 +64,9 @@ public class Controller implements IAGConstant
      * Called automatically upon creation of the GUI
      * ===================================================================== */
     public void initialize() {
+
+        //---------- set the static pointer to the console ----------
+        consolePtr = listConsole;
 
         //---------- populate the different choice box configuration options ----------
 
@@ -152,15 +157,32 @@ public class Controller implements IAGConstant
     }
 
     /* ======================================================================
-     * xxx
+     * setGradingEngine()
+     * sets a reference to the GradingEngine object (this is the model in
+     * the MVC paradigm).
      * ===================================================================== */
-    public void setGradingEngine(GradingEngine e)
-    {
+    public void setGradingEngine(GradingEngine e) {
         //---------- set a reference to the grading engine ----------
         gradingEngine = e;
-
     }
-    //----------  ----------
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public static void console (String format, Object... arguments) {
+        String formattedOutput = String.format(format, arguments);
+
+        //if the GUI is not yet up, the consolePtr hasn't been set yet:
+        //dump the output to the screen.
+        if (consolePtr == null) {
+            System.out.println("[x]" + formattedOutput);
+        }
+        else{
+            System.out.println("[c]" + formattedOutput);
+            consolePtr.getItems().add(formattedOutput);
+        }
+    }
+
 
     /* ======================================================================
      * btnPrevClick()
@@ -169,9 +191,8 @@ public class Controller implements IAGConstant
      * graded assignments.  These buttons work in conjunction with the
      * student name drop-down list.
      * ===================================================================== */
-    public void btnPrevClick()
-    {
-        System.out.println("'Prev' button clicked.");
+    public void btnPrevClick() {
+        console("'Prev' button clicked.\n");
     }
 
 
@@ -179,9 +200,8 @@ public class Controller implements IAGConstant
      * menuFileQuit()
      * Callback for File->Quit
      * ===================================================================== */
-    public void menuFileQuit()
-    {
-        System.out.println("Good bye");
+    public void menuFileQuit() {
+        console("Good bye\n");
 
         /* get and close the app's stage.  This will quit the GUI and return
         control to AutoGrader2.main(). */
@@ -195,8 +215,7 @@ public class Controller implements IAGConstant
      * Callback for Settings->Config
      * This function sets the main tab to the CONFIGURATION_TAB.
      * ===================================================================== */
-    public void menuSettingsConfig()
-    {
+    public void menuSettingsConfig() {
         btnSettingsClick();
     }
 
@@ -205,8 +224,7 @@ public class Controller implements IAGConstant
      * Callback for Settings button.
      * This function sets the main tab to the CONFIGURATION_TAB.
      * ===================================================================== */
-    public void btnSettingsClick()
-    {
+    public void btnSettingsClick() {
         tabMain.getSelectionModel().select(CONFIGURATION_TAB);
         btnSettings.setTextFill(Paint.valueOf("blue"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
@@ -218,8 +236,7 @@ public class Controller implements IAGConstant
      * Callback for the Input/Setup button.
      * This function sets the main tab to the SETUP_INPUT_TAB.
      * ===================================================================== */
-    public void btnInputSetupClick()
-    {
+    public void btnInputSetupClick() {
         tabMain.getSelectionModel().select(SETUP_INPUT_TAB);
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("blue"));
@@ -231,8 +248,7 @@ public class Controller implements IAGConstant
      * Callback for the Output button.
      * This function sets the main tab to the OUTPUT_TAB.
      * ===================================================================== */
-    public void btnOutputClick()
-    {
+    public void btnOutputClick() {
         tabMain.getSelectionModel().select(OUTPUT_TAB);
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
@@ -241,13 +257,22 @@ public class Controller implements IAGConstant
     }
 
     /* ======================================================================
+     * btnConsoleClick()
+     * ===================================================================== */
+    public void btnConsoleClick(){
+        tabMain.getSelectionModel().select(CONSOLE_TAB);
+        btnSettings.setTextFill(Paint.valueOf("black"));
+        btnInputSetup.setTextFill(Paint.valueOf("black"));
+        btnOutput.setTextFill(Paint.valueOf("black"));
+    }
+
+    /* ======================================================================
      * btnTestDataRemoveClick()
      * Callback for "Remove" button associated with the Test Data list view.
      * Clicking this button is equivalent to pressing the delete or
      * backspace key to remove selected test data files from the list.
      * ===================================================================== */
-    public void btnTestDataRemoveClick()
-    {
+    public void btnTestDataRemoveClick() {
         /* Because we can't safely iterate through a list while we are deleting
          * items from it, we create a copy of the selected items in the list,
          * then we iterate through this non-changing list.  Note that it is
@@ -257,8 +282,7 @@ public class Controller implements IAGConstant
         Object[] selectedItems = listTestData.getSelectionModel().getSelectedItems().toArray();
 
         //go through the list of selected items and delete each one
-        for (Object selectedItem : selectedItems)
-        {
+        for (Object selectedItem : selectedItems) {
             listTestData.getItems().remove(selectedItem);
         }
 
@@ -274,12 +298,10 @@ public class Controller implements IAGConstant
      * these to invoke the function that deletes selected items from the
      * list view.
      * ===================================================================== */
-    public void listTestDataKeyPressed(KeyEvent e)
-    {
+    public void listTestDataKeyPressed(KeyEvent e) {
         /* Check if the user pressed either delete or backspace.  If so, delete
-        * all selected list entries. */
-        if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE)
-        {
+         * all selected list entries. */
+        if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE) {
             btnTestDataRemoveClick();
         }
     }
@@ -296,13 +318,11 @@ public class Controller implements IAGConstant
      * Also, we set the background color of the list view to light red
      * or light green to indicate a missing input.
      * ===================================================================== */
-    private void setStartButtonStatus()
-    {
+    private void setStartButtonStatus() {
         if (checkNoTestData.isSelected() || listTestData.getItems().size() != 0) {
             btnStart.setDisable(false);
             listTestData.setStyle("-fx-background-color: #f0fff0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
-        }
-        else {
+        } else {
             btnStart.setDisable(true);
             listTestData.setStyle("-fx-background-color: #fff0f0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
         }
@@ -315,16 +335,12 @@ public class Controller implements IAGConstant
      * When no test data is required, we disable the "Add" button the
      * "Remove" button as well as the list view.
      * ===================================================================== */
-    public void checkNoTestDataClick()
-    {
-        if (checkNoTestData.isSelected())
-        {
+    public void checkNoTestDataClick() {
+        if (checkNoTestData.isSelected()) {
             btnAdd.setDisable(true);
             btnRemove.setDisable(true);
             listTestData.setDisable(true);
-        }
-        else
-        {
+        } else {
             btnAdd.setDisable(false);
             btnRemove.setDisable(false);
             listTestData.setDisable(false);
@@ -338,8 +354,7 @@ public class Controller implements IAGConstant
      * Callback for the "Add" button on the Input/Setup tab.  The add button
      * is used to add test files to the test data list.
      * ===================================================================== */
-    public void btnAddClick()
-    {
+    public void btnAddClick() {
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
 
@@ -349,8 +364,7 @@ public class Controller implements IAGConstant
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
 
         //save the selected file objects in the test data list view
-        for (File file: files)
-        {
+        for (File file : files) {
             listTestData.getItems().add(file);
         }
     }
@@ -360,8 +374,7 @@ public class Controller implements IAGConstant
      * btnSourceDirectoryClick()
      * Callback for "Source Director" button on Input/Setup Tab.
      * ===================================================================== */
-    public void btnSourceDirectoryClick()
-    {
+    public void btnSourceDirectoryClick() {
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
 
@@ -369,7 +382,7 @@ public class Controller implements IAGConstant
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Open Assignments Directory");
         File directory = directoryChooser.showDialog(stage);
-        //System.out.println(directory.getCanonicalPath());
+        //console(directory.getCanonicalPath()\n);
         txtSourceDirectory.setText(directory.getAbsolutePath());
     }
 
@@ -381,8 +394,7 @@ public class Controller implements IAGConstant
      * tap pages.  Only the Settings/Input/Output buttons should be used
      * to navigate through he pages.
      * ===================================================================== */
-    public void tabMainOnKeyPressed(Event e)
-    {
+    public void tabMainOnKeyPressed(Event e) {
         /* consume key press events so that they do not go on to effect
         navigation controls on the main tab. */
         e.consume();
@@ -393,22 +405,21 @@ public class Controller implements IAGConstant
      * btnStart()
      * Callback for 'Start' button on Input/Setup tab
      * ===================================================================== */
-    public void btnStart()
-    {
+    public void btnStart() {
         MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
                 AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
                 AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(IAGConstant.YES));
 
         //---------- Configure the Grading Engine ----------
-        //----------  ----------
         gradingEngine.assignments = mpp.getAssignments();
 
         gradingEngine.dumpAssignments();
+        gradingEngine.cppCompiler = AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER);
+        gradingEngine.python3Interpreter = AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER);
+        gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
 
-
-
-
-    }
+        gradingEngine.processFiles();
+   }
 
 }
 

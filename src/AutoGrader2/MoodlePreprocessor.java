@@ -19,8 +19,7 @@ import java.util.*;
  * list of programming files contained in each directory.
  * The class also optionally unzips files in the student directory.
  * ===================================================================== */
-public class MoodlePreprocessor implements IAGConstant
-{
+public class MoodlePreprocessor implements IAGConstant {
     //---------- assignments dictionary ----------
     /* The key to the assignment files dictionary is the student's name.  The
     values are a list of files (.py, .cpp, .h, etc.) included with
@@ -33,14 +32,15 @@ public class MoodlePreprocessor implements IAGConstant
     private ArrayList<Assignment> assignments;
 
     /* The key to the assignment directories dictionary is the student's
-    * name.  The value is the directory that holds the student's
-    * submission.  The student's name is derived from the assignment
-    * directory. */
+     * name.  The value is the directory that holds the student's
+     * submission.  The student's name is derived from the assignment
+     * directory. */
     //private static Map<String, String> assignmentDirectories = new HashMap<String, String>();
 
     private String TopAssignmentsDirectory;
     private String language;
     private String[] extensions;
+    private boolean bAutoUncompress;
 
     /* ======================================================================
      * MoodlePreprocessor()
@@ -48,9 +48,9 @@ public class MoodlePreprocessor implements IAGConstant
      * and the assignment language.
      * The language can be either LANGUAGE_PYTHON3 or LANGUAGE_CPP
      * ===================================================================== */
-    MoodlePreprocessor(String sourceDirectory, String language, /*Boolean processRecursively,*/ Boolean autoUncompress)
-    {
+    MoodlePreprocessor(String sourceDirectory, String language, boolean autoUncompress_) {
         TopAssignmentsDirectory = sourceDirectory;
+        bAutoUncompress = autoUncompress_;
 
         //---------- set the language and corresponding file extensions ----------
         setLanguage(language);
@@ -59,22 +59,21 @@ public class MoodlePreprocessor implements IAGConstant
         assignments = new ArrayList<Assignment>();
 
         /*Steps
-        * 1) get the name of all subdirectories inside the assignmentDirectory
-        * 2) extract the student names from all these subdirectories.  Eliminate
-        * subdirectories that do not sport a valid student name.  These student
-        * names will be the keys to the dictionary.
-        * 3) within each student directory search for the appropriate files.
-        * these would be .zip, .py, .cpp and .h files, depending on the language.
-        * 4) add the files of interest to the assignments dictionary under the
-        * key that matches the student's name.
-        * */
+         * 1) get the name of all subdirectories inside the assignmentDirectory
+         * 2) extract the student names from all these subdirectories.  Eliminate
+         * subdirectories that do not sport a valid student name.  These student
+         * names will be the keys to the dictionary.
+         * 3) within each student directory search for the appropriate files.
+         * these would be .zip, .py, .cpp and .h files, depending on the language.
+         * 4) add the files of interest to the assignments dictionary under the
+         * key that matches the student's name.
+         * */
 
 
         //---------- verify that TopAssignmentsDirectory is a valid directory ----------
         File f = new File(TopAssignmentsDirectory);
-        if ( !f.isDirectory() )
-        {
-            System.out.println("'" + TopAssignmentsDirectory + "' is not a valid source directory.");
+        if (!f.isDirectory()) {
+            Controller.console("'" + TopAssignmentsDirectory + "' is not a valid source directory.");
             return;     //do nothing else
         }
 
@@ -86,32 +85,14 @@ public class MoodlePreprocessor implements IAGConstant
         //----------  ----------
         prepareAssignmentFiles();
 
-
-        //----------  ----------
-        //----------  ----------
-        //----------  ----------
-        //----------  ----------
-        //----------  ----------
-
     }
 
-    /* ======================================================================
-     * overloaded MoodlePreprocessor() constructor with default
-     * auto-compress argument.
-     * ===================================================================== */
-    /*
-    MoodlePreprocessor(String sourceDirectory, String language, Boolean processRecursively)
-    {
-        this(sourceDirectory, language, processRecursively, true);
-    }
-    */
 
     /* ======================================================================
      * overloaded MoodlePreprocessor() constructor with default recursion
      * and auto-compress arguments.
      * ===================================================================== */
-    MoodlePreprocessor(String sourceDirectory, String language)
-    {
+    MoodlePreprocessor(String sourceDirectory, String language) {
         this(sourceDirectory, language, true);
     }
 
@@ -121,42 +102,52 @@ public class MoodlePreprocessor implements IAGConstant
      * This method sets the programming language and the file extensions
      * list.
      * ===================================================================== */
-    private void setLanguage(String language_)
-    {
+    private void setLanguage(String language_) {
 
         //---------- set the default file extensions ----------
-        if (language_.equals(IAGConstant.LANGUAGE_CPP))
-        {
+        if (language_.equals(IAGConstant.LANGUAGE_CPP)) {
             this.language = language_;
             extensions = IAGConstant.CPP_EXTENSIONS;
-        }
-        else if (language_.equals(IAGConstant.LANGUAGE_PYTHON3))
-        {
+        } else if (language_.equals(IAGConstant.LANGUAGE_PYTHON3)) {
             this.language = language_;
             extensions = IAGConstant.PYTHON_EXTENSIONS;
-        }
-        else
-        {
+        } else {
             this.language = null;
             extensions = null;
         }
     }
 
+    /* ======================================================================
+     * getSubDirectories()
+     * given the path to a directory, this function returns an array of
+     * all sub-directories found in the directoryPath
+     * ===================================================================== */
+    private ArrayList<File> getSubDirectories(String directoryPath, boolean omitHiddenDirs) {
+        //---------- get all files in the provided directory ----------
+        ArrayList<File> dirsInFolder = new ArrayList<>();
+
+        File folder = new File(directoryPath);
+        for (File f : folder.listFiles()) {
+            if (f.isDirectory()) {
+                if (!f.isHidden() || !omitHiddenDirs)
+                    dirsInFolder.add(f);
+            }
+        }
+        return dirsInFolder;
+    }
 
     /* ======================================================================
      * getFilesInDirectory()
      * given the path to a directory, this function returns an array of
      * all files and sub-directories found in the directoryPath
      * ===================================================================== */
-    private ArrayList<File> getFilesInDirectory(String directoryPath, boolean omitHiddenFiles)
-    {
-        //---------- get all directories in the provided directory ----------
-        ArrayList<File> filesInFolder = new ArrayList<File>();
+    private ArrayList<File> getFilesInDirectory(String directoryPath, boolean omitHiddenFiles) {
+        //---------- get all files in the provided directory ----------
+        ArrayList<File> filesInFolder = new ArrayList<>();
 
         File folder = new File(directoryPath);
-        for (File f : folder.listFiles())
-        {
-            if (!f.isHidden())
+        for (File f : folder.listFiles()) {
+            if (!f.isHidden() || !omitHiddenFiles)
                 filesInFolder.add(f);
         }
         return filesInFolder;
@@ -167,8 +158,7 @@ public class MoodlePreprocessor implements IAGConstant
      * getFileExtension()
      * returns the extension of the given filename.
      * ===================================================================== */
-    private String getFileExtension(String fileName)
-    {
+    private String getFileExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
@@ -178,8 +168,7 @@ public class MoodlePreprocessor implements IAGConstant
      * a File object as an argument and returns the string extension of the
      * corresponding file.
      * ===================================================================== */
-    private String getFileExtension(File f)
-    {
+    private String getFileExtension(File f) {
         String fileName = f.getName();
         return getFileExtension(fileName);
     }
@@ -188,16 +177,11 @@ public class MoodlePreprocessor implements IAGConstant
      * getFileNameWithoutExtension()
      * returns the extension of the given filename.
      * ===================================================================== */
-    private String stripFileExtension(String fileName)
-    {
+    private String stripFileExtension(String fileName) {
         int locationOfDot = fileName.lastIndexOf('.');
         return fileName.substring(0, locationOfDot);
     }
 
-
-    /* ======================================================================
-     * xxx
-     * ===================================================================== */
 
     /* ======================================================================
      * findProgrammingFiles()
@@ -205,8 +189,7 @@ public class MoodlePreprocessor implements IAGConstant
      * directory with file extension matching any of the extensions on
      * the 'extensions' list.
      * ===================================================================== */
-    private ArrayList<File> findFilesByExtension(String directory, String[] fileExtensions)
-    {
+    private ArrayList<File> findFilesByExtension(String directory, String[] fileExtensions) {
         //---------- create an empty list of files ----------
         ArrayList<File> programmingFiles = new ArrayList<File>();
 
@@ -214,23 +197,20 @@ public class MoodlePreprocessor implements IAGConstant
         ArrayList<File> progFiles = getFilesInDirectory(directory, true);
 
         //---------- go through each file in the directory ----------
-        for (File f : progFiles)
-        {
+        for (File f : progFiles) {
             //---------- we will ignore subdirectories ----------
-            if (f.isFile())
-            {
+            if (f.isFile()) {
                 //---------- retrieve the extension on the file ----------
                 String f_extension = getFileExtension(f).toLowerCase();
                 //if fileExtensions.contains();
                 if (Arrays.asList(fileExtensions).contains(f_extension))
-                for (String ext : fileExtensions)
-                {
-                    //---------- if the extension on the file matches
-                    // one of the extension in the extensions list, add
-                    // it to the programming files list. ----------
-                    if (f_extension.equals(ext.toLowerCase()))
-                        programmingFiles.add(f);
-                }
+                    for (String ext : fileExtensions) {
+                        //---------- if the extension on the file matches
+                        // one of the extension in the extensions list, add
+                        // it to the programming files list. ----------
+                        if (f_extension.equals(ext.toLowerCase()))
+                            programmingFiles.add(f);
+                    }
 
             }
         }
@@ -242,117 +222,102 @@ public class MoodlePreprocessor implements IAGConstant
     /* ======================================================================
      * findAssignmentFiles()
      *
-     * 1) beginning with the provided directory, search for program files
+     * 1) Search for a zip file in the directory.  If any are found, unzip
+     * unzip them to new folders.
+     * 2) beginning with the provided directory, search for program files
      * (py or cpp).  If any are found, add them to the assignmentFiles list.
      * We are done.
-     * 2) If none are found, search for a zip file.  If any are found, unzip
-     * unzip them to new folders.
      * 3) Search for subdirectories in the assignmentDirectory.  These may
-     * already have existed or may have been created in step 2.
+     * already have existed or may have been created in step 1.
      * 4) In either case, for each sub-directory found, repeat step 1
      * with the subdirectory as the new assignmentDirectory.
      * 5) At this point, no assignment files were found, return an empty
      * ArrayList.
      * ===================================================================== */
-    private void findAssignmentFiles(ArrayList<File> files, String directory)
-    {
-        ArrayList<File> programmingFiles = findFilesByExtension(directory, extensions);
+    private void findAssignmentFiles(ArrayList<File> files, String directory) {
 
-        //---------- Step 1 ----------
-        if (programmingFiles.size() > 0)
-        {
-            files.addAll(programmingFiles);
-            return;
+        //---------- Step 1: find and uncompress zip files ----------
+        if (bAutoUncompress) {
+            ArrayList<File> compressedFiles = findFilesByExtension(directory, COMPRESSION_EXTENSIONS);
+            for (File cFile : compressedFiles) {
+                //uncompress each zip file
+                String[] cmd = {"unzip", "-u", cFile.getAbsolutePath(), "-d", stripFileExtension(cFile.getAbsolutePath())};
+                String cmdStr = "unzip -u \"" + cFile.getAbsolutePath() + "\" -d \"" + stripFileExtension(cFile.getAbsolutePath()) + "\"";
+                Controller.console(cmdStr);
+
+                try {
+                    Runtime r = Runtime.getRuntime();
+                    Process p = r.exec(cmd);        //execute the unzip command
+                    //Process p = r.exec("unzip -u \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b.zip\34 -d \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b\34");
+                    p.waitFor();
+                } catch (Exception e) {
+                    Controller.console("", e);
+                }
+            }
         }
 
-        //---------- Step 2: search zip files ----------
-        ArrayList<File> compressedFiles = findFilesByExtension(directory, COMPRESSION_EXTENSIONS);
-        for (File cFile : compressedFiles)
-        {
-            //uncompress each zip file
-            String cmd = "unzip \""+cFile.getName()+"\" -u -d \"" + stripFileExtension(cFile.getName()) + "\"";
-            System.out.println(cmd);
+        //---------- Step 2: find programming files in the directory ----------
+        ArrayList<File> programmingFiles = findFilesByExtension(directory, extensions);
+        if (programmingFiles.size() > 0) {
+            files.addAll(programmingFiles);
+            //if we found any files, we are done
+            //return;
         }
 
         //---------- Step 3: search for sub-directories ----------
-        //----------  ----------
-    }
+        ArrayList<File> subDirs = getSubDirectories(directory, true);
+        for (File sDir : subDirs) {
+            //Step 4: recursively call findAssignmentFiles() if we find subdirectories
+            findAssignmentFiles(files, sDir.toString());
+        }
 
+        //---------- Step 5 ----------
+        //No assignment files found.  This may be the end of the recursion.
+    }
 
 
     /* ======================================================================
      * prepareAssignmentFiles()
      *
      * ===================================================================== */
-    private void prepareAssignmentFiles()
-    {
-        for (Assignment assignment : assignments)
-        {
+    private void prepareAssignmentFiles() {
+        for (Assignment assignment : assignments) {
             //---------- initialize the assignmentFiles array list ----------
             assignment.assignmentFiles = new ArrayList<File>();
 
             //---------- call the recursive findAssignmentFiles method ----------
             findAssignmentFiles(assignment.assignmentFiles, assignment.assignmentDirectory);
-       }
 
-    }
-
-
-    /* ======================================================================
-     * getAssignmentFiles()  XXXXXX
-     * ===================================================================== */
-    private void getAssignmentFiles(ArrayList<File> files, String directory, boolean bRecursive, String[] extensions)
-    {
-        if (files == null)
-        {
-            System.out.println("'ArrayList<File> files' cannot be null!");
-            return;
+            //---------- set the language for the assignment ----------
+            if (assignment.assignmentFiles.size() > 0)
+                assignment.language = language;
         }
 
-        ArrayList<File> filesInCurrentDirectory = getFilesInDirectory(directory, true);
-        for (File file : filesInCurrentDirectory)
-        {
-            /* there are 3 cases to consider:
-            * 1) the file is a directory and we want to find files recursively.
-            * In this case, we call getAssignmentFiles() recursively.
-            * 2) the file is a directory but wa are not interested in recursively
-            * searching for files.  In this case, we simply ignore the file.
-            * 3) the file is not a directory.  In this we add the file to out
-            * list of files. */
-            if (file.isDirectory() && bRecursive)
-            {
-                getAssignmentFiles(files, file.toString(), true, extensions);
-            }
-
-            if (file.isFile())
-            {
-                for (String extension : extensions)
-                {
-                    String fileExtension = getFileExtension(file);
-                    if ( fileExtension.equals(extension))
-                    {
-                        //System.out.println(file.getName());
-                        files.add(file);
-                    }
-                    /*
-                    else
-                    {
-                        System.out.println(fileExtension + "!=" + extension);
-                    }*/
-                }
-            }
-        }
     }
 
 
     /* ======================================================================
      * extractStudentNameFromMoodleDirectoryName()
+     * This function returns either a string representing a student's name,
+     * an empty string, meaning that a valid student name could not be
+     * found or null, meaning that the provided directory is not a student
+     * assignment directory.
      * ===================================================================== */
-    private String extractStudentNameFromMoodleDirectoryName(String moodleDirectoryName)
-    {
+    private String extractStudentNameFromMoodleDirectoryName(String moodleDirectoryName) {
+        /* assume that directory names that begin with a "_" or a "__" are
+        intended to be hidden or system directories. */
+
+        if ( moodleDirectoryName.substring(0,1).equals("_") ) {
+            return null;
+        }
+
+        if ( moodleDirectoryName.substring(0, 2).equals("__") ) {
+             return null;
+        }
+
         String[] data = moodleDirectoryName.split("_");
         if (data.length < 2)    //this is an error condition; not a valid Moodle directory name
-            return null;
+            return "";
 
         return data[0];
     }
@@ -378,8 +343,7 @@ public class MoodlePreprocessor implements IAGConstant
      * under the TopAssignmentsDirectory.  Each entry should have a valid
      * .studentName and .assignmentDirectory value.
      * ===================================================================== */
-    private void prepareStudentDirectories()
-    {
+    private void prepareStudentDirectories() {
         //---------- get all directories in the top level directory ----------
         ArrayList<File> listOfFiles = getFilesInDirectory(TopAssignmentsDirectory, true);
 
@@ -388,48 +352,39 @@ public class MoodlePreprocessor implements IAGConstant
         int anonymousCounter = 1;
 
         //---------- go through the list and identify subdirectories ----------
-        for (File file: listOfFiles)
-        {
-            if (file.isDirectory())     //check that it is a directory
-            {
+        for (File file : listOfFiles) {
+            if (file.isDirectory()) {     //check that it is a directory
+
                 Assignment newAssignment = new Assignment();
 
                 //attempt to extract the student's name
-                String studentName = extractStudentNameFromMoodleDirectoryName( file.getName() );
+                String studentName = extractStudentNameFromMoodleDirectoryName(file.getName());
                 newAssignment.assignmentDirectory = file.toString();
 
-                if (studentName != null)
-                {
-                    //if successful, add to the assignmentDirectories dictionary
-                    //assignmentDirectories.put(studentName, file.toString());
-                    newAssignment.studentName = studentName;
-                }
-                else
-                {
+
+                if (studentName == null) {
+                    Controller.console("skipping directory " + file.getName());
+                } else if (studentName.equals("")) {
                     newAssignment.studentName = "Anonymous " + anonymousCounter;
                     anonymousCounter++;
+                    //add this assignment to the assignments ArrayList
+                    assignments.add(newAssignment);
+                } else {
+                    //student name successfully extracted: add to the assignmentDirectories dictionary
+                    newAssignment.studentName = studentName;
+                    //add this assignment to the assignments ArrayList
+                    assignments.add(newAssignment);
                 }
 
-                //add this assignment to the assignments ArrayList
-                assignments.add(newAssignment);
             }
         }
-
-        //System.out.println(assignments);
-        /*
-        for (String key : assignmentDirectories.keySet() )
-        {
-            System.out.println("assignmentDirectories["+key+"] = "+assignmentDirectories.get(key));
-        }
-        */
     }
 
     /* ======================================================================
      * getAssignments()
      * This function returns the list of assignments.
      * ===================================================================== */
-    public ArrayList<Assignment> getAssignments()
-    {
+    public ArrayList<Assignment> getAssignments() {
         return assignments;
     }
 
