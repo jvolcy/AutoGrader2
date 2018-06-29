@@ -413,6 +413,8 @@ public class Controller implements IAGConstant {
         //---------- Configure the Grading Engine ----------
         gradingEngine.assignments = mpp.getAssignments();
 
+        gradingEngine.assignments.get(2).language = IAGConstant.LANGUAGE_CPP;
+
         gradingEngine.dumpAssignments();
         gradingEngine.cppCompiler = AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER);
         gradingEngine.python3Interpreter = AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER);
