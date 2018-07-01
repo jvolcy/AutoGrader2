@@ -270,7 +270,7 @@
                                             <children>
                                                 <Button fx:id="btnPrev" minWidth="100.0" mnemonicParsing="false" onAction="#btnPrevClick" text="&lt;&lt; Prev" HBox.hgrow="ALWAYS" />
                                                 <ChoiceBox fx:id="cbName" minWidth="300.0" HBox.hgrow="ALWAYS" />
-                                                <Button fx:id="btnNext" minWidth="100.0" mnemonicParsing="false" text="Next &gt;&gt;" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="btnNext" minWidth="100.0" mnemonicParsing="false" onAction="#btnNextClick" text="Next &gt;&gt;" HBox.hgrow="ALWAYS" />
                                             </children>
                                         </HBox>
                                         <WebView fx:id="wvOutput" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />

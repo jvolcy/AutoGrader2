@@ -221,6 +221,7 @@ public class GradingEngine implements IAGConstant {
 
             //wait no more than the specified timeout for the process to complete.
             //a timeout of zero means wait indefinitely.
+
             if (timeout_sec > 0)
                 p.waitFor(timeout_sec, TimeUnit.SECONDS);
             else

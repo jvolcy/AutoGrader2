@@ -25,6 +25,9 @@ public class Controller implements IAGConstant {
     //---------- Misc. Controls ----------
     public TabPane tabMain;
     public AnchorPane anchorPaneMain;
+    public Label lblStatus;
+    public Label lblMessage;
+    public Label lblLanguage;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -52,6 +55,7 @@ public class Controller implements IAGConstant {
     public WebView wvOutput;
     public Button btnPrev;
     public Button btnNext;
+    public ChoiceBox cbName;
 
     //---------- Console Tab ----------
     public ListView listConsole;
@@ -158,6 +162,9 @@ public class Controller implements IAGConstant {
         //disable the Output button
         btnOutput.setDisable(true);
 
+        //---------- Initialize Misc. controls ----------
+        lblMessage.setText("");
+
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
 
@@ -199,9 +206,19 @@ public class Controller implements IAGConstant {
      * student name drop-down list.
      * ===================================================================== */
     public void btnPrevClick() {
-        console("'Prev' button clicked.\n");
+        cbName.getSelectionModel().selectPrevious();
     }
 
+    /* ======================================================================
+     * btnNextClick()
+     * The "Prev" and "Next" buttons are on the Output tab.  These are
+     * navigation buttons to move back and forth through the list of
+     * graded assignments.  These buttons work in conjunction with the
+     * student name drop-down list.
+     * ===================================================================== */
+    public void btnNextClick() {
+        cbName.getSelectionModel().selectNext();
+    }
 
     /* ======================================================================
      * menuFileQuit()
@@ -417,14 +434,19 @@ public class Controller implements IAGConstant {
                 AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
                 AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
+        cbName.getItems().removeAll();
+
         //---------- Configure the Grading Engine ----------
         gradingEngine.assignments = mpp.getAssignments();
 
         gradingEngine.assignments.get(2).language = LANGUAGE_CPP;
         for (Assignment assignment : gradingEngine.assignments) {
+            cbName.getItems().add(assignment.studentName);
             assignment.testFiles = new ArrayList<>();
             assignment.testFiles.add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");
         }
+
+        cbName.getSelectionModel().selectFirst();
 
         gradingEngine.cppCompiler = AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER);
         gradingEngine.python3Interpreter = AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER);
@@ -432,7 +454,12 @@ public class Controller implements IAGConstant {
         //gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
         gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
 
+        lblMessage.setText("Processing assignments...");
+
+        //need to run the processing in a thread ************* TO DO *****************
         gradingEngine.processAssignments();
+
+        lblMessage.setText("Processing Done.");
 
         gradingEngine.dumpAssignments();
 
