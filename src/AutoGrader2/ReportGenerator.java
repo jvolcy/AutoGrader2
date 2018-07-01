@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import static AutoGrader2.Controller.console;
 
 
 /* ======================================================================
@@ -28,15 +29,15 @@ import java.util.ArrayList;
  * @license
  * Dual licensed under the MIT and GPL licenses.Syntax Highlighter 3.0.83
  * ===================================================================== */
-public class ReportGenerator {
+public class ReportGenerator implements IAGConstant {
 
     /* ======================================================================
      * Constants
      * ===================================================================== */
 
     //---------- misc constants ----------
-    private final String PROG_OUTPUT_START_TOKEN = "@@@_START_TOKEN_@@@";
-    private final String PROG_OUTPUT_END_TOKEN = "@@@@_END_TOKEN_@@@";
+    //private final String PROG_OUTPUT_START_TOKEN = "@@@_START_TOKEN_@@@";
+    //private final String PROG_OUTPUT_END_TOKEN = "@@@@_END_TOKEN_@@@";
     private final String[] PYTHON_WHITE_SPACES = {" ", "\t", "\n", "\r"};
     private final String HTML_TAB_CHAR = "<pre style=\"display:inline;\">&#9;</pre>";
 
@@ -73,30 +74,32 @@ public class ReportGenerator {
      * ===================================================================== */
     public void setOutputFile(String fileName) {
         outputFileName = fileName;
-        writeToFile("", false);
+        writeToOutputFile("", false);
     }
 
     /* ======================================================================
-     * xxx
+     * generateReport()
      * ===================================================================== */
     public void generateReport() {
         makeHtmlHeader();
+
         for (Assignment assignment : assignments) {
-            writeSourceToOutputFile(assignment.assignmentFiles.get(0), assignment.language);
+            reportFileAnalytics(assignment);
+            writeSourceToOutputFile(assignment);
         }
     }
 
     /* ======================================================================
-     * xxx
+     * writeToOutputFile()
      * ===================================================================== */
-    private void writeToFile(String content, boolean bAppend) {
+    private void writeToOutputFile(String content, boolean bAppend) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputFileName, bAppend));
             bw.write(content);
             bw.close();
 
         } catch (Exception e) {
-            Controller.console(e.getMessage());
+            console(e.getMessage());
         }
     }
 
@@ -108,7 +111,7 @@ public class ReportGenerator {
             String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
             return text;
         } catch (Exception e) {
-            Controller.console(e.getMessage());
+            console(e.getMessage());
         }
         return null;
     }
@@ -120,7 +123,6 @@ public class ReportGenerator {
         return readFromFile(file.getAbsolutePath());
     }
 
-
     /* ======================================================================
      * xxx
      * ===================================================================== */
@@ -129,6 +131,14 @@ public class ReportGenerator {
         //extract the filename from the path name
         File f = new File(pathName);
         return f.getName();
+    }
+
+    /* ======================================================================
+     * formatErrorMsg()
+     * returns a string that is the html-formatted message in a red font
+     * ===================================================================== */
+    String formatErrorMsg(String errorMessage) {
+        return "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font>";
     }
 
     /* ======================================================================
@@ -155,7 +165,67 @@ public class ReportGenerator {
                 "<h1>" + headerText + "</h1>"
         );
 
-        writeToFile(htmlHeader, true);
+        writeToOutputFile(htmlHeader, true);
+    }
+
+    /* ======================================================================
+     * reportFileAnalytics()
+     * function that reports analytics for every file in a given assignment
+     * ===================================================================== */
+    private void reportFileAnalytics(Assignment assignment) {
+
+        //if there are no files, return an empty string
+        if (assignment.assignmentFiles.size() == 0)
+            return;
+
+        //is this a single file or a set of files?
+        boolean bSingleFile = assignment.assignmentFiles.size() == 1;
+
+        String report = "";
+
+        report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">";
+        report += "<br>\n=======================================================<br>\n";
+        report += "<a name=\"" + assignment.studentName + "\"></a>\n";
+        report += assignment.studentName + "<br>\n";
+        if (bSingleFile) {
+            //if this is a single file, simply output its name
+            report += assignment.assignmentFiles.get(0).getName();
+        } else {
+            //if these are multiple files, list the directory name in bold
+            report += "<b>" + fileNameFromPathName(assignment.assignmentDirectory) + "</b>"; //directory name in bold
+        }
+        report += "<br>\n=======================================================<br>\n</font>";
+
+
+        //for each file, report the analytics
+        for (File sourceFile : assignment.assignmentFiles) {
+            // if we have more than 1 file, then print the filename
+            if (bSingleFile == false) {
+            report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">" + sourceFile.getName() + "</font><br>\n";
+            }
+            //analyze the source file
+            switch (assignment.language) {
+                case IAGConstant.LANGUAGE_CPP:
+                    CppAnalysis cppAnalysis = CodeAnalyzer.analyzeCppFile(sourceFile.getAbsolutePath());
+                    report += "<font face=\"courier\" color=\"" + ANALYTICS_COLOR1 + "\">Code Lines: " + String.valueOf(cppAnalysis.numLines);
+                    report += "<br>\n~#Comments: " + String.valueOf(cppAnalysis.numComments) + "<br>\n";
+                    break;
+                case IAGConstant.LANGUAGE_PYTHON3:
+                    PythonAnalysis pythonAnalysis = CodeAnalyzer.analyzePythonFile(sourceFile.getAbsolutePath());
+                    report += "<font face=\"courier\" color=\"" + ANALYTICS_COLOR1 + "\">Code Lines: " + String.valueOf(pythonAnalysis.numLines);
+                    report += HTML_TAB_CHAR + HTML_TAB_CHAR + "~#Functions:  " + String.valueOf(pythonAnalysis.numFuncs);
+                    report += HTML_TAB_CHAR + HTML_TAB_CHAR + "~#Classes: " + String.valueOf(pythonAnalysis.numClasses);
+                    report += "<br>\n~#Comments: " + String.valueOf(pythonAnalysis.numComments);
+                    report += HTML_TAB_CHAR + HTML_TAB_CHAR + "~#DocStrs: " + String.valueOf(pythonAnalysis.numDocStr) + "<br>\n";
+                    break;
+                default:
+                    break;
+            }
+                report += "</font><br>";    //skip a line between entries
+
+        }
+
+        writeToOutputFile(report, true);
     }
 
 
@@ -163,42 +233,47 @@ public class ReportGenerator {
      * writeSourceToOutputFile()
      * function that inserts the provided source code into the output file.
      * ===================================================================== */
-    private void writeSourceToOutputFile(File sourceFile, String language) {
+    private void writeSourceToOutputFile(Assignment assignment) {
+        //is this a single file or a set of files?
+        boolean bSingleFile = assignment.assignmentFiles.size() == 1;
 
-        //extract the filename from the path
-        String filename = sourceFile.getName();
+        //for each file, add its html-formatted form to the output file
+        for (File sourceFile : assignment.assignmentFiles) {
 
-        //read the contents of the source file
-        String preprocessedSource = readFromFile(sourceFile);
+            //extract the filename from the path
+            String filename = sourceFile.getName();
 
-        //replace every occurrence of '<' with '&lt' in the source file for the syntax highlighter
-        String source = preprocessedSource.replaceAll("<", "&lt");
+            //read the contents of the source file
+            String preprocessedSource = readFromFile(sourceFile);
 
-        String brush;
-        switch (language) {
-            case IAGConstant.LANGUAGE_CPP:
-                brush = "<pre class=\"brush: cpp;\">";
-                break;
-            case IAGConstant.LANGUAGE_PYTHON3:
-                brush = "<pre class=\"brush: python;\">";
-                break;
-            default:
-                brush = "<pre>";
+            //replace every occurrence of '<' with '&lt' in the source file for the syntax highlighter
+            String source = preprocessedSource.replaceAll("<", "&lt");
+
+            String brush;
+            switch (assignment.language) {
+                case LANGUAGE_CPP:
+                    brush = "<pre class=\"brush: cpp;\">";
+                    break;
+                case LANGUAGE_PYTHON3:
+                    brush = "<pre class=\"brush: python;\">";
+                    break;
+                default:
+                    brush = "<pre>";
+            }
+
+            String outputString = "<font face=\"courier\" color=\"" + HEADER_COLOR2 + "\">";
+            if (!bSingleFile)
+                outputString += "-------------  BEGIN LISTING: " + filename + " -------------</font><br>\n";
+            outputString += brush;
+            outputString += source;
+            outputString += "</pre>";
+            outputString += "<font face=\"courier\" color=\"" + HEADER_COLOR2 + "\">";
+            if (!bSingleFile)
+                outputString += "-------------   END LISTING: " + filename + " -------------</font><br>\n";
+
+            //write the output to the output file
+            writeToOutputFile(outputString, true);
         }
-
-        String outputString = String.join("",
-
-        "<font face=\"courier\" color=\"" + HEADER_COLOR2 + "\">",
-        "-------------  BEGIN LISTING: " + filename + " -------------</font><br>\n",
-        brush,
-        source,
-        "</pre>",
-        "<font face=\"courier\" color=\"" + HEADER_COLOR2 + "\">",
-        "-------------   END LISTING: " + filename + " -------------</font><br>\n"
-        );
-
-        //write the output to the output file
-        writeToFile(outputString, true);
     }
 
 

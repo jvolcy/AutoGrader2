@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import static AutoGrader2.Controller.console;
 
 /* ======================================================================
  * AutoGrader2 class
@@ -88,7 +89,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
             }
 
         } catch (Exception e) {
-            Controller.console("", e);
+            console("", e);
         }
 
         return python3Path;
@@ -111,7 +112,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
         try {
             Runtime r = Runtime.getRuntime();
 
-            //use "which python3" to try to find a Python 3 interpreter
+            //use "which g++" to try to find a c++ compiler
             Process p = r.exec(new String[]{"which", "g++"});
             p.waitFor();
             BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -120,7 +121,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
 
             /* if "which g++" did not yield a suitable compiler, check for 'c++' */
             if (cppPath == null) {
-                //use "which python3" to try to find a Python 3 interpreter
+                //use "which c++" to try to find a Python 3 interpreter
                 p = r.exec(new String[]{"which", "c++"});
                 p.waitFor();
                 b = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -129,11 +130,45 @@ public class AutoGrader2 extends Application implements IAGConstant {
             }
 
         } catch (Exception e) {
-            //Controller.console("", e);
-            Controller.console(e.getMessage());
+            //console("", e);
+            console(e.getMessage());
         }
 
         return cppPath;
+
+    }
+
+    /* ======================================================================
+     * autoLocateShell()
+     * ===================================================================== */
+    private static String autoLocateShell() {
+        String shellPath = null;
+        try {
+            Runtime r = Runtime.getRuntime();
+
+            //use "which bash" to try to find a shell interpreter
+            Process p = r.exec(new String[]{"which", "bash"});
+            p.waitFor();
+            BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            shellPath = b.readLine();
+            b.close();
+
+            /* if "which bash" did not yield a suitable shell, check for 'sh' */
+            if (shellPath == null) {
+                //use "which sh" to try to find a shell interpreter
+                p = r.exec(new String[]{"which", "sh"});
+                p.waitFor();
+                b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                shellPath = b.readLine();
+                b.close();
+            }
+
+        } catch (Exception e) {
+            //console("", e);
+            console(e.getMessage());
+        }
+
+        return shellPath;
 
     }
 
@@ -144,7 +179,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      * function returns null.  All configuration keys and values are strings.
      * ===================================================================== */
     public static String getConfiguration(String key) {
-        //Controller.console("getting conf. for " + key);
+        //console("getting conf. for " + key);
         return ag_config.get(key);
     }
 
@@ -158,26 +193,34 @@ public class AutoGrader2 extends Application implements IAGConstant {
         //---------- auto-locate python3 interpreter ----------
         String python3Path = autoLocatePython3Interpreter();
         if (python3Path == null)
-            Controller.console("No auto-detected python3 interpreter.");
+            console("No auto-detected python3 interpreter.");
         else
-            Controller.console("Found a Python3 interpreter at '" + python3Path + "'");
+            console("Found a Python3 interpreter at '" + python3Path + "'");
 
         //---------- auto-locate c++ compiler ----------
         String cppPath = autoLocateCppCompiler();
         if (cppPath == null)
-            Controller.console("No auto-detected c++ compiler.");
+            console("No auto-detected c++ compiler.");
         else
-            Controller.console("Found a c++ compiler at '" + cppPath + "'");
+            console("Found a c++ compiler at '" + cppPath + "'");
+
+        //---------- auto-locate shell interpreter ----------
+        String shellPath = autoLocateShell();
+        if (shellPath == null)
+            console("No auto-detected shell interpreter.");
+        else
+            console("Found a shell interpreter at '" + shellPath + "'");
 
         //---------- Generate or set the default AG options ----------
         ag_config.put(AG_CONFIG.LANGUAGE, LANGUAGE_PYTHON3);
-        ag_config.put(AG_CONFIG.MAX_RUNTIME, "0");
+        ag_config.put(AG_CONFIG.MAX_RUNTIME, "3");
         ag_config.put(AG_CONFIG.MAX_OUTPUT_LINES, "200");
         ag_config.put(AG_CONFIG.INCLUDE_SOURCE, YES);
         ag_config.put(AG_CONFIG.AUTO_UNCOMPRESS, YES);
         ag_config.put(AG_CONFIG.PROCESS_RECURSIVELY, YES);
         ag_config.put(AG_CONFIG.PYTHON3_INTERPRETER, python3Path);
         ag_config.put(AG_CONFIG.CPP_COMPILER, cppPath);
+        ag_config.put(AG_CONFIG.SHELL, shellPath);
 
         //---------- Overwrite the default AG options with data from the JSON file ----------
         loadConfiguration(configFileName);
@@ -212,7 +255,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
         //---------- set the path to the JSON config file ----------
         String cwd = System.getProperty("user.dir");
         configFileName = Paths.get(cwd, CONFIG_FILENAME).toString();
-        Controller.console("Config file path = '" + configFileName + "'");
+        console("Config file path = '" + configFileName + "'");
 
         //---------- setup app configurations ----------
         setupConfiguration(configFileName);
@@ -226,7 +269,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
         //---------- Commit the AG options to the JSON file ----------
         saveConfiguration("");
 
-        Controller.console("Exiting main()...");
+        console("Exiting main()...");
     }
 }
 

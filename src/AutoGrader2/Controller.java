@@ -1,6 +1,5 @@
 package AutoGrader2;
 
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -13,6 +12,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /* ======================================================================
@@ -35,6 +35,7 @@ public class Controller implements IAGConstant {
     public ChoiceBox choiceBoxConfigRecursive;
     public TextField txtPython3Interpreter;
     public TextField txtCppCompiler;
+    public TextField txtShell;
     public Button btnSettings;
     public Button btnInputSetup;
     public Button btnOutput;
@@ -136,6 +137,12 @@ public class Controller implements IAGConstant {
             txtCppCompiler.setText(AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER));
         else
             txtCppCompiler.setText("");
+
+        //---------- set the shell interpreter path value ----------
+        if (AutoGrader2.getConfiguration(AG_CONFIG.SHELL) != null)
+            txtShell.setText(AutoGrader2.getConfiguration(AG_CONFIG.SHELL));
+        else
+            txtShell.setText("");
 
         //configure the "Test Data" list view to allow multiple selections
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -253,7 +260,7 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
-        wvOutput.getEngine().load("file:///Users/jvolcy/work/Spelman/Projects/data/AGP0202.html");
+        wvOutput.getEngine().load("file://" + gradingEngine.getOutputFileName());
     }
 
     /* ======================================================================
@@ -408,21 +415,35 @@ public class Controller implements IAGConstant {
     public void btnStart() {
         MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
                 AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
-                AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(IAGConstant.YES));
+                AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
         //---------- Configure the Grading Engine ----------
         gradingEngine.assignments = mpp.getAssignments();
 
-        gradingEngine.assignments.get(2).language = IAGConstant.LANGUAGE_CPP;
+        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;
+        for (Assignment assignment : gradingEngine.assignments) {
+            assignment.testFiles = new ArrayList<>();
+            assignment.testFiles.add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");
+        }
 
-        gradingEngine.dumpAssignments();
         gradingEngine.cppCompiler = AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER);
         gradingEngine.python3Interpreter = AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER);
-        gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
+        gradingEngine.shell = AutoGrader2.getConfiguration(AG_CONFIG.SHELL);
+        //gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
+        gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
 
-        gradingEngine.processFiles();
+        gradingEngine.processAssignments();
 
-   }
+        gradingEngine.dumpAssignments();
+
+        //enable the Output button
+        btnOutput.setDisable(false);
+
+        //switch to the output tab
+        btnOutputClick();
+        //tabMain.getSelectionModel().select(OUTPUT_TAB);
+
+    }
 
 }
 

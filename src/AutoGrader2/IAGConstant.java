@@ -23,8 +23,8 @@ public interface IAGConstant {
     public final String LANGUAGE_CPP = "C++";
 
     public final String[] PYTHON_EXTENSIONS = {"py"};
-    public final String[] CPP_EXTENSIONS = {"cpp", "c"};
-    public final String[] CPP_ALL_EXTENSIONS = {"cpp", "c", "h", "hpp"};
+    public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc"};
+    public final String[] CPP_ALL_EXTENSIONS = {"cpp", "c", "cc", "h", "hpp"};
     public final String[] COMPRESSION_EXTENSIONS = {"zip"};
 
     //---------- AG Options Dictionary Keys ----------
@@ -37,6 +37,7 @@ public interface IAGConstant {
         public static final String PROCESS_RECURSIVELY = "PROCESS_RECURSIVELY";
         public static final String PYTHON3_INTERPRETER = "PYTHON3_INTERPRETER";
         public static final String CPP_COMPILER = "CPP_COMPILER";
+        public static final String SHELL = "SHELL";
     }
 
     //---------- Misc Constants ----------

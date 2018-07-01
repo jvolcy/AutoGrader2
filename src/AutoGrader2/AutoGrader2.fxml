@@ -220,6 +220,22 @@
                                                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                                                     </VBox.margin>
                                                 </HBox>
+                                    <HBox layoutX="14.0" layoutY="273.0" maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Shell Interpreter" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <TextField fx:id="txtShell" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
                                             </children>
                                         </VBox>
                                     </content>

@@ -2,6 +2,7 @@ package AutoGrader2;
 
 import java.io.File;
 import java.util.*;
+import static AutoGrader2.Controller.console;
 
 /* ======================================================================
  * MoodlePreprocessor
@@ -73,7 +74,7 @@ public class MoodlePreprocessor implements IAGConstant {
         //---------- verify that TopAssignmentsDirectory is a valid directory ----------
         File f = new File(TopAssignmentsDirectory);
         if (!f.isDirectory()) {
-            Controller.console("'" + TopAssignmentsDirectory + "' is not a valid source directory.");
+            console("'" + TopAssignmentsDirectory + "' is not a valid source directory.");
             return;     //do nothing else
         }
 
@@ -243,7 +244,7 @@ public class MoodlePreprocessor implements IAGConstant {
                 //uncompress each zip file
                 String[] cmd = {"unzip", "-u", cFile.getAbsolutePath(), "-d", stripFileExtension(cFile.getAbsolutePath())};
                 String cmdStr = "unzip -u \"" + cFile.getAbsolutePath() + "\" -d \"" + stripFileExtension(cFile.getAbsolutePath()) + "\"";
-                Controller.console(cmdStr);
+                console(cmdStr);
 
                 try {
                     Runtime r = Runtime.getRuntime();
@@ -251,7 +252,7 @@ public class MoodlePreprocessor implements IAGConstant {
                     //Process p = r.exec("unzip -u \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b.zip\34 -d \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b\34");
                     p.waitFor();
                 } catch (Exception e) {
-                    Controller.console("", e);
+                    console("", e);
                 }
             }
         }
@@ -261,7 +262,7 @@ public class MoodlePreprocessor implements IAGConstant {
         if (programmingFiles.size() > 0) {
             files.addAll(programmingFiles);
             //if we found any files, we are done
-            //return;
+            return;
         }
 
         //---------- Step 3: search for sub-directories ----------
@@ -363,7 +364,7 @@ public class MoodlePreprocessor implements IAGConstant {
 
 
                 if (studentName == null) {
-                    Controller.console("skipping directory " + file.getName());
+                    console("skipping directory " + file.getName());
                 } else if (studentName.equals("")) {
                     newAssignment.studentName = "Anonymous " + anonymousCounter;
                     anonymousCounter++;

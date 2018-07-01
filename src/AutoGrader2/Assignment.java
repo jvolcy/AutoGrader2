@@ -13,14 +13,17 @@ public class Assignment {
     public ArrayList<File> assignmentFiles;
     public String language;
     //---------- code analysis members ----------
-    public Integer linesOfCode;
-    public Integer numCommenbts;
-    public Integer nunDocStrings;
-    public Integer numFunctions;
-    public Integer numClasses;
+    //public Integer linesOfCode;
+    //public Integer numCommenbts;
+    //public Integer nunDocStrings;
+    //public Integer numFunctions;
+    //public Integer numClasses;
+    //---------- errors ----------
+    public String compilerErrors;
+    public String[] runtimeErrors;     //there are as many entries as we have test cases
     //---------- processing/execution members ----------
-    public ArrayList<String> testFiles;
-    public ArrayList<String> testResults;
+    public ArrayList<String> testFiles;         //the length of this list is the # of test cases
+    public String[] progOutputs;     //there are as many entries as we have test cases
     //---------- grading members ----------
     public Integer grade;
     public String instructorComment;
@@ -37,11 +40,14 @@ public class Assignment {
         numClasses = null;
         grade = null;
         instructorComment = null;
-        */
-        testFiles = new ArrayList<>();
+
+        runtimeErrors = new ArrayList<>(); */
+        //testFiles = new ArrayList<>();
+        /*
         testResults = new ArrayList<>();
         //initialize the assignmentFiles ArrayList
         //assignmentFiles = new ArrayList<File>();
+        */
     }
 }
 
