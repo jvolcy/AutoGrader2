@@ -1,4 +1,4 @@
-package AutoGrader2;
+package AutoGraderApp;
 
 import javafx.event.Event;
 import javafx.scene.control.*;
@@ -62,7 +62,7 @@ public class Controller implements IAGConstant {
     public static ListView consolePtr;
 
     //---------- Misc members ----------
-    private GradingEngine gradingEngine;
+   //private GradingEngine gradingEngine;
 
     /* ======================================================================
      * initialize()
@@ -95,56 +95,56 @@ public class Controller implements IAGConstant {
         //---------- update the different configuration fields with the actual user-specified values ----------
 
         //---------- set the "language" value  ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE) != null)
-            choiceBoxConfigLanguage.setValue(AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE));
+        if ( AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE) != null)
+            choiceBoxConfigLanguage.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
         else
             choiceBoxConfigLanguage.setValue(LANGUAGE_PYTHON3);
 
         //---------- set the "max run time" value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME) != null)
-            txtMaxRunTime.setText(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME) != null)
+            txtMaxRunTime.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME));
         else
             txtMaxRunTime.setText("0");
 
         //---------- set the "max output lines" value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES) != null)
-            txtMaxLines.setText(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES) != null)
+            txtMaxLines.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
         else
             txtMaxLines.setText("200");
 
         //---------- set the "include source" value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.INCLUDE_SOURCE) != null)
-            choiceBoxConfigIncludeSource.setValue(AutoGrader2.getConfiguration(AG_CONFIG.INCLUDE_SOURCE));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.INCLUDE_SOURCE) != null)
+            choiceBoxConfigIncludeSource.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.INCLUDE_SOURCE));
         else
             choiceBoxConfigIncludeSource.setValue(YES);
 
         //---------- set the "auto uncompress" value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS) != null)
-            choiceBoxConfigAutoUncompress.setValue(AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS) != null)
+            choiceBoxConfigAutoUncompress.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS));
         else
             choiceBoxConfigAutoUncompress.setValue(YES);
 
         //---------- set the "recursive process" value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.PROCESS_RECURSIVELY) != null)
-            choiceBoxConfigRecursive.setValue(AutoGrader2.getConfiguration(AG_CONFIG.PROCESS_RECURSIVELY));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PROCESS_RECURSIVELY) != null)
+            choiceBoxConfigRecursive.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PROCESS_RECURSIVELY));
         else
             choiceBoxConfigRecursive.setValue(YES);
 
         //---------- set the python3 interpreter path value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) != null)
-            txtPython3Interpreter.setText(AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) != null)
+            txtPython3Interpreter.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         else
             txtPython3Interpreter.setText("");
 
         //---------- set the c++ compiler path value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER) != null)
-            txtCppCompiler.setText(AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) != null)
+            txtCppCompiler.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
         else
             txtCppCompiler.setText("");
 
         //---------- set the shell interpreter path value ----------
-        if (AutoGrader2.getConfiguration(AG_CONFIG.SHELL) != null)
-            txtShell.setText(AutoGrader2.getConfiguration(AG_CONFIG.SHELL));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.SHELL) != null)
+            txtShell.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.SHELL));
         else
             txtShell.setText("");
 
@@ -171,14 +171,17 @@ public class Controller implements IAGConstant {
     }
 
     /* ======================================================================
-     * setGradingEngine()
-     * sets a reference to the GradingEngine object (this is the model in
+     * setAutoGraderApp()
+     * sets a reference to the AutoGrader2 object (this is the model in
      * the MVC paradigm).
      * ===================================================================== */
-    public void setGradingEngine(GradingEngine e) {
+    /*
+    public void setAutoGraderRef(AutoGrader2 ag2) {
         //---------- set a reference to the grading engine ----------
-        gradingEngine = e;
+        autoGrader = ag2;
+        gradingEngine = autoGrader.getGradingEngine();
     }
+    */
 
     /* ======================================================================
      * xxx
@@ -228,7 +231,7 @@ public class Controller implements IAGConstant {
         console("Good bye\n");
 
         /* get and close the app's stage.  This will quit the GUI and return
-        control to AutoGrader2.main(). */
+        control to AutoGraderApp.main(). */
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
         stage.close();
 
@@ -277,7 +280,7 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
-        wvOutput.getEngine().load("file://" + gradingEngine.getOutputFileName());
+        wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
     }
 
     /* ======================================================================
@@ -430,30 +433,72 @@ public class Controller implements IAGConstant {
      * Callback for 'Start' button on Input/Setup tab
      * ===================================================================== */
     public void btnStart() {
+
+        //---------- create aliases ----------
+        // Create aliases for the autoGrader and gradingEngine members of
+        // AutoGraderApp.  These are used extensively below.
+        AutoGrader2 autoGrader = AutoGraderApp.autoGrader;
+        GradingEngine gradingEngine = autoGrader.getGradingEngine();
+
+        //---------- Invoke the Moodle file pre-processor ----------
+        lblMessage.setText("Pre-processing Moodle files...");
+        // The pre-processor extracts assignment files and student names
+        // from the downloaded and uncompressed Moodle submissions download.
         MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
-                AutoGrader2.getConfiguration(AG_CONFIG.LANGUAGE),
-                AutoGrader2.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
+                autoGrader.getConfiguration(AG_CONFIG.LANGUAGE),
+                autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
-        cbName.getItems().removeAll();
+        //---------- handle multiple Python files ----------
 
-        //---------- Configure the Grading Engine ----------
+        //---------- Xfer Assignments to the Grading Engine ----------
+        /* The Moodle pre-preocessor creates the Assignments files
+         * array.  It also populates the student name and possibly
+         * other details of each assignment.  This array list
+         * becomes the assignment list for the grading engine. */
         gradingEngine.assignments = mpp.getAssignments();
 
-        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;
-        for (Assignment assignment : gradingEngine.assignments) {
-            cbName.getItems().add(assignment.studentName);
-            assignment.testFiles = new ArrayList<>();
-            assignment.testFiles.add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");
-        }
-
-        cbName.getSelectionModel().selectFirst();
-
-        gradingEngine.cppCompiler = AutoGrader2.getConfiguration(AG_CONFIG.CPP_COMPILER);
-        gradingEngine.python3Interpreter = AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER);
-        gradingEngine.shell = AutoGrader2.getConfiguration(AG_CONFIG.SHELL);
+        //---------- Configure the Grading Engine ----------
+        gradingEngine.setCppCompiler(autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
+        gradingEngine.setPython3Interpreter(autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
+        gradingEngine.setShellInterpreter(autoGrader.getConfiguration(AG_CONFIG.SHELL));
         //gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
         gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
+        gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
+        gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
+        //---------- Initialize the student name choice box ----------
+        // This ChoiceBox appears on the output tab and contains student names.
+        // Along with the "Prev" and "Next" buttons, t is used to navigate
+        // the output HTML.
+        cbName.getItems().removeAll();
+
+        //---------- Add test files to the Assignment objects ----------
+        /* Here, we add test files from the 'listTestData' ListView.
+         * While we are going through the list of assignments,
+         * also take advantage and pupulate the student names
+         * ChoiceBox (cbName). */
+        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;
+        for (Assignment assignment : gradingEngine.assignments) {
+            //populate the names ChoiceBox with the student names
+            cbName.getItems().add(assignment.studentName);
+
+            //initialize the test files array list
+            assignment.testFiles = new ArrayList<>();
+
+            assignment.testFiles.add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******
+
+            //add the test files from the 'ListTestData' ListView
+            for (Object s : listTestData.getItems()) {
+                //TEMP ******* assignment.testFiles.add(s.toString());
+            }
+
+        }
+
+        //select the first name on the student name list by default
+        cbName.getSelectionModel().selectFirst();
+
+
+        //---------- invoke the grader ----------
         lblMessage.setText("Processing assignments...");
 
         //need to run the processing in a thread ************* TO DO *****************

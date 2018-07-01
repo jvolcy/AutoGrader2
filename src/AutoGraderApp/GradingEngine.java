@@ -1,4 +1,4 @@
-package AutoGrader2;
+package AutoGraderApp;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static AutoGrader2.Controller.console;
+import static AutoGraderApp.Controller.console;
 
 /* ======================================================================
  * structure to hold the results returned by the shellExec() function.
@@ -38,11 +38,12 @@ public class GradingEngine implements IAGConstant {
     private String outputFileName;
     private String outputDirectory;
     public boolean bIncludeSourceInOutput;
-    public int maxRunTime;
-    public int maxOutputLines;
-    public String cppCompiler;
-    public String python3Interpreter;
-    public String shell;
+    private int maxRunTime;
+    private int maxOutputLines;
+    private String cppCompiler;
+    private String python3Interpreter;
+    private String shell;
+    private AutoGrader2 autoGrader;
     private ReportGenerator reportGenerator;
 
 
@@ -56,6 +57,40 @@ public class GradingEngine implements IAGConstant {
         maxOutputLines = 100;   //100 lines of output max per program
         bIncludeSourceInOutput = true;
         setOutputFileName("AG_output.html");
+    }
+
+    /* ======================================================================
+     * setAutoGraderApp()
+     * sets a reference to the AutoGrader2 object (this is the model in
+     * the MVC paradigm).
+     * ===================================================================== */
+    /*
+    public void setAutoGraderRef(AutoGrader2 ag2) {
+        //---------- set a reference to the grading engine ----------
+        autoGrader = ag2;
+    }
+*/
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public void setMaxRunTime(int maxRunTime) {
+        this.maxRunTime = maxRunTime;
+    }
+
+    public void setMaxOutputLines(int maxOutputLines) {
+        this.maxOutputLines = maxOutputLines;
+    }
+
+    public void setPython3Interpreter(String python3Interpreter){
+        this.python3Interpreter = python3Interpreter;
+    }
+
+    public void setCppCompiler(String cppCompiler) {
+        this.cppCompiler = cppCompiler;
+    }
+
+    public void setShellInterpreter(String shell) {
+        this.shell = shell;
     }
 
     /* ======================================================================
@@ -276,8 +311,8 @@ public class GradingEngine implements IAGConstant {
         //create a results structure for the calls to shellExec()
         shellExecResult execResult = new shellExecResult();
 
-        int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
-        int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
+        //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
+        //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
 
         //********* TEMP ******** For python, there should only be on assignment file;  for C++, it doesn't matter
         String sourceFile = assignment.assignmentFiles.get(0).getAbsolutePath();
@@ -286,10 +321,11 @@ public class GradingEngine implements IAGConstant {
         for (int i = 0; i< numTests; i++) {
 
             String dataFileName = assignment.testFiles.get(i);
-            String cmd = "\"" + AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
+//            String cmd = "\"" + AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
+            String cmd = "\"" + python3Interpreter + "\" " +
                     "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
 
-            execResult = shellExec(cmd, maxRunTime, maxLines, assignment.assignmentFiles.get(0).getAbsolutePath());
+            execResult = shellExec(cmd, maxRunTime, maxOutputLines, assignment.assignmentFiles.get(0).getAbsolutePath());
 
             //store the output in the assignment object
             assignment.progOutputs[i] = execResult.output;
@@ -308,7 +344,7 @@ public class GradingEngine implements IAGConstant {
 
         String[] cmd = {
                 shell, "-c",
-                AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + " " +
+                AutoGraderApp.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + " " +
                         "\"" + sourceFile + "\"" +
                         " < \"" + dataFileName +
                         "\" >> \"" + tmpFileName + "\" 2>&1"};
@@ -324,7 +360,7 @@ public class GradingEngine implements IAGConstant {
             Process p;
             //p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", "cal 1988"});
             p = Runtime.getRuntime().exec(cmd);
-            p.waitFor(Long.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME)), TimeUnit.SECONDS);
+            p.waitFor(Long.valueOf(AutoGraderApp.getConfiguration(AG_CONFIG.MAX_RUNTIME)), TimeUnit.SECONDS);
 
             //attempt to destroy the process
             if (p.isAlive()) {
@@ -362,7 +398,7 @@ public class GradingEngine implements IAGConstant {
 
         String dataFileName = "/Users/jvolcy/work/Spelman/Projects/data/data.txt";
         String sourceFile = "/Users/jvolcy/work/Spelman/Projects/data/P0104 - Solution.py";
-        String cmd = "\"" + AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
+        String cmd = "\"" + AutoGraderApp.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
                 "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
 
         shellExecResult output = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile);

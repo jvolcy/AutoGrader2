@@ -1,11 +1,11 @@
-package AutoGrader2;
+package AutoGraderApp;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import static AutoGrader2.Controller.console;
+import static AutoGraderApp.Controller.console;
 
 
 /* ======================================================================

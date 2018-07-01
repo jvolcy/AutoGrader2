@@ -1,8 +1,8 @@
-package AutoGrader2;
+package AutoGraderApp;
 
 import java.io.File;
 import java.util.*;
-import static AutoGrader2.Controller.console;
+import static AutoGraderApp.Controller.console;
 
 /* ======================================================================
  * MoodlePreprocessor

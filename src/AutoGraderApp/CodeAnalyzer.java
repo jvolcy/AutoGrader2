@@ -1,8 +1,8 @@
-package AutoGrader2;
+package AutoGraderApp;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import static AutoGrader2.Controller.console;
+import static AutoGraderApp.Controller.console;
 
 class CppAnalysis {
     public int numLines = 0;     //Number of lines of code

@@ -1,10 +1,4 @@
-package AutoGrader2;
-
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+package AutoGraderApp;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,43 +7,40 @@ import java.nio.file.Paths;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import static AutoGrader2.Controller.console;
+import static AutoGraderApp.Controller.console;
 
 /* ======================================================================
- * AutoGrader2 class
+ * AutoGraderApp class
  * ===================================================================== */
-public class AutoGrader2 extends Application implements IAGConstant {
+public class AutoGrader2 implements IAGConstant {
 
     //---------- AutoGrader options ----------
-    private static Dictionary<String, String> ag_config = new Hashtable<String, String>();
+    private Dictionary<String, String> ag_config = new Hashtable<String, String>();
 
     //---------- Configuration File Path ----------
-    private static String configFileName = null;
+    private String configFileName;
 
-    private static GradingEngine gradingEngine;
+    private GradingEngine gradingEngine;
 
     /* ======================================================================
-     * start()
-     * This function is automatically called after the primary stage
-     * has been created.
-     * This is a good place to customize the appearance of the stage.
+     * AutoGraderApp()
+     * constructor
      * ===================================================================== */
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        //Parent root = FXMLLoader.load(getClass().getResource("AutoGrader2.fxml"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AutoGrader2.fxml"));
-        Parent root = loader.load();
+     AutoGrader2() {
 
-        // Get the Controller from the FXMLLoader
-        Controller controller = loader.getController();
-        controller.setGradingEngine(gradingEngine);
+        console("AutoGraderApp constructor...");
 
-        primaryStage.setTitle("Spelman AutoGrader 2.0");
-        primaryStage.setScene(new Scene(root, MIN_STAGE_WIDTH, MIN_STAGE_HEIGHT));
-        primaryStage.setMinWidth(MIN_STAGE_WIDTH);
-        primaryStage.setMinHeight(MIN_STAGE_HEIGHT);
+        //---------- set the path to the JSON config file ----------
+        String cwd = System.getProperty("user.dir");
+        configFileName = Paths.get(cwd, CONFIG_FILENAME).toString();
+        console("Config file path = '" + configFileName + "'");
 
-        primaryStage.show();
+        //---------- setup app configurations ----------
+        setupConfiguration(configFileName);
+
+        //---------- initialize the grading engine ----------
+        gradingEngine = new GradingEngine();
+
     }
 
     /* ======================================================================
@@ -66,7 +57,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      * If a p3 interpreter is found, its path is returned.  If not,
      * the function returns null.
      * ===================================================================== */
-    private static String autoLocatePython3Interpreter() {
+    private String autoLocatePython3Interpreter() {
         String python3Path = null;
         try {
             Runtime r = Runtime.getRuntime();
@@ -107,7 +98,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      * If a c++ compiler is found, its path is returned.  If not,
      * the function returns null.
      * ===================================================================== */
-    private static String autoLocateCppCompiler() {
+    private String autoLocateCppCompiler() {
         String cppPath = null;
         try {
             Runtime r = Runtime.getRuntime();
@@ -141,7 +132,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
     /* ======================================================================
      * autoLocateShell()
      * ===================================================================== */
-    private static String autoLocateShell() {
+    private String autoLocateShell() {
         String shellPath = null;
         try {
             Runtime r = Runtime.getRuntime();
@@ -178,7 +169,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      * If the key is not in the configuraiton dictionary ag_config, the
      * function returns null.  All configuration keys and values are strings.
      * ===================================================================== */
-    public static String getConfiguration(String key) {
+    public String getConfiguration(String key) {
         //console("getting conf. for " + key);
         return ag_config.get(key);
     }
@@ -189,7 +180,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      * The values used for the configurations are either hardcoded defaults
      * or generated by probing the system.
      * ===================================================================== */
-    private static void setupConfiguration(String configFileName) {
+    private void setupConfiguration(String configFileName) {
         //---------- auto-locate python3 interpreter ----------
         String python3Path = autoLocatePython3Interpreter();
         if (python3Path == null)
@@ -223,7 +214,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
         ag_config.put(AG_CONFIG.SHELL, shellPath);
 
         //---------- Overwrite the default AG options with data from the JSON file ----------
-        loadConfiguration(configFileName);
+        loadConfiguration();
 
     }
 
@@ -233,7 +224,7 @@ public class AutoGrader2 extends Application implements IAGConstant {
      *
      * configFileName is the full path of the JSON configuration file.
      * ===================================================================== */
-    private static void loadConfiguration(String configFileName) {
+    private void loadConfiguration() {
 
     }
 
@@ -243,34 +234,17 @@ public class AutoGrader2 extends Application implements IAGConstant {
      *
      * configFileName is the full path of the JSON configuration file.
      * ===================================================================== */
-    private static void saveConfiguration(String configFileName) {
+    public void saveConfiguration() {
 
     }
 
     /* ======================================================================
-     * main()
-     * Entry point into the application.
+     * xxx
      * ===================================================================== */
-    public static void main(String[] args) {
-        //---------- set the path to the JSON config file ----------
-        String cwd = System.getProperty("user.dir");
-        configFileName = Paths.get(cwd, CONFIG_FILENAME).toString();
-        console("Config file path = '" + configFileName + "'");
-
-        //---------- setup app configurations ----------
-        setupConfiguration(configFileName);
-
-        //---------- initialize the grading engine ----------
-        gradingEngine = new GradingEngine();
-
-        //---------- start the GUI ----------
-        launch(args);
-
-        //---------- Commit the AG options to the JSON file ----------
-        saveConfiguration("");
-
-        console("Exiting main()...");
+    public GradingEngine getGradingEngine() {
+        return gradingEngine;
     }
+
 }
 
 
