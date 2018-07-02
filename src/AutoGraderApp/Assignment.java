@@ -11,6 +11,7 @@ public class Assignment {
     public String studentName;
     public String assignmentDirectory;
     public ArrayList<File> assignmentFiles;
+    public File primaryAssignmentFile;
     public String language;
     //---------- code analysis members ----------
     //public Integer linesOfCode;
@@ -49,6 +50,7 @@ public class Assignment {
         //assignmentFiles = new ArrayList<File>();
         */
     }
+
 }
 
 

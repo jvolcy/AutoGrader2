@@ -1,6 +1,10 @@
 package AutoGraderApp;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -8,12 +12,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /* ======================================================================
  * Controller Class
@@ -28,6 +33,8 @@ public class Controller implements IAGConstant {
     public Label lblStatus;
     public Label lblMessage;
     public Label lblLanguage;
+    public static Label messagePtr;
+    //public static String message_;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -62,9 +69,12 @@ public class Controller implements IAGConstant {
     public static ListView consolePtr;
 
     //---------- Misc members ----------
+    Alert gradingThreadStatusAlert;
    //private GradingEngine gradingEngine;
+    //private Thread gradingTask;
 
-    /* ======================================================================
+    //private static StringProperty message_;
+   /* ======================================================================
      * initialize()
      * Called automatically upon creation of the GUI
      * ===================================================================== */
@@ -72,6 +82,7 @@ public class Controller implements IAGConstant {
 
         //---------- set the static pointer to the console ----------
         consolePtr = listConsole;
+        messagePtr = lblMessage;
 
         //---------- populate the different choice box configuration options ----------
 
@@ -168,6 +179,35 @@ public class Controller implements IAGConstant {
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
 
+        /*
+        ObservableValue<? extends String>  message2 = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String>  message2, String oldValue,  String newValue) {
+                          }
+        };
+*/
+        /*
+        message_ = new SimpleStringProperty();
+        //private Label label; //fxid assigned in SceneBuilder
+        lblMessage.textProperty().bind(message_);
+*/
+        //lblMessage.proper
+
+        /*(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableVal, String oldVal, String newVal) {
+                System.out.println("Label Text Changed:" + newVal);
+                lblMessage.setText(newVal);
+            }
+        });*/
+
+
+        gradingThreadStatusAlert = new Alert(Alert.AlertType.INFORMATION);
+        gradingThreadStatusAlert.setTitle("Auto Grader");
+        //gradingThreadStatusAlert.setHeaderText("Processing...");
+        gradingThreadStatusAlert.setContentText("Click Cancel to abort.");
+        gradingThreadStatusAlert.getButtonTypes().setAll(ButtonType.CANCEL);
+
     }
 
     /* ======================================================================
@@ -191,6 +231,14 @@ public class Controller implements IAGConstant {
 
         //if the GUI is not yet up, the consolePtr hasn't been set yet:
         //dump the output to the screen.
+        try {
+            consolePtr.getItems().add(formattedOutput);
+            System.out.println("[c]" + formattedOutput);
+        }
+        catch (Exception e) {
+            System.out.println("[x]" + formattedOutput);
+        }
+        /*
         if (consolePtr == null) {
             System.out.println("[x]" + formattedOutput);
         }
@@ -198,8 +246,21 @@ public class Controller implements IAGConstant {
             System.out.println("[c]" + formattedOutput);
             consolePtr.getItems().add(formattedOutput);
         }
+        */
     }
 
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public static void message (String msg) {
+
+        //if the GUI is not yet up, the messagePtr hasn't been set yet:
+        //dump the output to the screen.
+        System.out.println("[m]" + msg);
+        if (messagePtr != null) {
+            messagePtr.setText(msg);
+        }
+    }
 
     /* ======================================================================
      * btnPrevClick()
@@ -375,13 +436,15 @@ public class Controller implements IAGConstant {
         setStartButtonStatus();
     }
 
-
     /* ======================================================================
      * btnAddClick()
      * Callback for the "Add" button on the Input/Setup tab.  The add button
      * is used to add test files to the test data list.
      * ===================================================================== */
     public void btnAddClick() {
+
+
+        /* TEMP ***********
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
 
@@ -394,6 +457,7 @@ public class Controller implements IAGConstant {
         for (File file : files) {
             listTestData.getItems().add(file);
         }
+        */
     }
 
 
@@ -427,7 +491,94 @@ public class Controller implements IAGConstant {
         e.consume();
     }
 
+    /* ======================================================================
+     * selectMainPythonFile()
+     * This function creates a dialog box that permits the user to
+     * select the top-level python script when multiple python files are
+     * detected.  The function then populates the primaryAssignmentFile
+     * member of the Assignment object accordingly.
+     * ===================================================================== */
+    private void selectMainPythonFile(Assignment assignment) {
+        //create a list of choices that
+        List<String> choices = new ArrayList<>();;
 
+        for (File f : assignment.assignmentFiles) {
+            choices.add(f.getName());
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+
+        dialog.setTitle(assignment.studentName);
+        dialog.setHeaderText("More than one python source was found with "
+                + assignment.studentName
+                + "'s submission.\nPlease select the top level python file from the list.\n"
+                + "Select [Cancel] to skip this submission (not graded).");
+        dialog.setContentText("Primary source:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            for (File f : assignment.assignmentFiles) {
+                if (result.get().equals(f.getName())) {
+                    console(f.getAbsolutePath());
+                    assignment.primaryAssignmentFile = f;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            assignment.primaryAssignmentFile = null;
+            System.out.println("no choice");
+        }
+    }
+
+    /* ======================================================================
+     * gradingThread
+     * thread that performs the grading in the background
+     * ===================================================================== */
+    /*
+    private Task<Integer> gradingThread = new Task<Integer>() {
+        @Override protected Integer call() {
+
+            AutoGraderApp.autoGrader.getGradingEngine().processAssignments();
+
+            /x*
+            //---------- invoke the grader ----------
+            message("Processing assignments...");
+            //need to run the processing in a thread ************* TO DO *****************
+            AutoGraderApp.autoGrader.getGradingEngine().processAssignments();
+
+            message("Processing Done.");
+
+            AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
+
+            //enable the Output button
+            btnOutput.setDisable(false);
+
+            //switch to the output tab
+            btnOutputClick();
+*x/
+            return 0;
+        }
+    };
+*/
+/*
+     Task<Integer> task = new Task<Integer>() {
+         @Override protected Integer call() throws Exception {
+             int iterations;
+             for (iterations = 0; iterations < 10000000; iterations++) {
+                 if (isCancelled()) {
+                     updateMessage("Cancelled");
+                     break;
+                 }
+                 updateMessage("Iteration " + iterations);
+                 updateProgress(iterations, 10000000);
+             }
+             return iterations;
+         }
+     };
+*/
     /* ======================================================================
      * btnStart()
      * Callback for 'Start' button on Input/Setup tab
@@ -441,7 +592,8 @@ public class Controller implements IAGConstant {
         GradingEngine gradingEngine = autoGrader.getGradingEngine();
 
         //---------- Invoke the Moodle file pre-processor ----------
-        lblMessage.setText("Pre-processing Moodle files...");
+        message("Pre-processing Moodle files...");
+
         // The pre-processor extracts assignment files and student names
         // from the downloaded and uncompressed Moodle submissions download.
         MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
@@ -449,7 +601,25 @@ public class Controller implements IAGConstant {
                 autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
         //---------- handle multiple Python files ----------
-
+        /* for Python files, if there are more than 1 source files, the user must
+        * identify the primary file.  The function selectMainPythonFile()
+        * removes all python source files apart from the user-specified
+        * primary file. */
+        for (Assignment assignment : mpp.getAssignments()) {
+            //python only: we need to check for the # of programming files found
+            //only 1 can be the primary
+            if (assignment.language == IAGConstant.LANGUAGE_PYTHON3) {
+                if (assignment.assignmentFiles.size() > 1) {
+                    selectMainPythonFile(assignment);
+                } else if (assignment.assignmentFiles.size() == 1) {
+                    //make the lone assignment file the primary
+                    assignment.primaryAssignmentFile = assignment.assignmentFiles.get(0);
+                } else {
+                    console("*** Assertion failure: No programming files were found.  The" +
+                            "Moodle pre-preprocessor should not be in the Assignments list. ***");
+                }
+            }
+        }
         //---------- Xfer Assignments to the Grading Engine ----------
         /* The Moodle pre-preocessor creates the Assignments files
          * array.  It also populates the student name and possibly
@@ -497,14 +667,54 @@ public class Controller implements IAGConstant {
         //select the first name on the student name list by default
         cbName.getSelectionModel().selectFirst();
 
+        //disable the 'Start' button
+        btnStart.setDisable(true);
 
         //---------- invoke the grader ----------
-        lblMessage.setText("Processing assignments...");
+        message("Processing assignments...");
 
-        //need to run the processing in a thread ************* TO DO *****************
         gradingEngine.processAssignments();
 
-        lblMessage.setText("Processing Done.");
+        //---------- start the grading thread monitor ----------
+        /* this is a periodic function that runs in the context of
+        * the UI thread.  It's main purpose is to update the message
+        * label as the processing progresses. The function also
+        * closes out any cleanup that needs to occur
+        * post-processing. */
+        gradingThreadMonitor.setCycleCount(Timeline.INDEFINITE);
+        gradingThreadMonitor.play();
+
+        //Alert gradingThreadStatusAlert = new Alert(Alert.AlertType.INFORMATION);
+        gradingThreadStatusAlert.setHeaderText("Processing " + gradingEngine.getProcessingStatus().progress + " assignments.");
+
+        gradingThreadStatusAlert.showAndWait();
+
+        //here, check to see if we are still running.  If so, the user clicked 'Cancel'
+        if (gradingEngine.getProcessingStatus().bRunning) {
+            System.out.println("Aborting...");
+            gradingEngine.abortGrading();
+        }
+
+        //ProcessingStatus ps = gradingEngine.getProcessingStatus();
+
+        /*
+        while (ps.bRunning) {
+
+            //ps = gradingEngine.getProcessingStatus();
+            /x*
+            try {
+                sleep(500);
+            } catch (Exception e) {}
+            *x/
+            yield();
+
+            //message(ps.message);
+            //selectMainPythonFile(gradingEngine.assignments.get(0));
+            //lblMessage.setText(ps.message);
+        }
+        */
+    /*
+        message("Processing Done.");
 
         gradingEngine.dumpAssignments();
 
@@ -513,9 +723,62 @@ public class Controller implements IAGConstant {
 
         //switch to the output tab
         btnOutputClick();
-        //tabMain.getSelectionModel().select(OUTPUT_TAB);
+*/
+
+        /*
+        //---------- start the grading thread ----------
+        gradingTask = new Thread(gradingThread);
+        gradingTask.setDaemon(true);        //true = end the task if the main app exits
+        gradingTask.start();
+*/
 
     }
+
+    /* ======================================================================
+     * gradingThreadMonitor
+     * This timeline is essentially a periodic function that executes with
+     * a period of 0.25 sec.  The function has multiple purposes and is
+     * intended to run only while the grading operation is in process.  The
+     * function begins with a call to gradingThreadMonitor.start() in the
+     * btnStart() handler.  It monitors the ProcessingStatus structure
+     * updated by the grading engine while processing assignments.  The
+     * timer auto-terminates when the processing reports to be complete.
+     * That is, when ProcessingStatus.bRunning is false.  The function
+     * performs a few post-processing tasks like enabling the output
+     * button and switching to the output tab.
+     * ===================================================================== */
+    Timeline gradingThreadMonitor = new Timeline(new KeyFrame(Duration.seconds(0.25), new EventHandler<ActionEvent>() {
+
+        @Override
+        public void handle(ActionEvent event) {
+            ProcessingStatus ps = AutoGraderApp.autoGrader.getGradingEngine().getProcessingStatus();
+
+            if (ps.bRunning) {
+                message("Processing submission for " + ps.message + "...");
+                gradingThreadStatusAlert.setHeaderText("Processing submissions..." +
+                        100*(ps.progress-ps.startVal)/(ps.endVal-ps.startVal) + "%.\n[" +
+                ps.message + "]");
+                return;
+            } else {
+                gradingThreadMonitor.stop();
+                gradingThreadStatusAlert.close();
+
+                message("Processing Done.");
+
+                AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
+
+                //enable the Output button
+                btnOutput.setDisable(false);
+
+                //re-enable the 'Start' button
+                btnStart.setDisable(false);
+
+                //switch to the output tab
+                btnOutputClick();
+            }
+        }
+    }));
+
 
 }
 

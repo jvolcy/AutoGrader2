@@ -62,6 +62,13 @@ public class AutoGraderApp extends Application implements IAGConstant {
     }
 }
 
+/* ======================================================================
+ * To Do
+ * Threads (the grader should work in a tread)
+ * Notification (update lblMessage with student names as the grader is working)
+ * Dialogbox (a custom dialog box to allow the user to select between
+ * multiple python files is needed)
+ * ===================================================================== */
 
 
 /* ======================================================================

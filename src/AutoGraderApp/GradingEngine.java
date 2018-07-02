@@ -1,5 +1,8 @@
 package AutoGraderApp;
 
+import javafx.concurrent.Task;
+import sun.plugin.perf.PluginRollup;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static AutoGraderApp.Controller.console;
+import static AutoGraderApp.Controller.message;
 
 /* ======================================================================
  * structure to hold the results returned by the shellExec() function.
@@ -20,6 +24,33 @@ class shellExecResult {
     Boolean bMaxLinesExceeded;
     String output;
 }
+
+/* ======================================================================
+ * structure to reports the status of the grading process,
+ * processAssignments().  This function is expected to be run inside
+ * of a thread or task.  The status structure is used to "peek"
+ * inside the running process.
+ * ===================================================================== */
+class ProcessingStatus {
+    Boolean bRunning;
+    String message;
+    Integer progress;
+    Integer startVal;
+    Integer endVal;
+
+    ProcessingStatus() {
+        bRunning = false;
+    };
+
+    ProcessingStatus(Boolean bRunning, String message, Integer progress, Integer startVal, Integer endVal) {
+        this.bRunning = bRunning;
+        this.message = message;
+        this.progress = progress;
+        this.startVal = startVal;
+        this.endVal = endVal;
+    }
+}
+
 
 /* ======================================================================
  * GradingEngine class
@@ -45,7 +76,10 @@ public class GradingEngine implements IAGConstant {
     private String shell;
     private AutoGrader2 autoGrader;
     private ReportGenerator reportGenerator;
+    private ProcessingStatus processingStatus;
 
+    private Thread gradingTask;
+    private boolean bAbortRequest;
 
     /* ======================================================================
      * GradingEngine Constructor
@@ -57,6 +91,15 @@ public class GradingEngine implements IAGConstant {
         maxOutputLines = 100;   //100 lines of output max per program
         bIncludeSourceInOutput = true;
         setOutputFileName("AG_output.html");
+
+    }
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public ProcessingStatus getProcessingStatus() {
+        return processingStatus;
     }
 
     /* ======================================================================
@@ -198,7 +241,7 @@ public class GradingEngine implements IAGConstant {
                 if (line.contains(token)) {
                     String pidStr = line.trim().split(" ")[0];
                     pids.add( Integer.valueOf(pidStr) );
-                    console(pidStr + "-->" + line.trim().split(" ")[1]);
+                    //console(pidStr + "-->" + line.trim().split(" ")[1]);
                 }
             }
         } catch (Exception e) {
@@ -243,7 +286,7 @@ public class GradingEngine implements IAGConstant {
         for (String s : cmd) {
             cmdStr += s + " ";
         }
-        console("Executing " + args + "\n  as  " + cmdStr );
+        System.out.println("Executing " + args + "\n  as  " + cmdStr );
 
         try {
             //attempt to execute the command
@@ -252,7 +295,7 @@ public class GradingEngine implements IAGConstant {
 
             //attempt to detect the PIDs of the launched shell and command
             ArrayList<Integer> pids = getPidFromToken(identifyingToken);
-            console("Started process(es) %s", pids.toString());
+            System.out.println("Started process(es) " + pids.toString());
 
             //wait no more than the specified timeout for the process to complete.
             //a timeout of zero means wait indefinitely.
@@ -266,7 +309,7 @@ public class GradingEngine implements IAGConstant {
             //flag and attempt to forcefully terminate it.
             if (p.isAlive()) {
                 execResult.bTimedOut = true;
-                console ("Killing process %s. Run time exceeds max value of %d seconds.", p.toString(), maxRunTime);
+                System.out.println ("Killing process " + p.toString() + ". Run time exceeds max value of " + maxRunTime + " seconds.");
 
                 //attempt to destroy the process using the Java supplied methods
                 p.destroy();
@@ -276,7 +319,7 @@ public class GradingEngine implements IAGConstant {
                 //a unix kill command
                 for (Integer pid : pids) {
                     String killCmd = "kill -9 " + pid.toString();
-                    console(killCmd);
+                    System.out.println(killCmd);
                     Runtime.getRuntime().exec(killCmd);
                 }
             }
@@ -404,14 +447,52 @@ public class GradingEngine implements IAGConstant {
         shellExecResult output = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile);
         console(output.output);
         */
+
+        bAbortRequest = false;
+        processingStatus = new ProcessingStatus(true, "", 1, 1, assignments.size());
+
+        //---------- start the grading thread ----------
+        gradingTask = new Thread(gradingThread);
+        gradingTask.setDaemon(true);        //true = end the task if the main app exits
+        gradingTask.start();
+
+        //console("Exiting processAssignments()...");
+/*
         for (Assignment assignment : assignments) {
+
+            //Controller.messagePtr.setText("sfsdfds");
+            message("Processing submission for " + assignment.studentName);
             execAssignment(assignment);
         }
-
+*/
         //reportGenerator = new ReportGenerator("AutoGrader 2", outputFileNameWithoutExtension, assignments, outputFileName);
         //reportGenerator.generateReport();
     }
 
+    /* ======================================================================
+     * gradingThread
+     * thread that performs the grading in the background
+     * ===================================================================== */
+    private Task<Integer> gradingThread = new Task<Integer>() {
+        @Override
+        protected Integer call() {
+
+            for (Assignment assignment : assignments) {
+                processingStatus.message = assignment.studentName;
+                //Controller.messagePtr.setText("sfsdfds");
+                //message("Processing submission for " + assignment.studentName);
+                execAssignment(assignment);
+                processingStatus.progress++;
+
+                //if a request is made to stop processing, break out of the loop
+                if (bAbortRequest) break;
+            }
+
+            //indicate that the thread is done.
+            processingStatus.bRunning = false;
+            return 0;
+        }
+    };
 
     /* ======================================================================
      * dumpAssignments()
@@ -431,6 +512,7 @@ public class GradingEngine implements IAGConstant {
             for (File f : assignment.assignmentFiles) {
                 console("\t" + f.getAbsolutePath());
             }
+            console("primaryAssignmentFile = " + assignment.primaryAssignmentFile);
 
             if (assignment.testFiles != null)           //TEMP*******
             for (int i=0; i<assignment.testFiles.size(); i++) {
@@ -443,6 +525,12 @@ public class GradingEngine implements IAGConstant {
         }
     }
 
+    /* ======================================================================
+     * abortGrading
+     * ===================================================================== */
+    public void abortGrading() {
+        bAbortRequest = true;
+    }
 
 }
 
