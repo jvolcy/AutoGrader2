@@ -1,7 +1,7 @@
 package AutoGraderApp;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import sun.plugin.perf.PluginRollup;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +28,7 @@ class shellExecResult {
 /* ======================================================================
  * structure to reports the status of the grading process,
  * processAssignments().  This function is expected to be run inside
- * of a thread or task.  The status structure is used to "peek"
+ * of a thread, service or task.  The status structure is used to "peek"
  * inside the running process.
  * ===================================================================== */
 class ProcessingStatus {
@@ -78,9 +78,8 @@ public class GradingEngine implements IAGConstant {
     private ReportGenerator reportGenerator;
     private ProcessingStatus processingStatus;
 
-    private Thread gradingTask;
     private boolean bAbortRequest;
-
+    private GradingService gradingService;
     /* ======================================================================
      * GradingEngine Constructor
      * ===================================================================== */
@@ -102,17 +101,6 @@ public class GradingEngine implements IAGConstant {
         return processingStatus;
     }
 
-    /* ======================================================================
-     * setAutoGraderApp()
-     * sets a reference to the AutoGrader2 object (this is the model in
-     * the MVC paradigm).
-     * ===================================================================== */
-    /*
-    public void setAutoGraderRef(AutoGrader2 ag2) {
-        //---------- set a reference to the grading engine ----------
-        autoGrader = ag2;
-    }
-*/
     /* ======================================================================
      * xxx
      * ===================================================================== */
@@ -357,14 +345,14 @@ public class GradingEngine implements IAGConstant {
         //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
         //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
 
-        //********* TEMP ******** For python, there should only be on assignment file;  for C++, it doesn't matter
-        String sourceFile = assignment.assignmentFiles.get(0).getAbsolutePath();
+        if (assignment.primaryAssignmentFile == null) return;
+        //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
+        String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();  //.assignmentFiles.get(0).getAbsolutePath();
 
         //run the code for each test case
         for (int i = 0; i< numTests; i++) {
 
             String dataFileName = assignment.testFiles.get(i);
-//            String cmd = "\"" + AutoGrader2.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
             String cmd = "\"" + python3Interpreter + "\" " +
                     "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
 
@@ -379,48 +367,10 @@ public class GradingEngine implements IAGConstant {
                         + " seconds exceeded.  Process forcefully terminated... output may be lost.\"";
             }
         }
-/*
 
-        dataFileName = "/Users/jvolcy/work/Spelman/Projects/data/data3.txt";
-        String sourceFile = "/Users/jvolcy/work/Spelman/Projects/data/P0104 - Solution.py";
-        String tmpFileName = outputFileName + ".AG2";
+        //tab the assignemnt as "auto-graded"
+        assignment.bAutoGraded = true;
 
-        String[] cmd = {
-                shell, "-c",
-                AutoGraderApp.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + " " +
-                        "\"" + sourceFile + "\"" +
-                        " < \"" + dataFileName +
-                        "\" >> \"" + tmpFileName + "\" 2>&1"};
-
-        //concatenate the cmd array string for display on the console
-        String cmdStr = "";
-        for (String s : cmd) {
-            cmdStr += s;
-        }
-        console(cmdStr);
-
-        try {
-            Process p;
-            //p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", "cal 1988"});
-            p = Runtime.getRuntime().exec(cmd);
-            p.waitFor(Long.valueOf(AutoGraderApp.getConfiguration(AG_CONFIG.MAX_RUNTIME)), TimeUnit.SECONDS);
-
-            //attempt to destroy the process
-            if (p.isAlive()) {
-                console("killing process...");
-                p.destroy();
-                p.waitFor(1, TimeUnit.SECONDS);
-
-                //after 1 second, if the process is still alive attempt to forcibly destroy it
-                if (p.isAlive()) {
-                    p.destroyForcibly();
-                }
-            }
-        }
-        catch (Exception e) {
-            console(e.getMessage());
-        }
-        */
     }
 
     /* ======================================================================
@@ -435,52 +385,68 @@ public class GradingEngine implements IAGConstant {
      * ===================================================================== */
     public void processAssignments() {
 
-        /*
-        String filename = fileNameFromPathName(outputFileName);
-        String outputFileNameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
-
-        String dataFileName = "/Users/jvolcy/work/Spelman/Projects/data/data.txt";
-        String sourceFile = "/Users/jvolcy/work/Spelman/Projects/data/P0104 - Solution.py";
-        String cmd = "\"" + AutoGraderApp.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "\" " +
-                "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
-
-        shellExecResult output = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile);
-        console(output.output);
-        */
 
         bAbortRequest = false;
         processingStatus = new ProcessingStatus(true, "", 1, 1, assignments.size());
 
-        //---------- start the grading thread ----------
+        //---------- start the grading service ----------
+        gradingService = new GradingService();
+        message("Attempting to launch grading service...");
+        gradingService.start();
+        /*
         gradingTask = new Thread(gradingThread);
         gradingTask.setDaemon(true);        //true = end the task if the main app exits
+        message("Attempting to launch grading thread...");
         gradingTask.start();
+        */
 
-        //console("Exiting processAssignments()...");
-/*
-        for (Assignment assignment : assignments) {
-
-            //Controller.messagePtr.setText("sfsdfds");
-            message("Processing submission for " + assignment.studentName);
-            execAssignment(assignment);
-        }
-*/
-        //reportGenerator = new ReportGenerator("AutoGrader 2", outputFileNameWithoutExtension, assignments, outputFileName);
-        //reportGenerator.generateReport();
     }
+
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    private class GradingService extends Service<Void> {
+
+        @Override
+        protected Task<Void> createTask() {
+            return new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+
+                    message("Grading service started...");
+                    for (Assignment assignment : assignments) {
+                        processingStatus.message = assignment.studentName;
+                        execAssignment(assignment);
+                        processingStatus.progress++;
+
+                        //if a request is made to stop processing, break out of the loop
+                        if (bAbortRequest) break;
+                    }
+
+                    //indicate that the thread is done.
+                    processingStatus.bRunning = false;
+                    message("Grading thread ending...");
+                    return null;
+                }
+            };
+        }
+    }
+
 
     /* ======================================================================
      * gradingThread
      * thread that performs the grading in the background
      * ===================================================================== */
+    /*
     private Task<Integer> gradingThread = new Task<Integer>() {
         @Override
         protected Integer call() {
 
+            message("Grading thread started...");
             for (Assignment assignment : assignments) {
                 processingStatus.message = assignment.studentName;
-                //Controller.messagePtr.setText("sfsdfds");
-                //message("Processing submission for " + assignment.studentName);
                 execAssignment(assignment);
                 processingStatus.progress++;
 
@@ -493,6 +459,7 @@ public class GradingEngine implements IAGConstant {
             return 0;
         }
     };
+    */
 
     /* ======================================================================
      * dumpAssignments()
@@ -515,11 +482,19 @@ public class GradingEngine implements IAGConstant {
             console("primaryAssignmentFile = " + assignment.primaryAssignmentFile);
 
             if (assignment.testFiles != null)           //TEMP*******
-            for (int i=0; i<assignment.testFiles.size(); i++) {
-                console("Errors: %s", assignment.runtimeErrors[i]);
-                console("Output: %s", assignment.progOutputs[i]);
-            }
+                if (assignment.testFiles.size() == 0) {
+                    console("No programming files found.");
+                }
+                else {
+                    for (int i = 0; i < assignment.testFiles.size(); i++) {
+                        if (assignment.runtimeErrors != null)
+                            console("Errors: %s", assignment.runtimeErrors[i]);
 
+                        if (assignment.progOutputs != null)
+                            console("Output: %s", assignment.progOutputs[i]);
+                    }
+                }
+            console("bAudograded = %s", assignment.bAutoGraded);
             console("grade = %d", assignment.grade);
             console("instructorComment = " + assignment.instructorComment);
         }

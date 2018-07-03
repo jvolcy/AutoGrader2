@@ -26,6 +26,7 @@ public class Assignment {
     public ArrayList<String> testFiles;         //the length of this list is the # of test cases
     public String[] progOutputs;     //there are as many entries as we have test cases
     //---------- grading members ----------
+    public Boolean bAutoGraded;
     public Integer grade;
     public String instructorComment;
 

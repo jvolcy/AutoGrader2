@@ -12,6 +12,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -33,8 +34,7 @@ public class Controller implements IAGConstant {
     public Label lblStatus;
     public Label lblMessage;
     public Label lblLanguage;
-    public static Label messagePtr;
-    //public static String message_;
+    private static Label messagePtr;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -66,15 +66,13 @@ public class Controller implements IAGConstant {
 
     //---------- Console Tab ----------
     public ListView listConsole;
-    public static ListView consolePtr;
+    private static ListView consolePtr;
 
     //---------- Misc members ----------
-    Alert gradingThreadStatusAlert;
-   //private GradingEngine gradingEngine;
-    //private Thread gradingTask;
+    private Alert gradingThreadStatusAlert;     //alert box displayed while processing assignments
+    private final Double GRADING_TIMELINE_PERIOD = 0.25;        //0.25 second period
 
-    //private static StringProperty message_;
-   /* ======================================================================
+  /* ======================================================================
      * initialize()
      * Called automatically upon creation of the GUI
      * ===================================================================== */
@@ -159,11 +157,12 @@ public class Controller implements IAGConstant {
         else
             txtShell.setText("");
 
-        //configure the "Test Data" list view to allow multiple selections
+        //---------- configure the "Test Data" list view to allow multiple selections ----------
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listTestData.getItems().add("filename1");
-        listTestData.getItems().add("filename2");
-        listTestData.getItems().add("filename3");
+        listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
+        listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
+        //listTestData.getItems().add("filename2");
+        //listTestData.getItems().add("filename3");
 
         setStartButtonStatus();
 
@@ -179,49 +178,18 @@ public class Controller implements IAGConstant {
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
 
-        /*
-        ObservableValue<? extends String>  message2 = new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String>  message2, String oldValue,  String newValue) {
-                          }
-        };
-*/
-        /*
-        message_ = new SimpleStringProperty();
-        //private Label label; //fxid assigned in SceneBuilder
-        lblMessage.textProperty().bind(message_);
-*/
-        //lblMessage.proper
+        //---------- Configure the grading thread monitoring thread ----------
+        gradingThreadMonitor.setCycleCount(Timeline.INDEFINITE);
 
-        /*(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableVal, String oldVal, String newVal) {
-                System.out.println("Label Text Changed:" + newVal);
-                lblMessage.setText(newVal);
-            }
-        });*/
-
-
+        //---------- Configure the grading thread status alert pop-up dialog ----------
         gradingThreadStatusAlert = new Alert(Alert.AlertType.INFORMATION);
         gradingThreadStatusAlert.setTitle("Auto Grader");
         //gradingThreadStatusAlert.setHeaderText("Processing...");
         gradingThreadStatusAlert.setContentText("Click Cancel to abort.");
         gradingThreadStatusAlert.getButtonTypes().setAll(ButtonType.CANCEL);
 
-    }
 
-    /* ======================================================================
-     * setAutoGraderApp()
-     * sets a reference to the AutoGrader2 object (this is the model in
-     * the MVC paradigm).
-     * ===================================================================== */
-    /*
-    public void setAutoGraderRef(AutoGrader2 ag2) {
-        //---------- set a reference to the grading engine ----------
-        autoGrader = ag2;
-        gradingEngine = autoGrader.getGradingEngine();
     }
-    */
 
     /* ======================================================================
      * xxx
@@ -416,7 +384,6 @@ public class Controller implements IAGConstant {
         }
     }
 
-
     /* ======================================================================
      * checkNoTestDataClick()
      * Callback for "No Test Data" check box on the Input/Setup tab.
@@ -442,9 +409,6 @@ public class Controller implements IAGConstant {
      * is used to add test files to the test data list.
      * ===================================================================== */
     public void btnAddClick() {
-
-
-        /* TEMP ***********
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
 
@@ -457,7 +421,7 @@ public class Controller implements IAGConstant {
         for (File file : files) {
             listTestData.getItems().add(file);
         }
-        */
+
     }
 
 
@@ -533,52 +497,7 @@ public class Controller implements IAGConstant {
         }
     }
 
-    /* ======================================================================
-     * gradingThread
-     * thread that performs the grading in the background
-     * ===================================================================== */
-    /*
-    private Task<Integer> gradingThread = new Task<Integer>() {
-        @Override protected Integer call() {
 
-            AutoGraderApp.autoGrader.getGradingEngine().processAssignments();
-
-            /x*
-            //---------- invoke the grader ----------
-            message("Processing assignments...");
-            //need to run the processing in a thread ************* TO DO *****************
-            AutoGraderApp.autoGrader.getGradingEngine().processAssignments();
-
-            message("Processing Done.");
-
-            AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
-
-            //enable the Output button
-            btnOutput.setDisable(false);
-
-            //switch to the output tab
-            btnOutputClick();
-*x/
-            return 0;
-        }
-    };
-*/
-/*
-     Task<Integer> task = new Task<Integer>() {
-         @Override protected Integer call() throws Exception {
-             int iterations;
-             for (iterations = 0; iterations < 10000000; iterations++) {
-                 if (isCancelled()) {
-                     updateMessage("Cancelled");
-                     break;
-                 }
-                 updateMessage("Iteration " + iterations);
-                 updateProgress(iterations, 10000000);
-             }
-             return iterations;
-         }
-     };
-*/
     /* ======================================================================
      * btnStart()
      * Callback for 'Start' button on Input/Setup tab
@@ -615,6 +534,7 @@ public class Controller implements IAGConstant {
                     //make the lone assignment file the primary
                     assignment.primaryAssignmentFile = assignment.assignmentFiles.get(0);
                 } else {
+                    /* Getting here implies that no programming files were found. */
                     console("*** Assertion failure: No programming files were found.  The" +
                             "Moodle pre-preprocessor should not be in the Assignments list. ***");
                 }
@@ -631,7 +551,6 @@ public class Controller implements IAGConstant {
         gradingEngine.setCppCompiler(autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
         gradingEngine.setPython3Interpreter(autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         gradingEngine.setShellInterpreter(autoGrader.getConfiguration(AG_CONFIG.SHELL));
-        //gradingEngine.setOutputFileName("/Users/jvolcy/work/Spelman/Projects/data/AGtest.html");
         gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
@@ -640,14 +559,14 @@ public class Controller implements IAGConstant {
         // This ChoiceBox appears on the output tab and contains student names.
         // Along with the "Prev" and "Next" buttons, t is used to navigate
         // the output HTML.
-        cbName.getItems().removeAll();
+        cbName.getItems().clear();
 
         //---------- Add test files to the Assignment objects ----------
         /* Here, we add test files from the 'listTestData' ListView.
          * While we are going through the list of assignments,
          * also take advantage and pupulate the student names
          * ChoiceBox (cbName). */
-        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;
+        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;           //***** TEMP
         for (Assignment assignment : gradingEngine.assignments) {
             //populate the names ChoiceBox with the student names
             cbName.getItems().add(assignment.studentName);
@@ -655,15 +574,13 @@ public class Controller implements IAGConstant {
             //initialize the test files array list
             assignment.testFiles = new ArrayList<>();
 
-            assignment.testFiles.add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******
-
             //add the test files from the 'ListTestData' ListView
             for (Object s : listTestData.getItems()) {
-                //TEMP ******* assignment.testFiles.add(s.toString());
+                assignment.testFiles.add(s.toString());
             }
 
         }
-
+gradingEngine.dumpAssignments();
         //select the first name on the student name list by default
         cbName.getSelectionModel().selectFirst();
 
@@ -681,56 +598,23 @@ public class Controller implements IAGConstant {
         * label as the processing progresses. The function also
         * closes out any cleanup that needs to occur
         * post-processing. */
-        gradingThreadMonitor.setCycleCount(Timeline.INDEFINITE);
         gradingThreadMonitor.play();
 
-        //Alert gradingThreadStatusAlert = new Alert(Alert.AlertType.INFORMATION);
+        //---------- Display the grading status alert ----------
         gradingThreadStatusAlert.setHeaderText("Processing " + gradingEngine.getProcessingStatus().progress + " assignments.");
-
         gradingThreadStatusAlert.showAndWait();
 
-        //here, check to see if we are still running.  If so, the user clicked 'Cancel'
+        //---------- Check for usr abort ----------
+        /* If we are here, then the status alert has closed.  This
+        would be the result of either the user closing it, or the
+        grading timeline closing it programmatically.  Check to see
+        if the grading process is still running.  If it is, the
+        user clicked 'Cancel' and we should abort the grading process. */
         if (gradingEngine.getProcessingStatus().bRunning) {
             System.out.println("Aborting...");
             gradingEngine.abortGrading();
         }
 
-        //ProcessingStatus ps = gradingEngine.getProcessingStatus();
-
-        /*
-        while (ps.bRunning) {
-
-            //ps = gradingEngine.getProcessingStatus();
-            /x*
-            try {
-                sleep(500);
-            } catch (Exception e) {}
-            *x/
-            yield();
-
-            //message(ps.message);
-            //selectMainPythonFile(gradingEngine.assignments.get(0));
-            //lblMessage.setText(ps.message);
-        }
-        */
-    /*
-        message("Processing Done.");
-
-        gradingEngine.dumpAssignments();
-
-        //enable the Output button
-        btnOutput.setDisable(false);
-
-        //switch to the output tab
-        btnOutputClick();
-*/
-
-        /*
-        //---------- start the grading thread ----------
-        gradingTask = new Thread(gradingThread);
-        gradingTask.setDaemon(true);        //true = end the task if the main app exits
-        gradingTask.start();
-*/
 
     }
 
@@ -747,24 +631,40 @@ public class Controller implements IAGConstant {
      * performs a few post-processing tasks like enabling the output
      * button and switching to the output tab.
      * ===================================================================== */
-    Timeline gradingThreadMonitor = new Timeline(new KeyFrame(Duration.seconds(0.25), new EventHandler<ActionEvent>() {
+    private Timeline gradingThreadMonitor = new Timeline(new KeyFrame(Duration.seconds(GRADING_TIMELINE_PERIOD), new EventHandler<ActionEvent>() {
 
         @Override
         public void handle(ActionEvent event) {
+            //create a ProcessingStatus object to monitor the status of the grading processor
             ProcessingStatus ps = AutoGraderApp.autoGrader.getGradingEngine().getProcessingStatus();
 
+            /* we will keep running so long as the grading engine is still
+            * processing. This is indicated by the bRunning member of the
+            * ProcessingStatus object being "true". */
             if (ps.bRunning) {
+                //update the lblMessage text
                 message("Processing submission for " + ps.message + "...");
+                /* calculate the % complete and update the pop-up alert initiated
+                * by btnClick. */
                 gradingThreadStatusAlert.setHeaderText("Processing submissions..." +
                         100*(ps.progress-ps.startVal)/(ps.endVal-ps.startVal) + "%.\n[" +
                 ps.message + "]");
+
+                /* our work is done for this invocation.  The timeline will
+                * execute again in 0.25 seconds. */
                 return;
-            } else {
-                gradingThreadMonitor.stop();
-                gradingThreadStatusAlert.close();
+            }
+            else {
+                /* If we are here, ps.bRunning is false, meaning that the
+                * the grading engine is done.  We will self-terminate
+                * the current timeline, close the status alert dialog,
+                * and do other post-processing things. */
+                gradingThreadMonitor.stop();        //end the current timeline
+                gradingThreadStatusAlert.close();   //close the alert dialog
 
-                message("Processing Done.");
+                message("Processing Done.");    //update the lblMessage
 
+                //dump the assignments to the console  ************ TEMP **************
                 AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
 
                 //enable the Output button

@@ -292,6 +292,7 @@ public class MoodlePreprocessor implements IAGConstant {
             //---------- set the language for the assignment ----------
             if (assignment.assignmentFiles.size() > 0)
                 assignment.language = language;
+                assignment.bAutoGraded = false;     //indicate the assignment has not yet been auto-graded
         }
 
     }
