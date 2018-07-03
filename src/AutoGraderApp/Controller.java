@@ -49,6 +49,7 @@ public class Controller implements IAGConstant {
     public Button btnSettings;
     public Button btnInputSetup;
     public Button btnOutput;
+    public Button btnConsole;
 
     //---------- Input/Setup Tab ----------
     public ListView listTestData;
@@ -71,6 +72,7 @@ public class Controller implements IAGConstant {
     //---------- Misc members ----------
     private Alert gradingThreadStatusAlert;     //alert box displayed while processing assignments
     private final Double GRADING_TIMELINE_PERIOD = 0.25;        //0.25 second period
+    private ReportGenerator reportGenerator;
 
   /* ======================================================================
      * initialize()
@@ -224,10 +226,13 @@ public class Controller implements IAGConstant {
 
         //if the GUI is not yet up, the messagePtr hasn't been set yet:
         //dump the output to the screen.
-        System.out.println("[m]" + msg);
-        if (messagePtr != null) {
+        try {
             messagePtr.setText(msg);
         }
+        catch (Exception e) {
+            console("[m]" + msg);
+        }
+
     }
 
     /* ======================================================================
@@ -285,6 +290,8 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("blue"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
+        btnConsole.setTextFill(Paint.valueOf("black"));
+
     }
 
     /* ======================================================================
@@ -297,6 +304,7 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("blue"));
         btnOutput.setTextFill(Paint.valueOf("black"));
+        btnConsole.setTextFill(Paint.valueOf("black"));
     }
 
     /* ======================================================================
@@ -309,7 +317,8 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
-        wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
+        btnConsole.setTextFill(Paint.valueOf("black"));
+        //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
     }
 
     /* ======================================================================
@@ -320,6 +329,7 @@ public class Controller implements IAGConstant {
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
+        btnConsole.setTextFill(Paint.valueOf("blue"));
     }
 
     /* ======================================================================
@@ -580,7 +590,7 @@ public class Controller implements IAGConstant {
             }
 
         }
-gradingEngine.dumpAssignments();
+
         //select the first name on the student name list by default
         cbName.getSelectionModel().selectFirst();
 
@@ -614,6 +624,41 @@ gradingEngine.dumpAssignments();
             System.out.println("Aborting...");
             gradingEngine.abortGrading();
         }
+
+        //---------- post-processing ----------
+
+        /* post-processing of the auto-grading operation will be completed.
+         * in the function doPostGradingProcessing().  This function
+         * is called as the final operation of the gradingThreadMonitor
+         * Timeline. */
+    }
+
+    /* ======================================================================
+     * doPostGradingProcessing()
+     * This function is called after the grading engine has completed its
+     * work.  The function's primary goal is to invoke the report generator
+     * and display its output.
+     * ===================================================================== */
+    private void doPostGradingProcessing() {
+
+        //enable the Output button
+        btnOutput.setDisable(false);
+
+        reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
+                txtSourceDirectory.getText(),       //header text
+                AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
+
+        reportGenerator.generateReport();
+
+        wvOutput.getEngine().loadContent(reportGenerator.getDocument());
+        //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
+
+        //switch to the output tab
+        btnOutputClick();
+
+        //dump the assignments to the console  ************ TEMP **************
+        AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
+
 
 
     }
@@ -664,17 +709,11 @@ gradingEngine.dumpAssignments();
 
                 message("Processing Done.");    //update the lblMessage
 
-                //dump the assignments to the console  ************ TEMP **************
-                AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
-
-                //enable the Output button
-                btnOutput.setDisable(false);
-
                 //re-enable the 'Start' button
                 btnStart.setDisable(false);
 
-                //switch to the output tab
-                btnOutputClick();
+                //call the post-processing function
+                doPostGradingProcessing();
             }
         }
     }));

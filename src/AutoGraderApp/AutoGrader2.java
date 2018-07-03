@@ -120,6 +120,16 @@ public class AutoGrader2 implements IAGConstant {
                 b.close();
             }
 
+            /* if still not found, check for 'cpp' */
+            if (cppPath == null) {
+                //use "which c++" to try to find a Python 3 interpreter
+                p = r.exec(new String[]{"which", "cpp"});
+                p.waitFor();
+                b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                cppPath = b.readLine();
+                b.close();
+            }
+
         } catch (Exception e) {
             //console("", e);
             console(e.getMessage());

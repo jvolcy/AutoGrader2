@@ -51,32 +51,35 @@ public class ReportGenerator implements IAGConstant {
     private final String FEEDBACK_COLOR = "purple";   //color of "instructor feedback" text
     private final String LINE_NUMBER_COLOR = "gray";  //color for code line numbers
 
-    private String outputFileName;
+    //private String outputFileName;
     private ArrayList<Assignment> assignments;
     private String title;
     private String headerText;
+
+    private String document;        //the HTML document
 
 
     /* ======================================================================
      * ReportGenerator()
      * ReportGenerator constructor.
      * ===================================================================== */
-    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments, String outputFile) {
+    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments /*, String outputFile*/) {
         this.title = title;
         this.headerText = headerText;
         this.assignments = assignments;
-        setOutputFile(outputFile);
+        //setOutputFile(outputFile);
     }
 
     /* ======================================================================
      * setOutputFile()
      * This function initializes the output file.
      * ===================================================================== */
+    /*
     public void setOutputFile(String fileName) {
         outputFileName = fileName;
         writeToOutputFile("", false);
     }
-
+    */
     /* ======================================================================
      * generateReport()
      * ===================================================================== */
@@ -85,13 +88,24 @@ public class ReportGenerator implements IAGConstant {
 
         for (Assignment assignment : assignments) {
             reportFileAnalytics(assignment);
-            writeSourceToOutputFile(assignment);
+            reportSourceCode(assignment);
+            reportOutputs(assignment);
+            insertGradingBox(assignment, "");
         }
+        reportClosingInfo(assignments);
+    }
+
+    /* ======================================================================
+     * getDocument()
+     * ===================================================================== */
+    public String getDocument() {
+        return document;
     }
 
     /* ======================================================================
      * writeToOutputFile()
      * ===================================================================== */
+    /*
     private void writeToOutputFile(String content, boolean bAppend) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputFileName, bAppend));
@@ -102,7 +116,7 @@ public class ReportGenerator implements IAGConstant {
             console(e.getMessage());
         }
     }
-
+    */
     /* ======================================================================
      * xxx
      * ===================================================================== */
@@ -147,7 +161,7 @@ public class ReportGenerator implements IAGConstant {
     private void makeHtmlHeader() {
         //create the html header in the output file
 
-        String htmlHeader = String.join("\n",
+        document = String.join("\n",
                 "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",
                 "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
                 "<head>",
@@ -165,7 +179,7 @@ public class ReportGenerator implements IAGConstant {
                 "<h1>" + headerText + "</h1>"
         );
 
-        writeToOutputFile(htmlHeader, true);
+        //writeToOutputFile(htmlHeader, true);
     }
 
     /* ======================================================================
@@ -225,15 +239,16 @@ public class ReportGenerator implements IAGConstant {
 
         }
 
-        writeToOutputFile(report, true);
+        //writeToOutputFile(report, true);
+        document += report;
     }
 
 
     /* ======================================================================
-     * writeSourceToOutputFile()
-     * function that inserts the provided source code into the output file.
+     * reportSourceCode()
+     * function that inserts the provided source code into the document.
      * ===================================================================== */
-    private void writeSourceToOutputFile(Assignment assignment) {
+    private void reportSourceCode(Assignment assignment) {
         //is this a single file or a set of files?
         boolean bSingleFile = assignment.assignmentFiles.size() == 1;
 
@@ -272,9 +287,88 @@ public class ReportGenerator implements IAGConstant {
                 outputString += "-------------   END LISTING: " + filename + " -------------</font><br>\n";
 
             //write the output to the output file
-            writeToOutputFile(outputString, true);
+            //writeToOutputFile(outputString, true);
+            document += outputString;
         }
     }
+
+    /* ======================================================================
+     * reportOutputs()
+     * function that inserts the results of each test case into the
+     * document.  These results include execution times, errors and
+     * program outputs.
+     * ===================================================================== */
+    private void reportOutputs(Assignment assignment) {
+
+        if (assignment.testFiles == null || assignment.testFiles.size() == 0) {
+            //here, we assume that the user specified no test files
+        }
+        else {
+            for (int i = 0; i < assignment.testFiles.size(); i++) {
+                //add the name of the test file to the document
+                document += "<font face=\"verdana\" color=\" " + HEADER_COLOR2
+                        + "\"><br>\n------------- "
+                        + fileNameFromPathName( assignment.testFiles.get(i) )
+                        + " -------------</font>\n";
+
+                //add the corresponding test file output to the document
+                document += "<pre><font face=\"courier\" color=\"" + OUTPUT_COLOR + "\">";
+                document += assignment.progOutputs[i] + "</font></pre>";
+
+                //report any error messages here
+                reportErrorMsg(assignment.runtimeErrors[i]);
+                reportExecutionTime(assignment.executionTimes[i]);
+            }
+        }
+    }
+
+
+
+    /* ======================================================================
+     * reportErrorMsg()
+     * print the supplied message in red to the document
+     * ===================================================================== */
+    void reportErrorMsg(String errorMessage) {
+        document += "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font>";
+    }
+
+    /* ======================================================================
+     * reportExecutionTime()
+     * print the supplied message in red to the document
+     * ===================================================================== */
+    void reportExecutionTime(Double execTime) {
+        document += "<font face=\"verdana\" color=\"" + ANALYTICS_COLOR2
+                + "\">[Execution Time: " + String.format("%.4f", execTime)
+                + " sec.]</font><br>\n";
+    }
+
+    /* ======================================================================
+     * insertGradingBox
+     * function that creates the instructor grading box.  This box is
+     * pre-populated with the student's name.
+     * ===================================================================== */
+    void insertGradingBox(Assignment assignment, String gradingTextLabel) {
+        document += "<font face=\"courier\" color=\"" + FEEDBACK_COLOR + "\">"
+                + "<br>Instructor Feedback for " + assignment.studentName
+                + "</font><br><textarea name=\"" + gradingTextLabel
+                + "\" rows=4 cols=80>" + assignment.studentName
+                + "\nGrade: \nComments: </textarea><br><br>";
+    }
+
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    void reportClosingInfo(ArrayList<Assignment> assignments) {
+        reportErrorMsg("<br><br><b>**** " + assignments.size()
+                + " project(s) processed. ****</b><br><font face=\"verdana\">"
+                + "Report Generator: AutoGrader v" + AutoGraderApp.version  + "<br>"
+                + "C++ Compiler: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) + "<br>"
+                + "Python Interpreter: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "<br>");
+
+    }
+
 
 
     /* ======================================================================

@@ -14,6 +14,7 @@ import static AutoGraderApp.Controller.console;
 public class AutoGraderApp extends Application implements IAGConstant {
 
     public static AutoGrader2 autoGrader;
+    public static final String version = "2.0";
 
     /* ======================================================================
      * start()
@@ -30,7 +31,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
         Parent root = loader.load();
 
         // Get the Controller from the FXMLLoader
-        Controller controller = loader.getController();
+        //Controller controller = loader.getController();
         //controller.setGradingEngine(autoGrader.getGradingEngine());
         //controller.setAutoGraderRef(autoGrader);
 
