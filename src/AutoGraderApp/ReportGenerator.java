@@ -103,20 +103,20 @@ public class ReportGenerator implements IAGConstant {
     }
 
     /* ======================================================================
-     * writeToOutputFile()
+     * writeReportToFile()
      * ===================================================================== */
-    /*
-    private void writeToOutputFile(String content, boolean bAppend) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(outputFileName, bAppend));
-            bw.write(content);
+    public void writeReportToFile(String fileName) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
+            bw.write(document);
             bw.close();
-
-        } catch (Exception e) {
+            console("Writing file %s.", fileName);
+        }
+        catch (IOException e) {
             console(e.getMessage());
         }
+
     }
-    */
+
     /* ======================================================================
      * xxx
      * ===================================================================== */
@@ -198,9 +198,9 @@ public class ReportGenerator implements IAGConstant {
         String report = "";
 
         report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">";
+        report += "<a id=\"" + assignment.studentName + "\"></a>\n";
         report += "<br>\n=======================================================<br>\n";
-        report += "<a name=\"" + assignment.studentName + "\"></a>\n";
-        report += assignment.studentName + "<br>\n";
+       report += assignment.studentName + "<br>\n";
         if (bSingleFile) {
             //if this is a single file, simply output its name
             report += assignment.assignmentFiles.get(0).getName();

@@ -185,6 +185,17 @@ public class AutoGrader2 implements IAGConstant {
     }
 
     /* ======================================================================
+     * getConfiguration()
+     * This function returns the value for the supplied configuration key.
+     * If the key is not in the configuraiton dictionary ag_config, the
+     * function returns null.  All configuration keys and values are strings.
+     * ===================================================================== */
+    public String setConfiguration(String key, String value) {
+        //console("setting conf. for " + key);
+        return ag_config.put(key, value);
+    }
+
+    /* ======================================================================
      * setupConfiguration()
      * This function sets up default AG2 configurations.
      * The values used for the configurations are either hardcoded defaults
@@ -213,9 +224,9 @@ public class AutoGrader2 implements IAGConstant {
             console("Found a shell interpreter at '" + shellPath + "'");
 
         //---------- Generate or set the default AG options ----------
-        ag_config.put(AG_CONFIG.LANGUAGE, LANGUAGE_PYTHON3);
+        ag_config.put(AG_CONFIG.LANGUAGE, LANGUAGE_AUTO);
         ag_config.put(AG_CONFIG.MAX_RUNTIME, "3");
-        ag_config.put(AG_CONFIG.MAX_OUTPUT_LINES, "200");
+        ag_config.put(AG_CONFIG.MAX_OUTPUT_LINES, "100");
         ag_config.put(AG_CONFIG.INCLUDE_SOURCE, YES);
         ag_config.put(AG_CONFIG.AUTO_UNCOMPRESS, YES);
         ag_config.put(AG_CONFIG.PROCESS_RECURSIVELY, YES);

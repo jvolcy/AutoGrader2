@@ -67,7 +67,7 @@ public class GradingEngine implements IAGConstant {
     /* The assignments list. */
     public ArrayList<Assignment> assignments;
     public ArrayList<File> testDataFiles;
-    private String outputFileName;
+    //private String outputFileName;
     private String outputDirectory;
     public boolean bIncludeSourceInOutput;
     private int maxRunTime;
@@ -90,8 +90,6 @@ public class GradingEngine implements IAGConstant {
         maxRunTime = 3;     //3 seconds
         maxOutputLines = 100;   //100 lines of output max per program
         bIncludeSourceInOutput = true;
-        setOutputFileName("AG_output.html");
-
     }
 
 
@@ -128,20 +126,22 @@ public class GradingEngine implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
+    /*
     public void setOutputFileName(String fileName) {
         outputFileName = fileName;
         File f = new File(fileName);
         outputDirectory =  f.getParent();
         console("output directory = " + outputDirectory);
     }
-
+*/
     /* ======================================================================
      * xxx
      * ===================================================================== */
+    /*
     public String getOutputFileName() {
         return outputFileName;
     }
-
+*/
     /* ======================================================================
      * xxx
      * ===================================================================== */

@@ -10,6 +10,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
@@ -86,7 +87,7 @@
                     </children></HBox>
                 <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
                     <tabs>
-                        <Tab text="0. Configure">
+                        <Tab onSelectionChanged="#configChanged" text="0. Configure">
                             <content>
                                 <ScrollPane fitToHeight="true" fitToWidth="true">
                                     <content>
@@ -118,7 +119,7 @@
                                                                 <Insets left="8.0" right="4.0" />
                                                             </padding>
                                                         </Label>
-                                                        <TextField fx:id="txtMaxRunTime" HBox.hgrow="ALWAYS" />
+                                          <Spinner fx:id="spinnerMaxRunTime" minWidth="200.0" prefHeight="27.0" HBox.hgrow="ALWAYS" />
                                                     </children>
                                                     <VBox.margin>
                                                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -134,7 +135,7 @@
                                                                 <Insets left="8.0" right="4.0" />
                                                             </padding>
                                                         </Label>
-                                                        <TextField fx:id="txtMaxLines" HBox.hgrow="ALWAYS" />
+                                          <Spinner fx:id="spinnerMaxLines" minWidth="200.0" HBox.hgrow="ALWAYS" />
                                                     </children>
                                                     <VBox.margin>
                                                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -269,7 +270,7 @@
                                         <HBox alignment="TOP_CENTER" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
                                             <children>
                                                 <Button fx:id="btnPrev" minWidth="100.0" mnemonicParsing="false" onAction="#btnPrevClick" text="&lt;&lt; Prev" HBox.hgrow="ALWAYS" />
-                                                <ChoiceBox fx:id="cbName" minWidth="300.0" HBox.hgrow="ALWAYS" />
+                                                <ChoiceBox fx:id="cbName" minWidth="300.0" onMouseClicked="#cbNameClick" HBox.hgrow="ALWAYS" />
                                                 <Button fx:id="btnNext" minWidth="100.0" mnemonicParsing="false" onAction="#btnNextClick" text="Next &gt;&gt;" HBox.hgrow="ALWAYS" />
                                             </children>
                                         </HBox>

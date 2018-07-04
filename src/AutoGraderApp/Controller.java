@@ -2,6 +2,8 @@ package AutoGraderApp;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -38,8 +40,8 @@ public class Controller implements IAGConstant {
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
-    public TextField txtMaxRunTime;
-    public TextField txtMaxLines;
+    public Spinner<Integer> spinnerMaxRunTime;
+    public Spinner<Integer> spinnerMaxLines;
     public ChoiceBox choiceBoxConfigIncludeSource;
     public ChoiceBox choiceBoxConfigAutoUncompress;
     public ChoiceBox choiceBoxConfigRecursive;
@@ -87,6 +89,7 @@ public class Controller implements IAGConstant {
         //---------- populate the different choice box configuration options ----------
 
         //---------- setup "language" config options ----------
+        choiceBoxConfigLanguage.getItems().add(LANGUAGE_AUTO);
         choiceBoxConfigLanguage.getItems().add(LANGUAGE_PYTHON3);
         choiceBoxConfigLanguage.getItems().add(LANGUAGE_CPP);
 
@@ -109,19 +112,17 @@ public class Controller implements IAGConstant {
         if ( AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE) != null)
             choiceBoxConfigLanguage.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
         else
-            choiceBoxConfigLanguage.setValue(LANGUAGE_PYTHON3);
+            choiceBoxConfigLanguage.setValue(LANGUAGE_AUTO);
 
         //---------- set the "max run time" value ----------
+        spinnerMaxRunTime.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME) != null)
-            txtMaxRunTime.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME));
-        else
-            txtMaxRunTime.setText("0");
+           spinnerMaxRunTime.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
-        //---------- set the "max output lines" value ----------
+       //---------- set the "max output lines" value ----------
+        spinnerMaxLines.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES) != null)
-            txtMaxLines.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
-        else
-            txtMaxLines.setText("200");
+            spinnerMaxLines.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
 
         //---------- set the "include source" value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.INCLUDE_SOURCE) != null)
@@ -163,8 +164,6 @@ public class Controller implements IAGConstant {
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
-        //listTestData.getItems().add("filename2");
-        //listTestData.getItems().add("filename3");
 
         setStartButtonStatus();
 
@@ -180,6 +179,13 @@ public class Controller implements IAGConstant {
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
 
+        cbName.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                cbNameClick();
+            }
+        });
+
         //---------- Configure the grading thread monitoring thread ----------
         gradingThreadMonitor.setCycleCount(Timeline.INDEFINITE);
 
@@ -190,7 +196,27 @@ public class Controller implements IAGConstant {
         gradingThreadStatusAlert.setContentText("Click Cancel to abort.");
         gradingThreadStatusAlert.getButtonTypes().setAll(ButtonType.CANCEL);
 
+    }
+    /* ======================================================================
+     * configChanged()
+     * function called whenever the configuration tab is selected or
+     * unselected
+     * ===================================================================== */
+    public void configChanged() {
+        //if (tabMain.getSelectionModel().isSelected(IAGConstant.CONFIGURATION_TAB)) return;
+        if (choiceBoxConfigLanguage.getSelectionModel().getSelectedItem() == null) return;
 
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_OUTPUT_LINES, spinnerMaxLines.getValue().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.INCLUDE_SOURCE, choiceBoxConfigIncludeSource.getSelectionModel().getSelectedItem().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.AUTO_UNCOMPRESS, choiceBoxConfigAutoUncompress.getSelectionModel().getSelectedItem().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PROCESS_RECURSIVELY, choiceBoxConfigRecursive.getSelectionModel().getSelectedItem().toString());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
+        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
+
+        //System.out.println("config changed,");
     }
 
     /* ======================================================================
@@ -236,6 +262,16 @@ public class Controller implements IAGConstant {
     }
 
     /* ======================================================================
+     * cbNameClick()
+     * ===================================================================== */
+    public void cbNameClick() {
+        wvOutput.getEngine().executeScript("document.getElementById(\""
+                + cbName.getSelectionModel().getSelectedItem().toString()
+                + "\").scrollIntoView();");
+    }
+
+
+    /* ======================================================================
      * btnPrevClick()
      * The "Prev" and "Next" buttons are on the Output tab.  These are
      * navigation buttons to move back and forth through the list of
@@ -244,6 +280,11 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnPrevClick() {
         cbName.getSelectionModel().selectPrevious();
+        /*
+        wvOutput.getEngine().executeScript("document.getElementById(\""
+                + cbName.getSelectionModel().getSelectedItem().toString()
+                + "\").scrollIntoView();");
+                */
     }
 
     /* ======================================================================
@@ -255,6 +296,11 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnNextClick() {
         cbName.getSelectionModel().selectNext();
+        /*
+        wvOutput.getEngine().executeScript("document.getElementById(\""
+                + cbName.getSelectionModel().getSelectedItem().toString()
+                + "\").scrollIntoView();");
+                */
     }
 
     /* ======================================================================
@@ -561,7 +607,7 @@ public class Controller implements IAGConstant {
         gradingEngine.setCppCompiler(autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
         gradingEngine.setPython3Interpreter(autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         gradingEngine.setShellInterpreter(autoGrader.getConfiguration(AG_CONFIG.SHELL));
-        gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
+        //gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
@@ -574,9 +620,8 @@ public class Controller implements IAGConstant {
         //---------- Add test files to the Assignment objects ----------
         /* Here, we add test files from the 'listTestData' ListView.
          * While we are going through the list of assignments,
-         * also take advantage and pupulate the student names
+         * also take advantage and populate the student names
          * ChoiceBox (cbName). */
-        gradingEngine.assignments.get(2).language = LANGUAGE_CPP;           //***** TEMP
         for (Assignment assignment : gradingEngine.assignments) {
             //populate the names ChoiceBox with the student names
             cbName.getItems().add(assignment.studentName);
@@ -659,6 +704,7 @@ public class Controller implements IAGConstant {
         //dump the assignments to the console  ************ TEMP **************
         AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
 
+        reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
 
 
     }

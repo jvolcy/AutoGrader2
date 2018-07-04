@@ -40,7 +40,6 @@ public class MoodlePreprocessor implements IAGConstant {
 
     private String TopAssignmentsDirectory;
     private String language;
-    private String[] extensions;
     private boolean bAutoUncompress;
 
     /* ======================================================================
@@ -105,17 +104,25 @@ public class MoodlePreprocessor implements IAGConstant {
      * ===================================================================== */
     private void setLanguage(String language_) {
 
+        //by default assign language to language_.  This may change below.
+        language = language_;
+
         //---------- set the default file extensions ----------
-        if (language_.equals(IAGConstant.LANGUAGE_CPP)) {
-            this.language = language_;
-            extensions = IAGConstant.CPP_EXTENSIONS;
-        } else if (language_.equals(IAGConstant.LANGUAGE_PYTHON3)) {
-            this.language = language_;
-            extensions = IAGConstant.PYTHON_EXTENSIONS;
-        } else {
-            this.language = null;
-            extensions = null;
+        switch (language_) {
+            case IAGConstant.LANGUAGE_CPP:
+                //extensions = IAGConstant.CPP_EXTENSIONS;
+                break;
+            case IAGConstant.LANGUAGE_PYTHON3:
+                //extensions = IAGConstant.PYTHON_EXTENSIONS;
+                break;
+            case IAGConstant.LANGUAGE_AUTO:
+                //extensions = IAGConstant.PYTHON_AND_CPP_EXTENSIONS;
+                break;
+            default:
+                //extensions = IAGConstant.PYTHON_AND_CPP_EXTENSIONS;;
+                language = LANGUAGE_AUTO;       //invalid language specified: use AUTO by default
         }
+
     }
 
     /* ======================================================================
@@ -258,7 +265,7 @@ public class MoodlePreprocessor implements IAGConstant {
         }
 
         //---------- Step 2: find programming files in the directory ----------
-        ArrayList<File> programmingFiles = findFilesByExtension(directory, extensions);
+        ArrayList<File> programmingFiles = findFilesByExtension(directory, PYTHON_AND_CPP_EXTENSIONS);
         if (programmingFiles.size() > 0) {
             files.addAll(programmingFiles);
             //if we found any files, we are done
@@ -276,6 +283,22 @@ public class MoodlePreprocessor implements IAGConstant {
         //No assignment files found.  This may be the end of the recursion.
     }
 
+    /* ======================================================================
+     * autoDetectLanguage()
+     *
+     * ===================================================================== */
+    private String autoDetectLanguage(ArrayList<File> progFiles) {
+        for (File f : progFiles) {
+            String f_extension = getFileExtension(f).toLowerCase();
+            if (Arrays.asList(IAGConstant.PYTHON_EXTENSIONS).contains(f_extension)) {
+                return IAGConstant.LANGUAGE_PYTHON3;
+            }
+            if (Arrays.asList(IAGConstant.CPP_EXTENSIONS).contains(f_extension)) {
+                return IAGConstant.LANGUAGE_CPP;
+            }
+        }
+        return IAGConstant.LANGUAGE_UNKNOWN;
+    }
 
     /* ======================================================================
      * prepareAssignmentFiles()
@@ -284,14 +307,45 @@ public class MoodlePreprocessor implements IAGConstant {
     private void prepareAssignmentFiles() {
         for (Assignment assignment : assignments) {
             //---------- initialize the assignmentFiles array list ----------
-            assignment.assignmentFiles = new ArrayList<File>();
+            assignment.assignmentFiles = new ArrayList<>();
+
+            //create a temporary assignment files array list
+            ArrayList<File> assignmentFiles = new ArrayList<>();
 
             //---------- call the recursive findAssignmentFiles method ----------
-            findAssignmentFiles(assignment.assignmentFiles, assignment.assignmentDirectory);
+            findAssignmentFiles(assignmentFiles, assignment.assignmentDirectory);
 
             //---------- set the language for the assignment ----------
-            if (assignment.assignmentFiles.size() > 0)
+            if (language.equals( IAGConstant.LANGUAGE_AUTO) ) {
+                assignment.language = autoDetectLanguage(assignmentFiles);
+            }
+            else {
                 assignment.language = language;
+            }
+
+            String[] extensions;
+
+            switch (assignment.language) {
+                case IAGConstant.LANGUAGE_PYTHON3:
+                    extensions = IAGConstant.PYTHON_EXTENSIONS;
+                    break;
+                case IAGConstant.LANGUAGE_CPP:
+                    extensions = IAGConstant.CPP_EXTENSIONS;
+                    break;
+                default:        //unable to determine the language
+                    extensions = new String[] {};
+            }
+
+            //add only files of the right type to the assignment file list
+            for (File f: assignmentFiles) {
+                String f_extension = getFileExtension(f).toLowerCase();
+                if (Arrays.asList(extensions).contains(f_extension)){
+                        //---------- if the extension on the file matches
+                        // one of the extension in the extensions list, add
+                        // it to the programming files list. ----------
+                    assignment.assignmentFiles.add(f);
+                    }
+            }
                 assignment.bAutoGraded = false;     //indicate the assignment has not yet been auto-graded
         }
 

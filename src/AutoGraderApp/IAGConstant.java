@@ -19,12 +19,15 @@ public interface IAGConstant {
     public final String YES = "Yes";
     public final String NO = "No";
 
+    public final String LANGUAGE_AUTO = "Auto";
     public final String LANGUAGE_PYTHON3 = "Python 3";
     public final String LANGUAGE_CPP = "C++";
+    public final String LANGUAGE_UNKNOWN = "Unknown";
 
     public final String[] PYTHON_EXTENSIONS = {"py"};
-    public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc"};
-    public final String[] CPP_ALL_EXTENSIONS = {"cpp", "c", "cc", "h", "hpp"};
+    //public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc"};
+    public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc", "h", "hpp"};
+    public final String[] PYTHON_AND_CPP_EXTENSIONS = {"py", "cpp", "c", "cc", "h", "hpp"};
     public final String[] COMPRESSION_EXTENSIONS = {"zip"};
 
     //---------- AG Options Dictionary Keys ----------
