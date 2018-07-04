@@ -68,7 +68,7 @@ public class GradingEngine implements IAGConstant {
     public ArrayList<Assignment> assignments;
     public ArrayList<File> testDataFiles;
     //private String outputFileName;
-    private String outputDirectory;
+    private String tempOutputDirectory;
     public boolean bIncludeSourceInOutput;
     private int maxRunTime;
     private int maxOutputLines;
@@ -121,6 +121,14 @@ public class GradingEngine implements IAGConstant {
 
     public void setShellInterpreter(String shell) {
         this.shell = shell;
+    }
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public void setTempOutputDirectory(String dirName) {
+        tempOutputDirectory =  dirName;
+        console("output directory = " + tempOutputDirectory);
     }
 
     /* ======================================================================
@@ -263,7 +271,7 @@ public class GradingEngine implements IAGConstant {
         execResult.execTimeSec = 0.0;
 
         //create a temp file to capture program output
-        File tmpFile = new File(outputDirectory + "/TEMP.AG2");
+        File tmpFile = new File(tempOutputDirectory + "/TEMP.AG2");
 
         //delete any previous temp file in the output directory.
         try {
@@ -364,19 +372,44 @@ public class GradingEngine implements IAGConstant {
         //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
         String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();  //.assignmentFiles.get(0).getAbsolutePath();
 
-        //run the code for each test case
+        /* we have to add logic that handles the case where no test files are required differently
+        * from the cases where test files are needed.  In the former case, there is no input
+        * redirection (no user input).  In the latter case, we redirect stdin from the test
+        * data files.  The command line includes a "< testFile" argument. */
+        boolean bNoTestFiles = false;       //set a flag to denote no test files
+        if (numTests == 0) {
+            /* while there are no test files, we must set numTests to 0 in order to
+            * enter the for loop.  We set it to 1 so that the loop executes only
+            * once.  We will use the boolean flag bNoTestFiles inside the loop
+            * to indicate whether or not test data files are to be used. */
+            numTests = 1;   //we will have a single test w/o test files
+            bNoTestFiles = true;
+        }
+
+        //run the code for each test case.
         for (int i = 0; i < numTests; i++) {
+            String cmd;
 
-            String dataFileName = assignment.testFiles.get(i);
-            String cmd = "\"" + python3Interpreter + "\" " +
-                    "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
+            //use bNoTestFiles to determine the format of the command string, cmd
+            if (bNoTestFiles) {
+                //if we have no test files, do not include input redirection in the exec command
+                cmd = "\"" + python3Interpreter + "\" " +
+                        "\"" + sourceFile + "\"";
+            }
+            else {
+                //we have test files: use them to redirect stdin in the exec command
+                String dataFileName = assignment.testFiles.get(i);
+                cmd = "\"" + python3Interpreter + "\" " +
+                        "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
+            }
 
+            //the command string, cmd
             execResult = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile);
 
             //store the output in the assignment object
             assignment.progOutputs[i] = execResult.output;
 
-            //store any runtime errors in the assignment object
+            //store any runtime/compiler errors in the assignment object
             assignment.runtimeErrors[i] = "";   //initialize the runtimeErrors string
             if (execResult.bTimedOut) {
                 assignment.runtimeErrors[i] += "Maximum execution time of " + maxRunTime
@@ -387,10 +420,11 @@ public class GradingEngine implements IAGConstant {
                         + ") exceeded.  Output truncated.\n";
             }
 
+            //store the execution time in the assignment object
             assignment.executionTimes[i] = execResult.execTimeSec;
         }
 
-        //tab the assignemnt as "auto-graded"
+        //tag the assignemnt as "auto-graded"
         assignment.bAutoGraded = true;
 
     }

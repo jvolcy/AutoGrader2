@@ -174,6 +174,7 @@ public class Controller implements IAGConstant {
         btnOutput.setDisable(true);
 
         //---------- Initialize Misc. controls ----------
+        lblLanguage.setText("");
         lblMessage.setText("");
 
         //************* TEMP **************
@@ -204,19 +205,25 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void configChanged() {
         //if (tabMain.getSelectionModel().isSelected(IAGConstant.CONFIGURATION_TAB)) return;
-        if (choiceBoxConfigLanguage.getSelectionModel().getSelectedItem() == null) return;
+        try {
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_OUTPUT_LINES, spinnerMaxLines.getValue().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.INCLUDE_SOURCE, choiceBoxConfigIncludeSource.getSelectionModel().getSelectedItem().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.AUTO_UNCOMPRESS, choiceBoxConfigAutoUncompress.getSelectionModel().getSelectedItem().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PROCESS_RECURSIVELY, choiceBoxConfigRecursive.getSelectionModel().getSelectedItem().toString());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
+            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_OUTPUT_LINES, spinnerMaxLines.getValue().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.INCLUDE_SOURCE, choiceBoxConfigIncludeSource.getSelectionModel().getSelectedItem().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.AUTO_UNCOMPRESS, choiceBoxConfigAutoUncompress.getSelectionModel().getSelectedItem().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PROCESS_RECURSIVELY, choiceBoxConfigRecursive.getSelectionModel().getSelectedItem().toString());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
-        AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
-
-        //System.out.println("config changed,");
+            if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE).equals(IAGConstant.LANGUAGE_AUTO))
+                lblLanguage.setText("");
+            else
+                lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+        }
+        catch (Exception e) {
+            console("", e);
+        }
     }
 
     /* ======================================================================
@@ -265,9 +272,15 @@ public class Controller implements IAGConstant {
      * cbNameClick()
      * ===================================================================== */
     public void cbNameClick() {
-        wvOutput.getEngine().executeScript("document.getElementById(\""
-                + cbName.getSelectionModel().getSelectedItem().toString()
-                + "\").scrollIntoView();");
+        try {
+            wvOutput.getEngine().executeScript("document.getElementById(\""
+                    + cbName.getSelectionModel().getSelectedItem().toString()
+                    + "\").scrollIntoView();");
+        }
+        catch (Exception e){
+            //trap any calls made before the wvOutput engine is assigned a document
+            console(e.getMessage());
+        }
     }
 
 
@@ -607,6 +620,7 @@ public class Controller implements IAGConstant {
         gradingEngine.setCppCompiler(autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
         gradingEngine.setPython3Interpreter(autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         gradingEngine.setShellInterpreter(autoGrader.getConfiguration(AG_CONFIG.SHELL));
+        gradingEngine.setTempOutputDirectory(txtSourceDirectory.getText());
         //gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
@@ -644,6 +658,7 @@ public class Controller implements IAGConstant {
 
         //---------- invoke the grader ----------
         message("Processing assignments...");
+        lblStatus.setText("Working...");
 
         gradingEngine.processAssignments();
 
@@ -667,6 +682,7 @@ public class Controller implements IAGConstant {
         user clicked 'Cancel' and we should abort the grading process. */
         if (gradingEngine.getProcessingStatus().bRunning) {
             System.out.println("Aborting...");
+            lblStatus.setText("Aborting...");
             gradingEngine.abortGrading();
         }
 
@@ -741,6 +757,8 @@ public class Controller implements IAGConstant {
                         100*(ps.progress-ps.startVal)/(ps.endVal-ps.startVal) + "%.\n[" +
                 ps.message + "]");
 
+                lblStatus.setText("Working..." + 100*(ps.progress-ps.startVal)/(ps.endVal-ps.startVal) + "%");
+
                 /* our work is done for this invocation.  The timeline will
                 * execute again in 0.25 seconds. */
                 return;
@@ -754,6 +772,7 @@ public class Controller implements IAGConstant {
                 gradingThreadStatusAlert.close();   //close the alert dialog
 
                 message("Processing Done.");    //update the lblMessage
+                lblStatus.setText("Ready.");
 
                 //re-enable the 'Start' button
                 btnStart.setDisable(false);

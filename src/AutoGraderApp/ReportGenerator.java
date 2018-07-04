@@ -140,20 +140,12 @@ public class ReportGenerator implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    private String fileNameFromPathName(String pathName)
-    {
+    private String fileNameFromPathName(String pathName) {
         //extract the filename from the path name
         File f = new File(pathName);
         return f.getName();
     }
 
-    /* ======================================================================
-     * formatErrorMsg()
-     * returns a string that is the html-formatted message in a red font
-     * ===================================================================== */
-    String formatErrorMsg(String errorMessage) {
-        return "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font>";
-    }
 
     /* ======================================================================
      * makeHtmlHeader()
@@ -176,7 +168,7 @@ public class ReportGenerator implements IAGConstant {
                 "",
                 "<body style=\"background: white; font-family: Helvetica\">",
                 "<form encrypt=\"multipart/form-data\" action=\"\" method=\"POST\">",
-                "<h1>" + headerText + "</h1>"
+                "<h2>" + fileNameFromPathName(headerText) + "</h2>"
         );
 
         //writeToOutputFile(htmlHeader, true);
@@ -187,26 +179,32 @@ public class ReportGenerator implements IAGConstant {
      * function that reports analytics for every file in a given assignment
      * ===================================================================== */
     private void reportFileAnalytics(Assignment assignment) {
-
-        //if there are no files, return an empty string
-        if (assignment.assignmentFiles.size() == 0)
-            return;
-
-        //is this a single file or a set of files?
-        boolean bSingleFile = assignment.assignmentFiles.size() == 1;
-
         String report = "";
 
         report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">";
         report += "<a id=\"" + assignment.studentName + "\"></a>\n";
         report += "<br>\n=======================================================<br>\n";
-       report += assignment.studentName + "<br>\n";
-        if (bSingleFile) {
-            //if this is a single file, simply output its name
-            report += assignment.assignmentFiles.get(0).getName();
-        } else {
-            //if these are multiple files, list the directory name in bold
-            report += "<b>" + fileNameFromPathName(assignment.assignmentDirectory) + "</b>"; //directory name in bold
+        report += assignment.studentName + "<br>\n";
+
+        /* we have 3 cases to consider here:
+         * 1) there are no assignments files.  In this case, we simply want to state
+         * that no assignment files were found
+         * 2) there is 1 assignment file.  In this case, we want to output the name
+         * of the assignment file in the report
+         * 3) there are multiple assignment files.  In this case, we want to include
+         * the the name of the parent directory in bold. */
+        switch (assignment.assignmentFiles.size()) {
+            case 0:
+                //report += "No programming files found.";
+                report += formatErrorMsg("No programming files found.");
+                break;
+            case 1:
+                //if this is a single file, simply output its name
+                report += assignment.assignmentFiles.get(0).getName();
+                break;
+            default:
+                //here, these are multiple files: list the directory name in bold
+                report += "<b>" + fileNameFromPathName(assignment.assignmentDirectory) + "</b>"; //directory name in bold
         }
         report += "<br>\n=======================================================<br>\n</font>";
 
@@ -214,8 +212,8 @@ public class ReportGenerator implements IAGConstant {
         //for each file, report the analytics
         for (File sourceFile : assignment.assignmentFiles) {
             // if we have more than 1 file, then print the filename
-            if (bSingleFile == false) {
-            report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">" + sourceFile.getName() + "</font><br>\n";
+            if (assignment.assignmentFiles.size() > 1) {
+                report += "<font face=\"verdana\" color=\"" + HEADER_COLOR1 + "\">" + sourceFile.getName() + "</font><br>\n";
             }
             //analyze the source file
             switch (assignment.language) {
@@ -235,7 +233,7 @@ public class ReportGenerator implements IAGConstant {
                 default:
                     break;
             }
-                report += "</font><br>";    //skip a line between entries
+            report += "</font><br>";    //skip a line between entries
 
         }
 
@@ -300,8 +298,9 @@ public class ReportGenerator implements IAGConstant {
      * ===================================================================== */
     private void reportOutputs(Assignment assignment) {
 
-        if (assignment.testFiles == null || assignment.testFiles.size() == 0) {
-            //here, we assume that the user specified no test files
+        if (assignment.assignmentFiles == null || assignment.assignmentFiles.size() == 0) {
+            //no programming files, so no test data output
+            return;
         }
         else {
             for (int i = 0; i < assignment.testFiles.size(); i++) {
@@ -323,13 +322,20 @@ public class ReportGenerator implements IAGConstant {
     }
 
 
+    /* ======================================================================
+     * formatErrorMsg()
+     * returns a string that is the html-formatted message in a red font
+     * ===================================================================== */
+    String formatErrorMsg(String errorMessage) {
+        return "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font><br>";
+    }
 
     /* ======================================================================
      * reportErrorMsg()
      * print the supplied message in red to the document
      * ===================================================================== */
     void reportErrorMsg(String errorMessage) {
-        document += "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font>";
+        document += formatErrorMsg(errorMessage);
     }
 
     /* ======================================================================
@@ -366,7 +372,6 @@ public class ReportGenerator implements IAGConstant {
                 + "Report Generator: AutoGrader v" + AutoGraderApp.version  + "<br>"
                 + "C++ Compiler: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) + "<br>"
                 + "Python Interpreter: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "<br>");
-
     }
 
 
