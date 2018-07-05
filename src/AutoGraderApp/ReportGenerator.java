@@ -38,7 +38,9 @@ public class ReportGenerator implements IAGConstant {
     //---------- misc constants ----------
     //private final String PROG_OUTPUT_START_TOKEN = "@@@_START_TOKEN_@@@";
     //private final String PROG_OUTPUT_END_TOKEN = "@@@@_END_TOKEN_@@@";
-    private final String[] PYTHON_WHITE_SPACES = {" ", "\t", "\n", "\r"};
+    public static final String HTML_GRADE_ID_SUFFIX = " grade";
+    public static final String  HTML_COMMENT_ID_SUFFIX = " comment";
+    //private final String[] PYTHON_WHITE_SPACES = {" ", "\t", "\n", "\r"};
     private final String HTML_TAB_CHAR = "<pre style=\"display:inline;\">&#9;</pre>";
 
     //---------- html color constants ----------
@@ -90,7 +92,7 @@ public class ReportGenerator implements IAGConstant {
             reportFileAnalytics(assignment);
             reportSourceCode(assignment);
             reportOutputs(assignment);
-            insertGradingBox(assignment, "");
+            insertGradingBoxes(assignment, "");
         }
         reportClosingInfo(assignments);
     }
@@ -349,18 +351,18 @@ public class ReportGenerator implements IAGConstant {
     }
 
     /* ======================================================================
-     * insertGradingBox
+     * insertGradingBoxes()
      * function that creates the instructor grading box.  This box is
      * pre-populated with the student's name.
      * ===================================================================== */
-    void insertGradingBox(Assignment assignment, String gradingTextLabel) {
+    void insertGradingBoxes(Assignment assignment, String gradingTextLabel) {
         document += "<font face=\"courier\" color=\"" + FEEDBACK_COLOR + "\">"
                 + "<br>Instructor Feedback for " + assignment.studentName
-                + "</font><br><textarea name=\"" + gradingTextLabel
-                + "\" rows=4 cols=80>" + assignment.studentName
-                + "\nGrade: \nComments: </textarea><br><br>";
+                + "</font><br><table><tr><td>Grade:<br><input type=\"text\" id=\""
+                + assignment.studentName + HTML_GRADE_ID_SUFFIX + "\"><br><br><br><br></td><td>"
+                + "&nbsp;&nbsp;&nbsp;</td><td>Comment:<br><textarea id=\""
+                + assignment.studentName + HTML_COMMENT_ID_SUFFIX + "\" rows=4 cols=60></textarea></td></tr></table>";
     }
-
 
 
     /* ======================================================================
@@ -373,6 +375,11 @@ public class ReportGenerator implements IAGConstant {
                 + "C++ Compiler: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) + "<br>"
                 + "Python Interpreter: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "<br>");
     }
+
+
+
+
+
 
 
 

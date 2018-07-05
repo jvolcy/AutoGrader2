@@ -17,6 +17,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -174,8 +175,9 @@ public class Controller implements IAGConstant {
         btnOutput.setDisable(true);
 
         //---------- Initialize Misc. controls ----------
-        lblLanguage.setText("");
-        lblMessage.setText("");
+        lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+
+        lblMessage.setText("AutoGrader " + AutoGraderApp.version);
 
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
@@ -216,10 +218,13 @@ public class Controller implements IAGConstant {
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
+            lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+            /*
             if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE).equals(IAGConstant.LANGUAGE_AUTO))
                 lblLanguage.setText("");
             else
                 lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+            */
         }
         catch (Exception e) {
             console("", e);
@@ -294,10 +299,21 @@ public class Controller implements IAGConstant {
     public void btnPrevClick() {
         cbName.getSelectionModel().selectPrevious();
         /*
-        wvOutput.getEngine().executeScript("document.getElementById(\""
-                + cbName.getSelectionModel().getSelectedItem().toString()
-                + "\").scrollIntoView();");
-                */
+        Element inputField = wvOutput.getEngine().getDocument().getElementById("Lea grade");
+        console(inputField.getAttribute("value") +";"+ inputField.getAttribute("name") +";"
+                + inputField.getAttribute("text") +";"+ inputField.getAttribute("put") +";"+
+                inputField.getAttribute("post") +";"+ inputField.getTagName() +";"+ inputField.getTextContent());
+        inputField.setAttribute("value", "This is the new value");
+
+        wvOutput.getEngine().executeScript("document.getElementById(\"Lea grade\").value=\"Sample Grade\"");
+        wvOutput.getEngine().executeScript("document.getElementById(\"Lea comment\").value=\"Sample Comment\"");
+        Object x = wvOutput.getEngine().executeScript("document.getElementById(\"Lea comment\").value");
+        System.out.println(x.toString());
+*/
+        saveGrades();
+        AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
+        //reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
+
     }
 
     /* ======================================================================
@@ -309,11 +325,6 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnNextClick() {
         cbName.getSelectionModel().selectNext();
-        /*
-        wvOutput.getEngine().executeScript("document.getElementById(\""
-                + cbName.getSelectionModel().getSelectedItem().toString()
-                + "\").scrollIntoView();");
-                */
     }
 
     /* ======================================================================
@@ -720,10 +731,75 @@ public class Controller implements IAGConstant {
         //dump the assignments to the console  ************ TEMP **************
         AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
 
-        reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
-
+        //reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
 
     }
+
+    /* ======================================================================
+     * xferGradesFromWebViewToAssignmentObject()
+     * retrieves the instructor-entered grades and comments for the
+     * given assignment and transfers them to the Assignment object.
+     * ===================================================================== */
+    void xferGradesFromWebViewToAssignmentObject(Assignment assignment) {
+        String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
+        String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
+
+        //set the grade
+        try {
+            Object oGrade = wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value");
+            assignment.grade = Integer.valueOf(oGrade.toString());
+        }
+        catch (Exception e) {
+            //if the id is not found or the conversion from str->int fails, set the grade to null
+            console(assignment.studentName + " : " + e.getMessage());
+            assignment.grade = null;
+        }
+
+        //set the comment
+        try {
+            Object oComment = wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value");
+            assignment.instructorComment = oComment.toString();
+        }
+        catch (Exception e) {
+            //if the id is not found, set the comment to null
+            assignment.instructorComment = null;
+        }
+
+    }
+
+
+    /* ======================================================================
+     * xferGradesFromAssignmentObjectToWebView()
+     * transfers the grade and comment fields of the supplied assignment
+     * to the corresponding fields in the web view.
+     *
+     *         ****This function has not been tested ****
+     * ===================================================================== */
+    void xferGradesFromAssignmentObjectToWebView(Assignment assignment) {
+        String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
+        String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
+
+        //set the grade and comment on the webview
+        try {
+            wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
+            wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value =\"" + assignment.instructorComment+"\"");
+        } catch (Exception e) {
+            console(assignment.studentName + " : " + e.getMessage());
+        }
+    }
+
+
+    /* ======================================================================
+     * saveGrades()
+     * saves the instructor grades and comments to the Assignment
+     * array list.
+     * ===================================================================== */
+    void saveGrades() {
+        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+            xferGradesFromWebViewToAssignmentObject(assignment);
+        }
+    }
+
 
     /* ======================================================================
      * gradingThreadMonitor
