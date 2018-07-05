@@ -19,7 +19,7 @@ import static AutoGraderApp.Controller.message;
 /* ======================================================================
  * structure to hold the results returned by the shellExec() function.
  * ===================================================================== */
-class shellExecResult {
+class shellExecResult implements java.io.Serializable {
     Boolean bTimedOut;
     Boolean bMaxLinesExceeded;
     String output;
@@ -32,7 +32,7 @@ class shellExecResult {
  * of a thread, service or task.  The status structure is used to "peek"
  * inside the running process.
  * ===================================================================== */
-class ProcessingStatus {
+class ProcessingStatus implements java.io.Serializable {
     Boolean bRunning;
     String message;
     Integer progress;
@@ -63,7 +63,7 @@ class ProcessingStatus {
  * - a cppCompiler or python3Interpreter, as appropriate
  * - testDataFiles, if required
  * ===================================================================== */
-public class GradingEngine implements IAGConstant {
+public class GradingEngine implements IAGConstant, java.io.Serializable {
     /* The assignments list. */
     public ArrayList<Assignment> assignments;
     public ArrayList<File> testDataFiles;
@@ -169,7 +169,7 @@ public class GradingEngine implements IAGConstant {
             String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
             return text;
         } catch (Exception e) {
-            console(e.getMessage());
+            console(e.toString());
         }
         return null;
     }
@@ -205,7 +205,7 @@ public class GradingEngine implements IAGConstant {
 
             if (numLines == maxLines) { bLastReadExceedsMaxLines = true; }
         } catch (Exception e) {
-            console(e.getMessage());
+            console(e.toString());
         }
         return text;
     }
@@ -246,7 +246,7 @@ public class GradingEngine implements IAGConstant {
                 }
             }
         } catch (Exception e) {
-            console(e.getMessage());
+            console(e.toString());
         }
         return pids;
     }
@@ -332,7 +332,7 @@ public class GradingEngine implements IAGConstant {
                 }
             }
         } catch (Exception e) {
-            console(e.getMessage());
+            console(e.toString());
         }
 
         //read in the output of the executed command from the temp file
@@ -457,7 +457,7 @@ public class GradingEngine implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    private class GradingService extends Service<Void> {
+    private class GradingService extends Service<Void> implements java.io.Serializable {
 
         @Override
         protected Task<Void> createTask() {

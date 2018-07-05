@@ -1,7 +1,6 @@
 package AutoGraderApp;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Dictionary;
@@ -132,7 +131,7 @@ public class AutoGrader2 implements IAGConstant {
 
         } catch (Exception e) {
             //console("", e);
-            console(e.getMessage());
+            console(e.toString());
         }
 
         return cppPath;
@@ -166,7 +165,7 @@ public class AutoGrader2 implements IAGConstant {
 
         } catch (Exception e) {
             //console("", e);
-            console(e.getMessage());
+            console(e.toString());
         }
 
         return shellPath;
@@ -264,6 +263,65 @@ public class AutoGrader2 implements IAGConstant {
      * ===================================================================== */
     public GradingEngine getGradingEngine() {
         return gradingEngine;
+    }
+
+
+    /* ======================================================================
+     * menuFileOpen()
+     * Callback for File->Open
+     * ===================================================================== */
+    public void deSerializeGradingEngineFromDisk(String fileName) {
+        // Deserialization
+        try
+        {
+            // Reading the object from a file
+            FileInputStream file = new FileInputStream(fileName);
+            ObjectInputStream in = new ObjectInputStream(file);
+
+            // Method for deserialization of object
+            gradingEngine = (GradingEngine)in.readObject();
+
+            in.close();
+            file.close();
+
+            console("Grading Engine successfully de-serialized.");
+       }
+
+        catch(Exception e)
+        {
+            console(e.toString());
+        }
+
+    }
+
+    /* ======================================================================
+     * menuFileSave()
+     * Callback for File->Save
+     * ===================================================================== */
+    public void serializeGradingEngineToDisk(String fileName) {
+        // Serialization
+        try
+        {
+            //Saving of object in a file
+            FileOutputStream file = new FileOutputStream(fileName);
+            ObjectOutputStream out = new ObjectOutputStream(file);
+
+            // Method for serialization of object
+            out.writeObject(gradingEngine);
+
+            out.close();
+            file.close();
+
+            console("Grading Engine successfully serialized.");
+
+        }
+
+        catch(Exception e)
+        {
+            console(e.toString());
+        }
+
+
     }
 
 }

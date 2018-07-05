@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /* ======================================================================
  * Assignment
  * ===================================================================== */
-public class Assignment {
+public class Assignment implements java.io.Serializable {
     //---------- general members ----------
     public String studentName;
     public String assignmentDirectory;

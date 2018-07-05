@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.w3c.dom.Element;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +53,9 @@ public class Controller implements IAGConstant {
     public Button btnInputSetup;
     public Button btnOutput;
     public Button btnConsole;
+    public Button btnSave;
+    public Button btnExportHtml;
+    public Button btnGradeSummary;
 
     //---------- Input/Setup Tab ----------
     public ListView listTestData;
@@ -284,7 +287,7 @@ public class Controller implements IAGConstant {
         }
         catch (Exception e){
             //trap any calls made before the wvOutput engine is assigned a document
-            console(e.getMessage());
+            console(e.toString());
         }
     }
 
@@ -325,6 +328,33 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnNextClick() {
         cbName.getSelectionModel().selectNext();
+    }
+
+    /* ======================================================================
+     * menuFileOpen()
+     * Callback for File->Open
+     * ===================================================================== */
+    public void menuFileOpen() {
+        // Deserialization
+        AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(txtSourceDirectory.getText() + "/object.AG");
+        doPostGradingProcessing();
+    }
+
+    /* ======================================================================
+     * menuFileSave()
+     * Callback for File->Save
+     * ===================================================================== */
+    public void menuFileSave() {
+        // Serialization
+        AutoGraderApp.autoGrader.serializeGradingEngineToDisk(txtSourceDirectory.getText() + "/object.AG");
+    }
+
+    /* ======================================================================
+     * menuFileExportHtml()
+     * Callback for File->Export HTML
+     * ===================================================================== */
+    public void menuFileExportHtml() {
+
     }
 
     /* ======================================================================
@@ -455,6 +485,7 @@ public class Controller implements IAGConstant {
      * or light green to indicate a missing input.
      * ===================================================================== */
     private void setStartButtonStatus() {
+        /*
         if (checkNoTestData.isSelected() || listTestData.getItems().size() != 0) {
             btnStart.setDisable(false);
             listTestData.setStyle("-fx-background-color: #f0fff0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
@@ -462,6 +493,7 @@ public class Controller implements IAGConstant {
             btnStart.setDisable(true);
             listTestData.setStyle("-fx-background-color: #fff0f0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
         }
+        */
     }
 
     /* ======================================================================
@@ -497,6 +529,7 @@ public class Controller implements IAGConstant {
         fileChooser.setTitle("Open Test Data File");
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
 
+        if (files == null) return;
         //save the selected file objects in the test data list view
         for (File file : files) {
             listTestData.getItems().add(file);
@@ -523,6 +556,37 @@ public class Controller implements IAGConstant {
 
 
     /* ======================================================================
+     * btnSaveClick()
+     * ===================================================================== */
+    public void btnSaveClick() {
+
+        menuFileSave();
+        //----------  ----------
+        //----------  ----------
+    }
+
+
+    /* ======================================================================
+     * btnExportHtmlClick()
+     * ===================================================================== */
+    public void btnExportHtmlClick() {
+
+        //----------  ----------
+        //----------  ----------
+    }
+
+
+    /* ======================================================================
+     * btnGradeSummaryClick()
+     * ===================================================================== */
+    public void btnGradeSummaryClick() {
+
+        //----------  ----------
+        //----------  ----------
+    }
+
+
+    /* ======================================================================
      * tabMainOnKeyPressed()
      * Callback for KeyPressed event on the main tab.  We capture and
      * consume this event to eliminate keyboard navigation through the
@@ -534,6 +598,7 @@ public class Controller implements IAGConstant {
         navigation controls on the main tab. */
         e.consume();
     }
+
 
     /* ======================================================================
      * selectMainPythonFile()
@@ -751,7 +816,7 @@ public class Controller implements IAGConstant {
         }
         catch (Exception e) {
             //if the id is not found or the conversion from str->int fails, set the grade to null
-            console(assignment.studentName + " : " + e.getMessage());
+            console(assignment.studentName + " : " + e.toString());
             assignment.grade = null;
         }
 
@@ -784,7 +849,7 @@ public class Controller implements IAGConstant {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
             wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value =\"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
-            console(assignment.studentName + " : " + e.getMessage());
+            console(assignment.studentName + " : " + e.toString());
         }
     }
 

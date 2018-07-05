@@ -114,7 +114,7 @@ public class ReportGenerator implements IAGConstant {
             console("Writing file %s.", fileName);
         }
         catch (IOException e) {
-            console(e.getMessage());
+            console(e.toString());
         }
 
     }
@@ -127,7 +127,7 @@ public class ReportGenerator implements IAGConstant {
             String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
             return text;
         } catch (Exception e) {
-            console(e.getMessage());
+            console(e.toString());
         }
         return null;
     }
