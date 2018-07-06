@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.Thread.sleep;
+
 /* ======================================================================
  * Controller Class
  * This class is the primary store of GUI callback functions.
@@ -37,7 +39,9 @@ public class Controller implements IAGConstant {
     public Label lblMessage;
     public Label lblLanguage;
     private static Label messagePtr;
+    public MenuItem menuFileSave;
     public MenuItem menuFileSaveAs;
+    public MenuItem menuFileExportHtml;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -79,8 +83,9 @@ public class Controller implements IAGConstant {
     private final Double GRADING_TIMELINE_PERIOD = 0.25;        //0.25 second period
     private ReportGenerator reportGenerator;
     private String documentFileName;
+    boolean bShowingSummary;
 
-  /* ======================================================================
+    /* ======================================================================
      * initialize()
      * Called automatically upon creation of the GUI
      * ===================================================================== */
@@ -113,7 +118,7 @@ public class Controller implements IAGConstant {
         //---------- update the different configuration fields with the actual user-specified values ----------
 
         //---------- set the "language" value  ----------
-        if ( AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE) != null)
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE) != null)
             choiceBoxConfigLanguage.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
         else
             choiceBoxConfigLanguage.setValue(LANGUAGE_AUTO);
@@ -121,9 +126,9 @@ public class Controller implements IAGConstant {
         //---------- set the "max run time" value ----------
         spinnerMaxRunTime.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME) != null)
-           spinnerMaxRunTime.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
+            spinnerMaxRunTime.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
-       //---------- set the "max output lines" value ----------
+        //---------- set the "max output lines" value ----------
         spinnerMaxLines.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES) != null)
             spinnerMaxLines.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
@@ -185,6 +190,11 @@ public class Controller implements IAGConstant {
         setStartButtonStatus();
         //*********************************
 
+        menuFileSave.setDisable(true);      //enable after successful processing
+        menuFileExportHtml.setDisable(true);
+        setDocumentFileName("null");
+        bShowingSummary = false;
+
         cbName.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -203,6 +213,7 @@ public class Controller implements IAGConstant {
         gradingThreadStatusAlert.getButtonTypes().setAll(ButtonType.CANCEL);
 
     }
+
     /* ======================================================================
      * configChanged()
      * function called whenever the configuration tab is selected or
@@ -222,8 +233,7 @@ public class Controller implements IAGConstant {
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
             lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             console("", e.toString());
         }
     }
@@ -234,7 +244,7 @@ public class Controller implements IAGConstant {
      * to the console tab.  If the console tab is not yet initialized,
      * the function outputs to stdout.
      * ===================================================================== */
-    public static void console (String format, Object... arguments) {
+    public static void console(String format, Object... arguments) {
         String formattedOutput = String.format(format, arguments);
 
         //if the GUI is not yet up, the consolePtr hasn't been set yet:
@@ -242,8 +252,7 @@ public class Controller implements IAGConstant {
         try {
             consolePtr.getItems().add(formattedOutput);
             System.out.println("[c]" + formattedOutput);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("[x]" + formattedOutput);
         }
     }
@@ -254,14 +263,13 @@ public class Controller implements IAGConstant {
      * middle of the screen.  If the lblMessage object is not yet
      * initialized, then the function outputs to stdout.
      * ===================================================================== */
-    public static void message (String msg) {
+    public static void message(String msg) {
 
         //if the GUI is not yet up, the messagePtr hasn't been set yet:
         //dump the output to the screen.
         try {
             messagePtr.setText(msg);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             console("[m]" + msg);
         }
 
@@ -275,10 +283,9 @@ public class Controller implements IAGConstant {
             wvOutput.getEngine().executeScript("document.getElementById(\""
                     + cbName.getSelectionModel().getSelectedItem().toString()
                     + "\").scrollIntoView();");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             //trap any calls made before the wvOutput engine is assigned a document
-            console(e.toString());
+            console(">>>" + e.toString());
         }
     }
 
@@ -328,10 +335,18 @@ public class Controller implements IAGConstant {
         File f = fileChooser.showOpenDialog(stage);
 
         //if the user cancels, do nothing
-        if (f==null) return;
+        if (f == null) return;
 
         // Deserialization
-        AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(f.getAbsolutePath());
+        try {
+            AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(f.getAbsolutePath());
+            setDocumentFileName(f.getAbsolutePath());
+        }
+        catch (Exception e) {
+            //here, we won't change the current document name
+            return;
+        }
+
         doPostGradingProcessing();
     }
 
@@ -342,19 +357,27 @@ public class Controller implements IAGConstant {
     public void menuFileSave() {
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+        message("Saving...");
 
-        FileChooser fileChooser = new FileChooser();
+        if (getDocumentFileName() == null) {
+            FileChooser fileChooser = new FileChooser();
 
-        // create an extension filter
-        FileChooser.ExtensionFilter extFilter =
-                new FileChooser.ExtensionFilter("AutoGrader 2 file (*.ag2)", "*.ag2");
-        fileChooser.getExtensionFilters().add(extFilter);
+            // create an extension filter
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("AutoGrader 2 file (*.ag2)", "*.ag2");
+            fileChooser.getExtensionFilters().add(extFilter);
 
-        fileChooser.setTitle("Save Assignment");
-        File f = fileChooser.showSaveDialog(stage);
+            fileChooser.setTitle("Save Assignment");
+            File f = fileChooser.showSaveDialog(stage);
 
-        //if the user cancels, do nothing
-        if (f==null) return;
+            //if the user cancels, do nothing
+            if (f == null) {
+                message("Save Canceled.");
+                return;
+            }
+
+            setDocumentFileName(f.getAbsolutePath());
+        }
 
         //update the grading engine's assignment with the entries from the web view.
         for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
@@ -362,14 +385,47 @@ public class Controller implements IAGConstant {
         }
 
         // Serialization
-        AutoGraderApp.autoGrader.serializeGradingEngineToDisk(f.getAbsolutePath());
+        try {
+            console("Writing " + documentFileName + " ...");
+            AutoGraderApp.autoGrader.serializeGradingEngineToDisk(getDocumentFileName());
+            message("Report Saved.");
+
+        } catch (Exception e) {
+            console(e.toString());
+            message("Save Failed.");
+            //the serialization process failed.  Invalidate the filename
+            setDocumentFileName(null);
+        }
+
     }
+
+
 
     /* ======================================================================
      * menuFileSave()
      * Callback for File->Save
      * ===================================================================== */
     public void menuFileSaveAs() {
+        if (getDocumentFileName() == null) {
+            /* this should never happen: the "Save As" menu option should not be enabled
+            * if the document has no name. */
+            console("Assertion error: documentFileName == null in call to menuFileSaveAs.");
+        }
+
+        //save the current document file name
+        String oldDocumentFileName = getDocumentFileName();
+
+        /* set the current document name to null.  This will force the fileChooser
+         * dialog to open in menuFileSave(). */
+        setDocumentFileName(null);
+        menuFileSave();
+
+        if (getDocumentFileName() == null) {
+            /* if the user cancels the fileChooser in the call to menuFileSave,
+            the document name will still be null.  In that case, re-assign the
+            previous document name. */
+            setDocumentFileName(oldDocumentFileName);
+        }
 
     }
 
@@ -379,6 +435,10 @@ public class Controller implements IAGConstant {
      * Callback for File->Export HTML
      * ===================================================================== */
     public void menuFileExportHtml() {
+        //update the grading engine's assignment with the entries from the web view.
+        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+            xferGradesFromWebViewToAssignmentObject(assignment);
+        }
 
     }
 
@@ -525,9 +585,19 @@ public class Controller implements IAGConstant {
      * setting documentFileName to null tells us that the document has not
      * been saved (has not been named).  This will also determine the
      * enable/disable status of the "Save As" menu option.
+     * Use the set/get documentFileName functions instead of directly
+     * accessing the documentFileName member variable.  This allows us to
+     * keep track of the enable/disable status of the "File->Save" and
+     * "File-Save As" menu options.
      * ===================================================================== */
     private void setDocumentFileName(String fileName) {
         documentFileName = fileName;
+
+        if (menuFileSave.isDisable()) {
+            // can't have a "Save as" without a "Save"
+            menuFileSaveAs.setDisable(true);
+            return;
+        }
 
         if (documentFileName == null) {
             menuFileSaveAs.setDisable(true);
@@ -535,8 +605,19 @@ public class Controller implements IAGConstant {
         else {
             menuFileSaveAs.setDisable(false);
         }
-
     }
+
+    /* ======================================================================
+     * getDocumentFileName()
+     * returns the document file name.
+     * Use the set/get documentFileName functions instead of directly
+     * accessing the documentFileName member variable.  This allows us to
+     * keep track of the enable/disable status of the "File->Save" and
+     * "File-Save As" menu options.
+     * ===================================================================== */
+    private String getDocumentFileName() { return documentFileName; }
+
+
 
     /* ======================================================================
      * btnAddClick()
@@ -591,10 +672,7 @@ public class Controller implements IAGConstant {
      * btnSaveClick()
      * ===================================================================== */
     public void btnSaveClick() {
-
         menuFileSave();
-        //----------  ----------
-        //----------  ----------
     }
 
 
@@ -602,9 +680,7 @@ public class Controller implements IAGConstant {
      * btnExportHtmlClick()
      * ===================================================================== */
     public void btnExportHtmlClick() {
-
-        //----------  ----------
-        //----------  ----------
+        menuFileExportHtml();
     }
 
 
@@ -613,8 +689,50 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnGradeSummaryClick() {
 
-        //----------  ----------
-        //----------  ----------
+        if (bShowingSummary)
+        {
+            //we are on the summary page: switch to the report page
+            /* we need to regenerate the report.  Any changes to the
+             * report in the form of a grade or instructor comment
+             * is stored in the assignments array list, not in the
+             * displayed report.  It must be re-generated before
+             * it is displayed again.*/
+
+            //generate the report
+            reportGenerator.generateReport();
+            wvOutput.getEngine().loadContent(reportGenerator.getDocument());
+
+            btnGradeSummary.setText("View Summary");
+            bShowingSummary = false;
+        }
+        else {
+            //we are on the report page: switch to the summary page.
+            /* transitioning from the report page to the summary page first requires
+            * that any edits to the grade and comment input controls be updated in the
+            * document.  The summary report must then be re-generated. */
+
+            //update the grading engine's assignment with the entries from the web view.
+            for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+                xferGradesFromWebViewToAssignmentObject(assignment);
+            }
+
+            //generate the summary report
+            reportGenerator.generateSummary();
+            wvOutput.getEngine().loadContent(reportGenerator.getSummary());
+            btnGradeSummary.setText("View Report");
+            bShowingSummary = true;
+        }
+
+        /* whether switching from report to summary or vice-versa, we need
+         * update the scroll position on the display based on the student
+         * name choice box. */
+
+
+        /* Not clear why the call to cbNameClick() does not cause the window
+        * to scroll to the selected name.  Instead, simply set cbName to
+        * the first item to match the state of the window. */
+        //cbNameClick();
+        cbName.getSelectionModel().selectFirst();
     }
 
 
@@ -839,6 +957,10 @@ public class Controller implements IAGConstant {
 
         //enable the Output button
         btnOutput.setDisable(false);
+
+        //enable save button
+        menuFileSave.setDisable(false);
+        menuFileExportHtml.setDisable(false);
 
         reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                 txtSourceDirectory.getText(),       //header text

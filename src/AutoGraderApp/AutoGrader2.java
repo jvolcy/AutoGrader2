@@ -270,10 +270,11 @@ public class AutoGrader2 implements IAGConstant {
      * menuFileOpen()
      * Callback for File->Open
      * ===================================================================== */
-    public void deSerializeGradingEngineFromDisk(String fileName) {
+    public void deSerializeGradingEngineFromDisk(String fileName) throws Exception {
         // Deserialization
+        /*
         try
-        {
+        {*/
             // Reading the object from a file
             FileInputStream file = new FileInputStream(fileName);
             ObjectInputStream in = new ObjectInputStream(file);
@@ -285,23 +286,24 @@ public class AutoGrader2 implements IAGConstant {
             file.close();
 
             console("Grading Engine successfully de-serialized.");
-       }
+/*       }
 
         catch(Exception e)
         {
             console(e.toString());
         }
-
+*/
     }
 
     /* ======================================================================
      * menuFileSave()
      * Callback for File->Save
      * ===================================================================== */
-    public void serializeGradingEngineToDisk(String fileName) {
+    public void serializeGradingEngineToDisk (String fileName) throws Exception  {
         // Serialization
+        /*
         try
-        {
+        {*/
             //Saving of object in a file
             FileOutputStream file = new FileOutputStream(fileName);
             ObjectOutputStream out = new ObjectOutputStream(file);
@@ -313,14 +315,15 @@ public class AutoGrader2 implements IAGConstant {
             file.close();
 
             console("Grading Engine successfully serialized.");
-
+/*
         }
 
         catch(Exception e)
         {
             console(e.toString());
+            throw (e);
         }
-
+*/
 
     }
 

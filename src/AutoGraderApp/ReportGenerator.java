@@ -53,35 +53,24 @@ public class ReportGenerator implements IAGConstant {
     private final String FEEDBACK_COLOR = "purple";   //color of "instructor feedback" text
     private final String LINE_NUMBER_COLOR = "gray";  //color for code line numbers
 
-    //private String outputFileName;
     private ArrayList<Assignment> assignments;
     private String title;
     private String headerText;
 
     private String document;        //the HTML document
+    private String summary;         //the HTML summary document
 
 
     /* ======================================================================
      * ReportGenerator()
      * ReportGenerator constructor.
      * ===================================================================== */
-    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments /*, String outputFile*/) {
+    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments) {
         this.title = title;
         this.headerText = headerText;
         this.assignments = assignments;
-        //setOutputFile(outputFile);
     }
 
-    /* ======================================================================
-     * setOutputFile()
-     * This function initializes the output file.
-     * ===================================================================== */
-    /*
-    public void setOutputFile(String fileName) {
-        outputFileName = fileName;
-        writeToOutputFile("", false);
-    }
-    */
     /* ======================================================================
      * generateReport()
      * ===================================================================== */
@@ -100,8 +89,48 @@ public class ReportGenerator implements IAGConstant {
     /* ======================================================================
      * getDocument()
      * ===================================================================== */
+    public void generateSummary() {
+        summary = String.join("\n",
+                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">",
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
+                "<head>",
+                "	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />",
+                "	<title>" + title + "</title>",
+                "</head>",
+                "<body style=\"background: white; font-family: Helvetica\">",
+                "<h2> Grading Summary<br><font color=\"gray\">" + fileNameFromPathName(headerText) + "</h2>");
+
+        for (Assignment assignment : assignments){
+            String grade = assignment.grade == null ? "---" : assignment.grade.toString();
+            String instructorComment = (assignment.instructorComment == null || assignment.instructorComment.equals(""))
+                    ? "None" : assignment.instructorComment;
+
+            summary += "<a id=\"" + assignment.studentName + "\"></a>\n";
+//            summary += "<hr width=\"100%\" align=\"left\">";
+            summary += "<hr><font face=\"verdana\" color=\"black\">";
+            summary += "<b>" + assignment.studentName + "</b><br>Grade<br>";
+            summary += "<font face=\"verdana\" color=\"blue\">";
+            summary += grade + "<br>";
+            summary += "<font face=\"verdana\" color=\"black\">Instructor comments<br>";
+            summary += "<font face=\"verdana\" color=\"blue\">";
+            summary += instructorComment + "<br>";
+        }
+
+        summary += "</body></html>";
+    }
+
+    /* ======================================================================
+     * getDocument()
+     * ===================================================================== */
     public String getDocument() {
         return document;
+    }
+
+    /* ======================================================================
+     * getSummary()
+     * ===================================================================== */
+    public String getSummary() {
+        return summary;
     }
 
     /* ======================================================================
@@ -169,11 +198,10 @@ public class ReportGenerator implements IAGConstant {
                 "</head>",
                 "",
                 "<body style=\"background: white; font-family: Helvetica\">",
-                "<form encrypt=\"multipart/form-data\" action=\"\" method=\"POST\">",
+                //"<form encrypt=\"multipart/form-data\" action=\"\" method=\"POST\">",
                 "<h2>" + fileNameFromPathName(headerText) + "</h2>"
         );
 
-        //writeToOutputFile(htmlHeader, true);
     }
 
     /* ======================================================================
@@ -239,7 +267,6 @@ public class ReportGenerator implements IAGConstant {
 
         }
 
-        //writeToOutputFile(report, true);
         document += report;
     }
 
@@ -286,8 +313,6 @@ public class ReportGenerator implements IAGConstant {
             if (!bSingleFile)
                 outputString += "-------------   END LISTING: " + filename + " -------------</font><br>\n";
 
-            //write the output to the output file
-            //writeToOutputFile(outputString, true);
             document += outputString;
         }
     }
@@ -328,7 +353,7 @@ public class ReportGenerator implements IAGConstant {
      * formatErrorMsg()
      * returns a string that is the html-formatted message in a red font
      * ===================================================================== */
-    String formatErrorMsg(String errorMessage) {
+    private String formatErrorMsg(String errorMessage) {
         return "<font color=\"" + ERROR_COLOR + "\">" + errorMessage + "</font><br>";
     }
 
@@ -336,7 +361,7 @@ public class ReportGenerator implements IAGConstant {
      * reportErrorMsg()
      * print the supplied message in red to the document
      * ===================================================================== */
-    void reportErrorMsg(String errorMessage) {
+    private void reportErrorMsg(String errorMessage) {
         document += formatErrorMsg(errorMessage);
     }
 
@@ -344,7 +369,7 @@ public class ReportGenerator implements IAGConstant {
      * reportExecutionTime()
      * print the supplied message in red to the document
      * ===================================================================== */
-    void reportExecutionTime(Double execTime) {
+    private void reportExecutionTime(Double execTime) {
         document += "<font face=\"verdana\" color=\"" + ANALYTICS_COLOR2
                 + "\">[Execution Time: " + String.format("%.4f", execTime)
                 + " sec.]</font><br>\n";
@@ -355,7 +380,7 @@ public class ReportGenerator implements IAGConstant {
      * function that creates the instructor grading box.  This box is
      * pre-populated with the student's name.
      * ===================================================================== */
-    void insertGradingBoxes(Assignment assignment) {
+    private void insertGradingBoxes(Assignment assignment) {
 
         //ensure that we have non-null quantities for the grade and comment
         String grade = assignment.grade == null ? "" : assignment.grade.toString();
@@ -365,7 +390,7 @@ public class ReportGenerator implements IAGConstant {
         //them with the associated assignment fields.
         document += "<font face=\"courier\" color=\"" + FEEDBACK_COLOR + "\">"
                 + "<br>Instructor Feedback for " + assignment.studentName
-                + "</font><br><table><tr><td>Grade:<br><input type=\"text\" id=\""
+                + "</font><br><table><tr><td>Grade <i>(int)</i>:<br><input type=\"text\" id=\""
                 + assignment.studentName + HTML_GRADE_ID_SUFFIX + "\" value=" + grade + "><br><br><br><br></td><td>"
                 + "&nbsp;&nbsp;&nbsp;</td><td>Comment:<br><textarea id=\""
                 + assignment.studentName + HTML_COMMENT_ID_SUFFIX + "\" rows=4 cols=60>" + instructorComment + "</textarea></td></tr></table>";
@@ -375,7 +400,7 @@ public class ReportGenerator implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    void reportClosingInfo(ArrayList<Assignment> assignments) {
+    private void reportClosingInfo(ArrayList<Assignment> assignments) {
         reportErrorMsg("<br><br><b>**** " + assignments.size()
                 + " project(s) processed. ****</b><br><font face=\"verdana\">"
                 + "Report Generator: AutoGrader v" + AutoGraderApp.version  + "<br>"
