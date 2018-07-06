@@ -92,7 +92,7 @@ public class ReportGenerator implements IAGConstant {
             reportFileAnalytics(assignment);
             reportSourceCode(assignment);
             reportOutputs(assignment);
-            insertGradingBoxes(assignment, "");
+            insertGradingBoxes(assignment);
         }
         reportClosingInfo(assignments);
     }
@@ -355,13 +355,20 @@ public class ReportGenerator implements IAGConstant {
      * function that creates the instructor grading box.  This box is
      * pre-populated with the student's name.
      * ===================================================================== */
-    void insertGradingBoxes(Assignment assignment, String gradingTextLabel) {
+    void insertGradingBoxes(Assignment assignment) {
+
+        //ensure that we have non-null quantities for the grade and comment
+        String grade = assignment.grade == null ? "" : assignment.grade.toString();
+        String instructorComment = assignment.instructorComment == null ? "" : assignment.instructorComment;
+
+        //create the grade input text field and comment textarea and populate
+        //them with the associated assignment fields.
         document += "<font face=\"courier\" color=\"" + FEEDBACK_COLOR + "\">"
                 + "<br>Instructor Feedback for " + assignment.studentName
                 + "</font><br><table><tr><td>Grade:<br><input type=\"text\" id=\""
-                + assignment.studentName + HTML_GRADE_ID_SUFFIX + "\"><br><br><br><br></td><td>"
+                + assignment.studentName + HTML_GRADE_ID_SUFFIX + "\" value=" + grade + "><br><br><br><br></td><td>"
                 + "&nbsp;&nbsp;&nbsp;</td><td>Comment:<br><textarea id=\""
-                + assignment.studentName + HTML_COMMENT_ID_SUFFIX + "\" rows=4 cols=60></textarea></td></tr></table>";
+                + assignment.studentName + HTML_COMMENT_ID_SUFFIX + "\" rows=4 cols=60>" + instructorComment + "</textarea></td></tr></table>";
     }
 
 

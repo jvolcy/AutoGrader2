@@ -43,6 +43,10 @@ public interface IAGConstant {
         public static final String SHELL = "SHELL";
     }
 
+    //---------- AG Directives ----------
+    public final String NAME_DIRECTIVE  =   "@@Name";
+    public final String MAIN_DIRECTIVE =    "@@Main";
+    public final String TITLE_DIRECTIVE =   "@@Title";
 
     //---------- Misc Constants ----------
     public final String CONFIG_FILENAME = "ag2Config.json";

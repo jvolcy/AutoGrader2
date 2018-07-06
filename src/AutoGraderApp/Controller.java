@@ -17,7 +17,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ public class Controller implements IAGConstant {
     public Label lblMessage;
     public Label lblLanguage;
     private static Label messagePtr;
+    public MenuItem menuFileSaveAs;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -60,7 +60,6 @@ public class Controller implements IAGConstant {
     //---------- Input/Setup Tab ----------
     public ListView listTestData;
     public Button btnStart;
-    public CheckBox checkNoTestData;
     public Button btnAdd;
     public Button btnRemove;
     public TextField txtSourceDirectory;
@@ -79,6 +78,7 @@ public class Controller implements IAGConstant {
     private Alert gradingThreadStatusAlert;     //alert box displayed while processing assignments
     private final Double GRADING_TIMELINE_PERIOD = 0.25;        //0.25 second period
     private ReportGenerator reportGenerator;
+    private String documentFileName;
 
   /* ======================================================================
      * initialize()
@@ -169,8 +169,6 @@ public class Controller implements IAGConstant {
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
 
-        setStartButtonStatus();
-
         //set the main tab to the input/setup tab by invoking the btnInputSetupClick callback
         btnInputSetupClick();
 
@@ -184,6 +182,8 @@ public class Controller implements IAGConstant {
 
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
+        setStartButtonStatus();
+        //*********************************
 
         cbName.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
             @Override
@@ -222,20 +222,17 @@ public class Controller implements IAGConstant {
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
             lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
-            /*
-            if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE).equals(IAGConstant.LANGUAGE_AUTO))
-                lblLanguage.setText("");
-            else
-                lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
-            */
         }
         catch (Exception e) {
-            console("", e);
+            console("", e.toString());
         }
     }
 
     /* ======================================================================
-     * xxx
+     * console()
+     * function that attempts to write the supplied formatted object
+     * to the console tab.  If the console tab is not yet initialized,
+     * the function outputs to stdout.
      * ===================================================================== */
     public static void console (String format, Object... arguments) {
         String formattedOutput = String.format(format, arguments);
@@ -249,19 +246,13 @@ public class Controller implements IAGConstant {
         catch (Exception e) {
             System.out.println("[x]" + formattedOutput);
         }
-        /*
-        if (consolePtr == null) {
-            System.out.println("[x]" + formattedOutput);
-        }
-        else{
-            System.out.println("[c]" + formattedOutput);
-            consolePtr.getItems().add(formattedOutput);
-        }
-        */
     }
 
     /* ======================================================================
-     * xxx
+     * message()
+     * function that attempts to update the message lable at the bottom
+     * middle of the screen.  If the lblMessage object is not yet
+     * initialized, then the function outputs to stdout.
      * ===================================================================== */
     public static void message (String msg) {
 
@@ -301,22 +292,6 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnPrevClick() {
         cbName.getSelectionModel().selectPrevious();
-        /*
-        Element inputField = wvOutput.getEngine().getDocument().getElementById("Lea grade");
-        console(inputField.getAttribute("value") +";"+ inputField.getAttribute("name") +";"
-                + inputField.getAttribute("text") +";"+ inputField.getAttribute("put") +";"+
-                inputField.getAttribute("post") +";"+ inputField.getTagName() +";"+ inputField.getTextContent());
-        inputField.setAttribute("value", "This is the new value");
-
-        wvOutput.getEngine().executeScript("document.getElementById(\"Lea grade\").value=\"Sample Grade\"");
-        wvOutput.getEngine().executeScript("document.getElementById(\"Lea comment\").value=\"Sample Comment\"");
-        Object x = wvOutput.getEngine().executeScript("document.getElementById(\"Lea comment\").value");
-        System.out.println(x.toString());
-*/
-        saveGrades();
-        AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
-        //reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
-
     }
 
     /* ======================================================================
@@ -335,8 +310,28 @@ public class Controller implements IAGConstant {
      * Callback for File->Open
      * ===================================================================== */
     public void menuFileOpen() {
+        //get the app's stage
+        Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+
+        //use a select file dialog box
+
+        //create a file chooser
+        FileChooser fileChooser = new FileChooser();
+
+
+        // create an extension filter
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("AutoGrader 2 file (*.ag2)", "*.ag2");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        fileChooser.setTitle("Open Assignment");
+        File f = fileChooser.showOpenDialog(stage);
+
+        //if the user cancels, do nothing
+        if (f==null) return;
+
         // Deserialization
-        AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(txtSourceDirectory.getText() + "/object.AG");
+        AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(f.getAbsolutePath());
         doPostGradingProcessing();
     }
 
@@ -345,11 +340,41 @@ public class Controller implements IAGConstant {
      * Callback for File->Save
      * ===================================================================== */
     public void menuFileSave() {
+        //get the app's stage
+        Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+
+        FileChooser fileChooser = new FileChooser();
+
+        // create an extension filter
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("AutoGrader 2 file (*.ag2)", "*.ag2");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        fileChooser.setTitle("Save Assignment");
+        File f = fileChooser.showSaveDialog(stage);
+
+        //if the user cancels, do nothing
+        if (f==null) return;
+
+        //update the grading engine's assignment with the entries from the web view.
+        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+            xferGradesFromWebViewToAssignmentObject(assignment);
+        }
+
         // Serialization
-        AutoGraderApp.autoGrader.serializeGradingEngineToDisk(txtSourceDirectory.getText() + "/object.AG");
+        AutoGraderApp.autoGrader.serializeGradingEngineToDisk(f.getAbsolutePath());
     }
 
     /* ======================================================================
+     * menuFileSave()
+     * Callback for File->Save
+     * ===================================================================== */
+    public void menuFileSaveAs() {
+
+    }
+
+
+        /* ======================================================================
      * menuFileExportHtml()
      * Callback for File->Export HTML
      * ===================================================================== */
@@ -453,7 +478,7 @@ public class Controller implements IAGConstant {
         }
 
         //adjust the status of the Start button
-        setStartButtonStatus();
+        //setStartButtonStatus();
 
     }
 
@@ -485,34 +510,32 @@ public class Controller implements IAGConstant {
      * or light green to indicate a missing input.
      * ===================================================================== */
     private void setStartButtonStatus() {
-        /*
-        if (checkNoTestData.isSelected() || listTestData.getItems().size() != 0) {
-            btnStart.setDisable(false);
-            listTestData.setStyle("-fx-background-color: #f0fff0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
-        } else {
-            btnStart.setDisable(true);
-            listTestData.setStyle("-fx-background-color: #fff0f0; -fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1");
+        //enable the start button only if the source directory is valid
+        try {
+            File f = new File(txtSourceDirectory.getText());
+            btnStart.setDisable(!(f.isDirectory()));
         }
-        */
+        catch (Exception e){
+            btnStart.setDisable(true);
+        }
     }
 
     /* ======================================================================
-     * checkNoTestDataClick()
-     * Callback for "No Test Data" check box on the Input/Setup tab.
-     * When no test data is required, we disable the "Add" button the
-     * "Remove" button as well as the list view.
+     * setDocumentFileName()
+     * setting documentFileName to null tells us that the document has not
+     * been saved (has not been named).  This will also determine the
+     * enable/disable status of the "Save As" menu option.
      * ===================================================================== */
-    public void checkNoTestDataClick() {
-        if (checkNoTestData.isSelected()) {
-            btnAdd.setDisable(true);
-            btnRemove.setDisable(true);
-            listTestData.setDisable(true);
-        } else {
-            btnAdd.setDisable(false);
-            btnRemove.setDisable(false);
-            listTestData.setDisable(false);
+    private void setDocumentFileName(String fileName) {
+        documentFileName = fileName;
+
+        if (documentFileName == null) {
+            menuFileSaveAs.setDisable(true);
         }
-        setStartButtonStatus();
+        else {
+            menuFileSaveAs.setDisable(false);
+        }
+
     }
 
     /* ======================================================================
@@ -550,10 +573,19 @@ public class Controller implements IAGConstant {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Open Assignments Directory");
         File directory = directoryChooser.showDialog(stage);
-        //console(directory.getCanonicalPath()\n);
         txtSourceDirectory.setText(directory.getAbsolutePath());
+
+        setStartButtonStatus();
     }
 
+    /* ======================================================================
+     * txtSourceDirectoryOnKeyReleased()
+     * function called whenever the txtSourceDirectory text box is
+     * edited.  Use this to change the status of the start button.
+     * ===================================================================== */
+    public void txtSourceDirectoryOnKeyReleased() {
+        setStartButtonStatus();
+    }
 
     /* ======================================================================
      * btnSaveClick()
@@ -642,6 +674,36 @@ public class Controller implements IAGConstant {
         }
     }
 
+    /* ======================================================================
+     * populateStudentNameChoiceBox()
+     * populates the cbName choice box on the output tab using the
+     * student names from the grading engine assignments array list.
+     * ===================================================================== */
+    public void populateStudentNameChoiceBox() {
+
+        try {
+            GradingEngine gradingEngine = AutoGraderApp.autoGrader.getGradingEngine();
+
+            //---------- Initialize the student name choice box ----------
+            // This ChoiceBox appears on the output tab and contains student names.
+            // Along with the "Prev" and "Next" buttons, t is used to navigate
+            // the output HTML.
+
+            //clear all current entries
+            cbName.getItems().clear();
+
+            for (Assignment assignment : gradingEngine.assignments) {
+                //populate the names ChoiceBox with the student names
+                cbName.getItems().add(assignment.studentName);
+            }
+
+            //select the first name on the student name list by default
+            cbName.getSelectionModel().selectFirst();
+        }
+        catch (Exception e) {
+            console(e.toString());
+        }
+    }
 
     /* ======================================================================
      * btnStart()
@@ -654,6 +716,12 @@ public class Controller implements IAGConstant {
         // AutoGraderApp.  These are used extensively below.
         AutoGrader2 autoGrader = AutoGraderApp.autoGrader;
         GradingEngine gradingEngine = autoGrader.getGradingEngine();
+
+        //---------- null the documentFileName ----------
+        /* setting documentFileName to null tells us that the document has not
+        * been saved (has not been named).  This will also determine the
+        * enable/disable status of the "Save As" menu option. */
+        setDocumentFileName(null);
 
         //---------- Invoke the Moodle file pre-processor ----------
         message("Pre-processing Moodle files...");
@@ -701,20 +769,9 @@ public class Controller implements IAGConstant {
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
-        //---------- Initialize the student name choice box ----------
-        // This ChoiceBox appears on the output tab and contains student names.
-        // Along with the "Prev" and "Next" buttons, t is used to navigate
-        // the output HTML.
-        cbName.getItems().clear();
-
         //---------- Add test files to the Assignment objects ----------
-        /* Here, we add test files from the 'listTestData' ListView.
-         * While we are going through the list of assignments,
-         * also take advantage and populate the student names
-         * ChoiceBox (cbName). */
+        // Here, we add test files from the 'listTestData' ListView.
         for (Assignment assignment : gradingEngine.assignments) {
-            //populate the names ChoiceBox with the student names
-            cbName.getItems().add(assignment.studentName);
 
             //initialize the test files array list
             assignment.testFiles = new ArrayList<>();
@@ -726,8 +783,6 @@ public class Controller implements IAGConstant {
 
         }
 
-        //select the first name on the student name list by default
-        cbName.getSelectionModel().selectFirst();
 
         //disable the 'Start' button
         btnStart.setDisable(true);
@@ -759,8 +814,12 @@ public class Controller implements IAGConstant {
         if (gradingEngine.getProcessingStatus().bRunning) {
             System.out.println("Aborting...");
             lblStatus.setText("Aborting...");
+            message("Cancelling...");
             gradingEngine.abortGrading();
         }
+
+        //reset the status (enabled/disabled) of the start button
+        setStartButtonStatus();
 
         //---------- post-processing ----------
 
@@ -787,8 +846,14 @@ public class Controller implements IAGConstant {
 
         reportGenerator.generateReport();
 
+        //---------- Initialize the student name choice box ----------
+        // This ChoiceBox appears on the output tab and contains student names.
+        // Along with the "Prev" and "Next" buttons, t is used to navigate
+        // the output HTML.
+        populateStudentNameChoiceBox();
+
+        //point the web engine to the generated html report
         wvOutput.getEngine().loadContent(reportGenerator.getDocument());
-        //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
 
         //switch to the output tab
         btnOutputClick();
@@ -850,18 +915,6 @@ public class Controller implements IAGConstant {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value =\"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
             console(assignment.studentName + " : " + e.toString());
-        }
-    }
-
-
-    /* ======================================================================
-     * saveGrades()
-     * saves the instructor grades and comments to the Assignment
-     * array list.
-     * ===================================================================== */
-    void saveGrades() {
-        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
-            xferGradesFromWebViewToAssignmentObject(assignment);
         }
     }
 

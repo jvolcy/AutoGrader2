@@ -33,6 +33,7 @@
                                     <items>
                                         <MenuItem fx:id="menuFileOpen" mnemonicParsing="false" onAction="#menuFileOpen" text="Open" />
                                         <MenuItem fx:id="menuFileSave" disable="true" mnemonicParsing="false" onAction="#menuFileSave" text="Save" />
+                              <MenuItem fx:id="menuFileSaveAs" disable="true" mnemonicParsing="false" onAction="#menuFileSaveAs" text="Save as" />
                               <MenuItem fx:id="menuFileExportHtml" disable="true" mnemonicParsing="false" onAction="#menuFileExportHtml" text="Export HTML" />
                                         <MenuItem fx:id="menuFileQuit" mnemonicParsing="false" onAction="#menuFileQuit" text="Quit">
                                             <accelerator>
@@ -258,7 +259,7 @@
                                  <font>
                                     <Font name="System Bold" size="15.0" />
                                  </font></Button>
-                              <TextField fx:id="txtSourceDirectory" layoutX="200.0" layoutY="28.0" prefHeight="27.0" prefWidth="355.0" />
+                              <TextField fx:id="txtSourceDirectory" layoutX="200.0" layoutY="28.0" onKeyReleased="#txtSourceDirectoryOnKeyReleased" prefHeight="27.0" prefWidth="355.0" />
                               <Label layoutX="45.0" layoutY="101.0" prefHeight="27.0" prefWidth="91.0" text="Test Data">
                                  <font>
                                     <Font name="Arial Bold Italic" size="13.0" />

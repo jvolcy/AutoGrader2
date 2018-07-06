@@ -24,7 +24,17 @@ class shellExecResult implements java.io.Serializable {
     Boolean bMaxLinesExceeded;
     String output;
     Double execTimeSec;
+
+    shellExecResult() {}
+
+    shellExecResult(Boolean bTimedOut, Boolean bMaxLinesExceeded, String output, Double execTimeSec) {
+        this.bTimedOut = bTimedOut;
+        this.bMaxLinesExceeded = bMaxLinesExceeded;
+        this.output = output;
+        this.execTimeSec = execTimeSec;
+    }
 }
+
 
 /* ======================================================================
  * structure to reports the status of the grading process,
@@ -289,7 +299,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         for (String s : cmd) {
             cmdStr += s + " ";
         }
-        System.out.println("Executing " + args + "\n  as  " + cmdStr );
+        console("Executing " + args + "\n  as  " + cmdStr );
 
         try {
             //attempt to execute the command
@@ -317,7 +327,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 ArrayList<Integer> pids = getPidFromToken(identifyingToken);
 
                 execResult.bTimedOut = true;
-                System.out.println ("Killing process " + p.toString() + ". Run time exceeds max value of " + maxRunTime + " seconds.");
+                console ("Killing process " + p.toString() + ". Run time exceeds max value of " + maxRunTime + " seconds.");
 
                 //attempt to destroy the process using the Java supplied methods
                 p.destroy();
@@ -327,7 +337,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 //a unix kill command
                 for (Integer pid : pids) {
                     String killCmd = "kill -9 " + pid.toString();
-                    System.out.println(killCmd);
+                   console(killCmd);
                     Runtime.getRuntime().exec(killCmd);
                 }
             }
@@ -352,10 +362,35 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
      *
      * ===================================================================== */
     private void execAssignment(Assignment assignment) {
+        /* numTests = the number of test cases.  This is either 1 if there
+         * are no test files, or equal to the # of test files. */
+        int numTests;
+        boolean bNoTestFiles;       //set a flag to denote no test files
 
-        if (assignment.testFiles == null) return;
+        if (assignment.testFiles == null)
+        {
+            //assignment.testFiles is null.  Assume there are no test
+            //files.  Set numTests to 1.
+            numTests = 1;
+            bNoTestFiles = true;
+        }
+        else {
+            numTests = assignment.testFiles.size();
 
-        int numTests = assignment.testFiles.size();
+            if (numTests == 0) {
+                /* while there are no test files, we must set numTests to 0 in order to
+                 * enter the for loop.  We set it to 1 so that the loop executes only
+                 * once.  We will use the boolean flag bNoTestFiles inside the loop
+                 * to indicate whether or not test data files are to be used. */
+                numTests = 1;   //we will have a single test w/o test files
+                bNoTestFiles = true;
+            }
+            else {
+                // here, numTests > 0.  Set bNoTestFiles to false
+                bNoTestFiles = false;
+            }
+        }
+
 
         //create arrays to hold test results
         assignment.runtimeErrors = new String[numTests];
@@ -363,7 +398,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         assignment.executionTimes = new Double[numTests];
 
         //create a results structure for the calls to shellExec()
-        shellExecResult execResult = new shellExecResult();
+        shellExecResult execResult;
 
         //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
         //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
@@ -376,15 +411,6 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         * from the cases where test files are needed.  In the former case, there is no input
         * redirection (no user input).  In the latter case, we redirect stdin from the test
         * data files.  The command line includes a "< testFile" argument. */
-        boolean bNoTestFiles = false;       //set a flag to denote no test files
-        if (numTests == 0) {
-            /* while there are no test files, we must set numTests to 0 in order to
-            * enter the for loop.  We set it to 1 so that the loop executes only
-            * once.  We will use the boolean flag bNoTestFiles inside the loop
-            * to indicate whether or not test data files are to be used. */
-            numTests = 1;   //we will have a single test w/o test files
-            bNoTestFiles = true;
-        }
 
         //run the code for each test case.
         for (int i = 0; i < numTests; i++) {
@@ -465,7 +491,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 @Override
                 protected Void call() throws Exception {
 
-                    System.out.println("Grading service started...");
+                    console("Grading service started...");
                     for (Assignment assignment : assignments) {
                         processingStatus.message = assignment.studentName;
                         execAssignment(assignment);
@@ -477,7 +503,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
 
                     //indicate that the thread is done.
                     processingStatus.bRunning = false;
-                    System.out.println("Grading thread ending...");
+                    console("Grading thread ending...");
                     return null;
                 }
             };
