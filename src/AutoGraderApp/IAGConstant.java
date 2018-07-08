@@ -47,6 +47,8 @@ public interface IAGConstant {
     public final String NAME_DIRECTIVE  =   "@@Name";
     public final String MAIN_DIRECTIVE =    "@@Main";
     public final String TITLE_DIRECTIVE =   "@@Title";
+    public final String DATE_DIRECTIVE =    "@@Date";
+    public final String DATA_DIRECTIVE =    "@@Data";
 
     //---------- Misc Constants ----------
     public final String CONFIG_FILENAME = "ag2Config.json";

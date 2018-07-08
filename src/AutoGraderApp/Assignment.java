@@ -15,7 +15,7 @@ public class Assignment implements java.io.Serializable {
     public String language;
     //---------- code analysis members ----------
     //public Integer linesOfCode;
-    //public Integer numCommenbts;
+    //public Integer numComments;
     //public Integer nunDocStrings;
     //public Integer numFunctions;
     //public Integer numClasses;
@@ -30,28 +30,12 @@ public class Assignment implements java.io.Serializable {
     public Boolean bAutoGraded;
     public Integer grade;
     public String instructorComment;
-
-    Assignment() {
-        //set the default student name, grade, instructor comment etc.
-        /*
-        studentName = null;
-        assignmentDirectory = null;
-        linesOfCode = null;
-        numCommenbts = null;
-        nunDocStrings = null;
-        numFunctions = null;
-        numClasses = null;
-        grade = null;
-        instructorComment = null;
-
-        runtimeErrors = new ArrayList<>(); */
-        //testFiles = new ArrayList<>();
-        /*
-        testResults = new ArrayList<>();
-        //initialize the assignmentFiles ArrayList
-        //assignmentFiles = new ArrayList<File>();
-        */
-    }
+    //---------- directives ----------
+    public String nameDirective;        //student name
+    public String titleDirective;       //assignment title
+    public String dateDirective;        //date
+    public String mainDirective;        //main module
+    public String dataDirective;        //misc. data
 
 }
 

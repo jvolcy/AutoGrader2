@@ -65,10 +65,11 @@ public class AutoGraderApp extends Application implements IAGConstant {
 
 /* ======================================================================
  * To Do
- * Threads (the grader should work in a tread)
- * Notification (update lblMessage with student names as the grader is working)
- * Dialogbox (a custom dialog box to allow the user to select between
- * multiple python files is needed)
+ * C++ support
+ * #1 Need to set the CWD on the Java grading thread
+ * #2 Add document to serialized output
+ * JSON configuration
+ * AG directives (add appropriate entries to Assignment class prior to release)
  * ===================================================================== */
 
 
