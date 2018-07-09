@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -17,6 +18,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -339,7 +341,7 @@ public class Controller implements IAGConstant {
 
         // Deserialization
         try {
-            AutoGraderApp.autoGrader.deSerializeGradingEngineFromDisk(f.getAbsolutePath());
+            AutoGraderApp.autoGrader.deSerializeFromDisk(f.getAbsolutePath());
             setDocumentFileName(f.getAbsolutePath());
         }
         catch (Exception e) {
@@ -348,7 +350,27 @@ public class Controller implements IAGConstant {
         }
 
         doPostGradingProcessing();
-    }
+
+        /* the serialized html report is the base html output from the the report generator.  It does
+        * not contain grades and comments which are entered by the instructor after the report is
+        * generated.  The grades and comments are ultimately stored in the Assignments array list.
+        * Upon de-serializing the AG document from disk, the base html document must be populated with
+        * the grades and comments from the AGDocument.  This is the work done by the
+        * AGDocumentToWebView() function.
+        *
+        * AGDocumentToWebView() necessarily makes reference to the different controls on the
+        * HTML page.  This function will fail if the page is not yet loaded.  Because the
+        * loading is done in a separate thread, we use a listener to check for a change in
+        * the page's LoadWorker status before calling AGDocumentToWebView(). */
+        /*
+        wvOutput.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                // new page has loaded, call AGDocumentToWebView
+                xferAGDocumentToWebView();
+            }
+        });
+*/
+   }
 
     /* ======================================================================
      * menuFileSave()
@@ -387,7 +409,7 @@ public class Controller implements IAGConstant {
         // Serialization
         try {
             console("Writing " + documentFileName + " ...");
-            AutoGraderApp.autoGrader.serializeGradingEngineToDisk(getDocumentFileName());
+            AutoGraderApp.autoGrader.serializeToDisk(getDocumentFileName());
             message("Report Saved.");
 
         } catch (Exception e) {
@@ -689,8 +711,7 @@ public class Controller implements IAGConstant {
      * ===================================================================== */
     public void btnGradeSummaryClick() {
 
-        if (bShowingSummary)
-        {
+        if (bShowingSummary) {
             //we are on the summary page: switch to the report page
             /* we need to regenerate the report.  Any changes to the
              * report in the form of a grade or instructor comment
@@ -704,12 +725,11 @@ public class Controller implements IAGConstant {
 
             btnGradeSummary.setText("View Summary");
             bShowingSummary = false;
-        }
-        else {
+        } else {
             //we are on the report page: switch to the summary page.
             /* transitioning from the report page to the summary page first requires
-            * that any edits to the grade and comment input controls be updated in the
-            * document.  The summary report must then be re-generated. */
+             * that any edits to the grade and comment input controls be updated in the
+             * document.  The summary report must then be re-generated. */
 
             //update the grading engine's assignment with the entries from the web view.
             for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
@@ -729,10 +749,23 @@ public class Controller implements IAGConstant {
 
 
         /* Not clear why the call to cbNameClick() does not cause the window
-        * to scroll to the selected name.  Instead, simply set cbName to
-        * the first item to match the state of the window. */
+         * to scroll to the selected name.  Instead, simply set cbName to
+         * the first item to match the state of the window. */
         //cbNameClick();
         cbName.getSelectionModel().selectFirst();
+
+        /* whether switching from report to summary or vice-versa, we need
+         * update the scroll position on the display based on the student
+         * name choice box. This function will fail if the page is not yet loaded.
+         * Because the loading is done in a separate thread, we use a listener
+         * to check for a change in the page's LoadWorker status before
+         * calling cbNameClick(). */
+        wvOutput.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                // new page has loaded, call AGDocumentToWebView
+                cbNameClick();
+            }
+        });
     }
 
 
@@ -962,11 +995,14 @@ public class Controller implements IAGConstant {
         menuFileSave.setDisable(false);
         menuFileExportHtml.setDisable(false);
 
+
         reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                 txtSourceDirectory.getText(),       //header text
                 AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
 
         reportGenerator.generateReport();
+        AutoGraderApp.autoGrader.sethtmlReport(reportGenerator.getDocument());
+
 
         //---------- Initialize the student name choice box ----------
         // This ChoiceBox appears on the output tab and contains student names.
@@ -974,8 +1010,9 @@ public class Controller implements IAGConstant {
         // the output HTML.
         populateStudentNameChoiceBox();
 
+
         //point the web engine to the generated html report
-        wvOutput.getEngine().loadContent(reportGenerator.getDocument());
+        wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.gethtmlReport());
 
         //switch to the output tab
         btnOutputClick();
@@ -992,7 +1029,7 @@ public class Controller implements IAGConstant {
      * retrieves the instructor-entered grades and comments for the
      * given assignment and transfers them to the Assignment object.
      * ===================================================================== */
-    void xferGradesFromWebViewToAssignmentObject(Assignment assignment) {
+    private void xferGradesFromWebViewToAssignmentObject(Assignment assignment) {
         String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
@@ -1024,19 +1061,37 @@ public class Controller implements IAGConstant {
      * xferGradesFromAssignmentObjectToWebView()
      * transfers the grade and comment fields of the supplied assignment
      * to the corresponding fields in the web view.
-     *
-     *         ****This function has not been tested ****
      * ===================================================================== */
-    void xferGradesFromAssignmentObjectToWebView(Assignment assignment) {
+    private void xferGradesFromAssignmentObjectToWebView(Assignment assignment) {
         String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
         //set the grade and comment on the webview
         try {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
-            wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value =\"" + assignment.instructorComment+"\"");
+            wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
             console(assignment.studentName + " : " + e.toString());
+        }
+    }
+
+    /* ======================================================================
+     * xferAGDocumentToWebView()
+     * transfers all grades and comments from the AG Document
+     * to the corresponding fields in the web view.
+     * The serialized html report is the base html output from the the
+     * report generator.  It does not contain grades and comments which are
+     * entered by the instructor after the report is generated.  The grades
+     * and comments are ultimately stored in the Assignments array list.
+     * Upon de-serializing the AG document from disk, the base html document
+     * must be populated with the grades and comments from the AGDocument.
+     * This is the work done by the AGDocumentToWebView function.
+     * ===================================================================== */
+    private void xferAGDocumentToWebView() {
+
+        //update the grading engine's assignment with the entries from the web view.
+        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+            xferGradesFromAssignmentObjectToWebView(assignment);
         }
     }
 
@@ -1092,7 +1147,14 @@ public class Controller implements IAGConstant {
 
                 //re-enable the 'Start' button
                 btnStart.setDisable(false);
+/*
+                reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
+                        txtSourceDirectory.getText(),       //header text
+                        AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
 
+                reportGenerator.generateReport();
+                AutoGraderApp.autoGrader.sethtmlReport(reportGenerator.getDocument());
+*/
                 //call the post-processing function
                 doPostGradingProcessing();
             }

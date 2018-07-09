@@ -9,6 +9,14 @@ import java.util.Hashtable;
 import static AutoGraderApp.Controller.console;
 
 /* ======================================================================
+ * AGDocument class
+ * ===================================================================== */
+class AGDocument implements java.io.Serializable {
+    public GradingEngine gradingEngine;
+    public String htmlReport;
+        }
+
+/* ======================================================================
  * AutoGraderApp class
  * ===================================================================== */
 public class AutoGrader2 implements IAGConstant {
@@ -19,7 +27,8 @@ public class AutoGrader2 implements IAGConstant {
     //---------- Configuration File Path ----------
     private String configFileName;
 
-    private GradingEngine gradingEngine;
+    private AGDocument agDocument;
+    //private GradingEngine gradingEngine;
 
     /* ======================================================================
      * AutoGraderApp()
@@ -38,7 +47,8 @@ public class AutoGrader2 implements IAGConstant {
         setupConfiguration(configFileName);
 
         //---------- initialize the grading engine ----------
-        gradingEngine = new GradingEngine();
+         agDocument = new AGDocument();
+         agDocument.gradingEngine = new GradingEngine();
 
     }
 
@@ -262,7 +272,23 @@ public class AutoGrader2 implements IAGConstant {
      * xxx
      * ===================================================================== */
     public GradingEngine getGradingEngine() {
-        return gradingEngine;
+        return agDocument.gradingEngine;
+    }
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public String gethtmlReport() {
+        return agDocument.htmlReport;
+    }
+
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+    public void sethtmlReport(String report) {
+        agDocument.htmlReport = report;
     }
 
 
@@ -270,7 +296,7 @@ public class AutoGrader2 implements IAGConstant {
      * menuFileOpen()
      * Callback for File->Open
      * ===================================================================== */
-    public void deSerializeGradingEngineFromDisk(String fileName) throws Exception {
+    public void deSerializeFromDisk(String fileName) throws Exception {
         // Deserialization
         /*
         try
@@ -280,7 +306,7 @@ public class AutoGrader2 implements IAGConstant {
             ObjectInputStream in = new ObjectInputStream(file);
 
             // Method for deserialization of object
-            gradingEngine = (GradingEngine)in.readObject();
+            agDocument = (AGDocument)in.readObject();
 
             in.close();
             file.close();
@@ -299,7 +325,7 @@ public class AutoGrader2 implements IAGConstant {
      * menuFileSave()
      * Callback for File->Save
      * ===================================================================== */
-    public void serializeGradingEngineToDisk (String fileName) throws Exception  {
+    public void serializeToDisk (String fileName) throws Exception  {
         // Serialization
         /*
         try
@@ -309,7 +335,7 @@ public class AutoGrader2 implements IAGConstant {
             ObjectOutputStream out = new ObjectOutputStream(file);
 
             // Method for serialization of object
-            out.writeObject(gradingEngine);
+            out.writeObject(agDocument);
 
             out.close();
             file.close();
