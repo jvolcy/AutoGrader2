@@ -18,14 +18,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.w3c.dom.Element;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.lang.Thread.sleep;
 
 /* ======================================================================
  * Controller Class
@@ -85,7 +83,7 @@ public class Controller implements IAGConstant {
     private final Double GRADING_TIMELINE_PERIOD = 0.25;        //0.25 second period
     private ReportGenerator reportGenerator;
     private String documentFileName;
-    boolean bShowingSummary;
+    private boolean bShowingSummary;
 
     /* ======================================================================
      * initialize()
@@ -362,14 +360,14 @@ public class Controller implements IAGConstant {
         * HTML page.  This function will fail if the page is not yet loaded.  Because the
         * loading is done in a separate thread, we use a listener to check for a change in
         * the page's LoadWorker status before calling AGDocumentToWebView(). */
-        /*
+
         wvOutput.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
                 // new page has loaded, call AGDocumentToWebView
                 xferAGDocumentToWebView();
             }
         });
-*/
+
    }
 
     /* ======================================================================
@@ -752,7 +750,7 @@ public class Controller implements IAGConstant {
          * to scroll to the selected name.  Instead, simply set cbName to
          * the first item to match the state of the window. */
         //cbNameClick();
-        cbName.getSelectionModel().selectFirst();
+        //cbName.getSelectionModel().selectFirst();
 
         /* whether switching from report to summary or vice-versa, we need
          * update the scroll position on the display based on the student
@@ -934,6 +932,8 @@ public class Controller implements IAGConstant {
 
         }
 
+        //---------- indicate the current hmtlReport is invalid ----------
+        AutoGraderApp.autoGrader.setHtmlReport(null);
 
         //disable the 'Start' button
         btnStart.setDisable(true);
@@ -995,14 +995,26 @@ public class Controller implements IAGConstant {
         menuFileSave.setDisable(false);
         menuFileExportHtml.setDisable(false);
 
+        /* if we are loading from file, getHtmlReport will return a non-null
+        * value.  If we are processing new data, we will need to generate
+        * a report.  getHmtlReport() will be null.*/
+        if (AutoGraderApp.autoGrader.getHtmlReport() == null) {
+            reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
+                    txtSourceDirectory.getText(),       //header text
+                    AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
 
-        reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
-                txtSourceDirectory.getText(),       //header text
-                AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
+            //we are processing new data so we need to generate a new report
+            reportGenerator.generateReport();
+            AutoGraderApp.autoGrader.setHtmlReport(reportGenerator.getDocument());
+        } else {
+            reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
+                    "",       //header text
+                    AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
 
-        reportGenerator.generateReport();
-        AutoGraderApp.autoGrader.sethtmlReport(reportGenerator.getDocument());
-
+            //Here, we are uploading an existing report.  We do not call reportGenerator.generateReport()
+            //Doing so would likely cause an error as file references are likely invalid.
+            AutoGraderApp.autoGrader.setHtmlReport(AutoGraderApp.autoGrader.getHtmlReport());
+        }
 
         //---------- Initialize the student name choice box ----------
         // This ChoiceBox appears on the output tab and contains student names.
@@ -1012,7 +1024,7 @@ public class Controller implements IAGConstant {
 
 
         //point the web engine to the generated html report
-        wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.gethtmlReport());
+        wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.getHtmlReport());
 
         //switch to the output tab
         btnOutputClick();

@@ -274,7 +274,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
      * lists PID and the command line used to launch the corresponding
      * process.
      * ===================================================================== */
-    private shellExecResult shellExec(String args, int timeout_sec, int maxOutputLines, String identifyingToken) {
+    private shellExecResult shellExec(String args, int timeout_sec, int maxOutputLines, String identifyingToken, String workingDirectory) {
         shellExecResult execResult = new shellExecResult();
         execResult.bTimedOut = false;
         execResult.bMaxLinesExceeded = false;
@@ -306,8 +306,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             long elpasedTime = System.currentTimeMillis();
 
             Process p;
-            p = Runtime.getRuntime().exec(cmd);
-
+            p = Runtime.getRuntime().exec(cmd, null, new File(workingDirectory));
 
             //wait no more than the specified timeout for the process to complete.
             //a timeout of zero means wait indefinitely.
@@ -405,7 +404,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
 
         if (assignment.primaryAssignmentFile == null) return;
         //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
-        String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();  //.assignmentFiles.get(0).getAbsolutePath();
+        String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();
 
         /* we have to add logic that handles the case where no test files are required differently
         * from the cases where test files are needed.  In the former case, there is no input
@@ -430,7 +429,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             }
 
             //the command string, cmd
-            execResult = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile);
+            execResult = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile, assignment.assignmentDirectory);
 
             //store the output in the assignment object
             assignment.progOutputs[i] = execResult.output;

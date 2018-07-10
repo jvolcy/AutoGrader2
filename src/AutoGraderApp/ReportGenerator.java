@@ -120,6 +120,17 @@ public class ReportGenerator implements IAGConstant {
     }
 
     /* ======================================================================
+     * generateSummaryFromDocument()
+     * Given an HTML document created by a previous invokation of
+     * generateDocument(), this function replaces the internal document
+     * string with the one supplied and generates a summary of its
+     * contents.
+     * ===================================================================== */
+    public void generateSummaryFromDocument(String document) {
+
+    }
+
+    /* ======================================================================
      * getDocument()
      * ===================================================================== */
     public String getDocument() {

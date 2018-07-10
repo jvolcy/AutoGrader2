@@ -12,6 +12,7 @@ import static AutoGraderApp.Controller.console;
  * AGDocument class
  * ===================================================================== */
 class AGDocument implements java.io.Serializable {
+    public String assignmentName;
     public GradingEngine gradingEngine;
     public String htmlReport;
         }
@@ -279,7 +280,7 @@ public class AutoGrader2 implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    public String gethtmlReport() {
+    public String getHtmlReport() {
         return agDocument.htmlReport;
     }
 
@@ -287,7 +288,7 @@ public class AutoGrader2 implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    public void sethtmlReport(String report) {
+    public void setHtmlReport(String report) {
         agDocument.htmlReport = report;
     }
 
