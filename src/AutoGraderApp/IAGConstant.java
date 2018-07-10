@@ -25,7 +25,7 @@ public interface IAGConstant {
     public final String LANGUAGE_UNKNOWN = "Unknown";
 
     public final String[] PYTHON_EXTENSIONS = {"py"};
-    //public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc"};
+    public final String[] CPP_COMPILER_EXTENSIONS = {"cpp", "c", "cc"};
     public final String[] CPP_EXTENSIONS = {"cpp", "c", "cc", "h", "hpp"};
     public final String[] PYTHON_AND_CPP_EXTENSIONS = {"py", "cpp", "c", "cc", "h", "hpp"};
     public final String[] COMPRESSION_EXTENSIONS = {"zip"};

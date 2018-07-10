@@ -340,14 +340,27 @@ public class Controller implements IAGConstant {
         // Deserialization
         try {
             AutoGraderApp.autoGrader.deSerializeFromDisk(f.getAbsolutePath());
-            setDocumentFileName(f.getAbsolutePath());
         }
         catch (Exception e) {
             //here, we won't change the current document name
             return;
         }
 
+        //put us on the report output page, not the summary page
+        if (bShowingSummary)
+            btnGradeSummaryClick();
+
+        //---------- Initialize the student name choice box ----------
+        // This ChoiceBox appears on the output tab and contains student names.
+        // Along with the "Prev" and "Next" buttons, t is used to navigate
+        // the output HTML.
+        populateStudentNameChoiceBox();
+
         doPostGradingProcessing();
+        /* set the document filename *after* doPostGradingProcessing().  The "Save As"
+        option will only be enabled if "Save" is first enabled.  That happens inside
+        of doPostGradingProcessing. */
+        setDocumentFileName(f.getAbsolutePath());
 
         /* the serialized html report is the base html output from the the report generator.  It does
         * not contain grades and comments which are entered by the instructor after the report is
@@ -711,15 +724,16 @@ public class Controller implements IAGConstant {
 
         if (bShowingSummary) {
             //we are on the summary page: switch to the report page
-            /* we need to regenerate the report.  Any changes to the
+            /* we need to explicitly populate the grades and
+             * comment fields in the report.  Any changes to the
              * report in the form of a grade or instructor comment
              * is stored in the assignments array list, not in the
              * displayed report.  It must be re-generated before
              * it is displayed again.*/
 
             //generate the report
-            reportGenerator.generateReport();
-            wvOutput.getEngine().loadContent(reportGenerator.getDocument());
+            doPostGradingProcessing();
+
 
             btnGradeSummary.setText("View Summary");
             bShowingSummary = false;
@@ -938,6 +952,10 @@ public class Controller implements IAGConstant {
         //disable the 'Start' button
         btnStart.setDisable(true);
 
+        //put us on the report output page, not the summary page
+        if (bShowingSummary)
+            btnGradeSummaryClick();
+
         //---------- invoke the grader ----------
         message("Processing assignments...");
         lblStatus.setText("Working...");
@@ -1016,18 +1034,13 @@ public class Controller implements IAGConstant {
             AutoGraderApp.autoGrader.setHtmlReport(AutoGraderApp.autoGrader.getHtmlReport());
         }
 
-        //---------- Initialize the student name choice box ----------
-        // This ChoiceBox appears on the output tab and contains student names.
-        // Along with the "Prev" and "Next" buttons, t is used to navigate
-        // the output HTML.
-        populateStudentNameChoiceBox();
-
 
         //point the web engine to the generated html report
         wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.getHtmlReport());
 
         //switch to the output tab
         btnOutputClick();
+
 
         //dump the assignments to the console  ************ TEMP **************
         AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
@@ -1167,6 +1180,12 @@ public class Controller implements IAGConstant {
                 reportGenerator.generateReport();
                 AutoGraderApp.autoGrader.sethtmlReport(reportGenerator.getDocument());
 */
+                //---------- Initialize the student name choice box ----------
+                // This ChoiceBox appears on the output tab and contains student names.
+                // Along with the "Prev" and "Next" buttons, t is used to navigate
+                // the output HTML.
+                populateStudentNameChoiceBox();
+
                 //call the post-processing function
                 doPostGradingProcessing();
             }

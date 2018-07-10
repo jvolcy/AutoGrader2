@@ -341,20 +341,29 @@ public class ReportGenerator implements IAGConstant {
             return;
         }
         else {
+            //report any compiler error messages here
+            if (assignment.compilerErrors != null)
+                reportErrorMsg(assignment.compilerErrors);
+
             for (int i = 0; i < assignment.testFiles.size(); i++) {
                 //add the name of the test file to the document
                 document += "<font face=\"verdana\" color=\" " + HEADER_COLOR2
                         + "\"><br>\n------------- "
-                        + fileNameFromPathName( assignment.testFiles.get(i) )
+                        + fileNameFromPathName(assignment.testFiles.get(i))
                         + " -------------</font>\n";
 
                 //add the corresponding test file output to the document
                 document += "<pre><font face=\"courier\" color=\"" + OUTPUT_COLOR + "\">";
-                document += assignment.progOutputs[i] + "</font></pre>";
+                if (assignment.progOutputs[i] != null)
+                    document += assignment.progOutputs[i];
+                document += "</font></pre>";
 
-                //report any error messages here
-                reportErrorMsg(assignment.runtimeErrors[i]);
-                reportExecutionTime(assignment.executionTimes[i]);
+                //report any runtime error messages here
+                if (assignment.runtimeErrors[i] != null)
+                    reportErrorMsg(assignment.runtimeErrors[i]);
+
+                if (assignment.executionTimes[i] != null)
+                    reportExecutionTime(assignment.executionTimes[i]);
             }
         }
     }

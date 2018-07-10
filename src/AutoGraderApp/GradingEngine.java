@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static AutoGraderApp.Controller.console;
@@ -90,6 +91,8 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
     private boolean bAbortRequest;
     private GradingService gradingService;
     private boolean bLastReadExceedsMaxLines;
+    private final int MAX_COMPILE_TIME_SEC = 10;
+    private final int MAX_COMPILER_OUTPUT_LINES = 200;
 
     /* ======================================================================
      * GradingEngine Constructor
@@ -228,6 +231,26 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
     }
 
     /* ======================================================================
+     * getFileExtension()
+     * returns the extension of the given filename.
+     * ===================================================================== */
+    private String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
+
+
+    /* ======================================================================
+     * getFileExtension()
+     * overloaded version of the getFileExtension() method that accepts
+     * a File object as an argument and returns the string extension of the
+     * corresponding file.
+     * ===================================================================== */
+    private String getFileExtension(File f) {
+        String fileName = f.getName();
+        return getFileExtension(fileName);
+    }
+
+    /* ======================================================================
      * This function attempts to determine the PID of a running process
      * based on any substring, the token, found on the command line used
      * to launch the the process.  The token should be as unique a
@@ -261,6 +284,59 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         return pids;
     }
 
+
+    /* ======================================================================
+     * xxx
+     * ===================================================================== */
+
+    private shellExecResult compileCppFiles(String compiler, ArrayList<File>sourceFiles, File exeFile, Integer timeoutSec, Integer maxOutputLines) {
+        //Delineate the start of the unformatted py code output with a token: PROG_OUTPUT_START_TOKEN.
+        //Flank with '\n's to ensure the token is on a line by itself
+
+        /*
+        //create a temp file to capture program output
+        File tmpFile = new File(tempOutputDirectory + "/TEMP.AB");
+
+        //delete any previous temp file in the output directory.
+        try {
+            //delete the temporary file if it exists, ignoring any "file not found" errors.
+            tmpFile.delete();
+        } catch (Exception e) {
+            //ignore errors from the delete operation
+        }
+        */
+        //compile the code
+        String compile_args = "\"" + compiler + "\" -o \"" + exeFile + "\" ";
+
+        for (File sourceFile : sourceFiles){
+            //include only .cpp files (not .h or .hpp files) on the g++ command line
+            if (Arrays.asList(IAGConstant.CPP_COMPILER_EXTENSIONS).contains(getFileExtension(sourceFile))) {
+                compile_args = compile_args + "\"" + sourceFile + "\" ";
+            }
+        }
+
+        //store the compiler output to a temp file
+        //compile_args = compile_args + "> \"" + tmpFile + "\" 2>&1";
+
+        //delete any previously compiled exe file in the output directory.
+        try {
+            //delete the exe file if it exists, ignoring any "file not found" errors.
+            exeFile.delete();
+        } catch (Exception e) {
+            //ignore errors from the delete operation
+        }
+
+        //perform the compilation
+        console("compiling:" + compile_args);
+        shellExecResult execResult;
+        execResult = shellExec(compile_args, timeoutSec, maxOutputLines, exeFile.getAbsolutePath(), exeFile.getParent());
+
+        return execResult;
+
+        //copy the first maxOutputLines from the temp file to the output file
+        //Also, limit the #bytes to 40 * maxOutputLines(this avoids large output files due to ridiculously long lines)
+
+    }
 
     /* ======================================================================
      * shellExec()
@@ -357,59 +433,25 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
     }
 
     /* ======================================================================
-     * execAssignment()
-     *
+     * pythonSubProcess()
+     * The functions pythonSubProcess() and cppSubProcess() exist simply
+     * to reduce the size of the execAssignment() function.  Much of the
+     * pre- and post-processing leading up to and following the calls to
+     * these functions is common.  To the extent possible, that commonality
+     * is captured in execAssignment().
      * ===================================================================== */
-    private void execAssignment(Assignment assignment) {
-        /* numTests = the number of test cases.  This is either 1 if there
-         * are no test files, or equal to the # of test files. */
-        int numTests;
-        boolean bNoTestFiles;       //set a flag to denote no test files
+    private void pythonSubProcess(Assignment assignment, int numTests, boolean bNoTestFiles) {
+        //declare a results structure for the calls to shellExec()
+        shellExecResult execResult = null;
 
-        if (assignment.testFiles == null)
-        {
-            //assignment.testFiles is null.  Assume there are no test
-            //files.  Set numTests to 1.
-            numTests = 1;
-            bNoTestFiles = true;
-        }
-        else {
-            numTests = assignment.testFiles.size();
-
-            if (numTests == 0) {
-                /* while there are no test files, we must set numTests to 0 in order to
-                 * enter the for loop.  We set it to 1 so that the loop executes only
-                 * once.  We will use the boolean flag bNoTestFiles inside the loop
-                 * to indicate whether or not test data files are to be used. */
-                numTests = 1;   //we will have a single test w/o test files
-                bNoTestFiles = true;
-            }
-            else {
-                // here, numTests > 0.  Set bNoTestFiles to false
-                bNoTestFiles = false;
-            }
-        }
-
-
-        //create arrays to hold test results
-        assignment.runtimeErrors = new String[numTests];
-        assignment.progOutputs = new String[numTests];
-        assignment.executionTimes = new Double[numTests];
-
-        //create a results structure for the calls to shellExec()
-        shellExecResult execResult;
-
-        //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
-        //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
-
+        //For python, there should be a primary assignment file;  for C++, it doesn't matter
         if (assignment.primaryAssignmentFile == null) return;
-        //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
         String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();
 
         /* we have to add logic that handles the case where no test files are required differently
-        * from the cases where test files are needed.  In the former case, there is no input
-        * redirection (no user input).  In the latter case, we redirect stdin from the test
-        * data files.  The command line includes a "< testFile" argument. */
+         * from the cases where test files are needed.  In the former case, there is no input
+         * redirection (no user input).  In the latter case, we redirect stdin from the test
+         * data files.  The command line includes a "< testFile" argument. */
 
         //run the code for each test case.
         for (int i = 0; i < numTests; i++) {
@@ -448,6 +490,174 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             //store the execution time in the assignment object
             assignment.executionTimes[i] = execResult.execTimeSec;
         }
+
+    }
+
+
+    /* ======================================================================
+     * cppSubProcess()
+     * The functions pythonSubProcess() and cppSubProcess() exist simply
+     * to reduce the size of the execAssignment() function.  Much of the
+     * pre- and post-processing leading up to and following the calls to
+     * these functions is common.  To the extent possible, that commonality
+     * is captured in execAssignment().
+     * ===================================================================== */
+    private void cppSubProcess(Assignment assignment, int numTests, boolean bNoTestFiles) {
+        console("cppSubProcess: " + assignment.studentName);
+        //declare a results structure for the calls to shellExec()
+        shellExecResult execResult = null;
+
+        File exeFile = new File(assignment.assignmentDirectory + "/AG.out");
+
+        //Compile the source once.
+        execResult = compileCppFiles(cppCompiler, assignment.assignmentFiles, exeFile, MAX_COMPILE_TIME_SEC, MAX_COMPILER_OUTPUT_LINES);
+        assignment.compilerErrors = execResult.output;
+
+        if (exeFile.isFile())   //did the compilation succeed?
+                console("Compilation succeeded.");
+        else {
+            console("Compilation Failed.");
+            return;
+        }
+
+        /* we have to add logic that handles the case where no test files are required differently
+         * from the cases where test files are needed.  In the former case, there is no input
+         * redirection (no user input).  In the latter case, we redirect stdin from the test
+         * data files.  The command line includes a "< testFile" argument. */
+
+        //run the code for each test case.
+        for (int i = 0; i < numTests; i++) {
+            String cmd;
+
+            //use bNoTestFiles to determine the format of the command string, cmd
+            if (bNoTestFiles) {
+                //if we have no test files, do not include input redirection in the exec command
+                cmd = "\"" + exeFile + "\" ";
+            }
+            else {
+                //we have test files: use them to redirect stdin in the exec command
+                String dataFileName = assignment.testFiles.get(i);
+                cmd = "\"" + exeFile + "\" " + " < \"" + dataFileName + "\"";
+            }
+
+            //the command string, cmd
+            execResult = shellExec(cmd, maxRunTime, maxOutputLines, exeFile.getAbsolutePath(), assignment.assignmentDirectory);
+
+            //store the output in the assignment object
+            assignment.progOutputs[i] = execResult.output;
+
+            //store any runtime/compiler errors in the assignment object
+            assignment.runtimeErrors[i] = "";   //initialize the runtimeErrors string
+            if (execResult.bTimedOut) {
+                assignment.runtimeErrors[i] += "Maximum execution time of " + maxRunTime
+                        + " seconds exceeded.  Process forcefully terminated... output may be lost.\n";
+            }
+            if (execResult.bMaxLinesExceeded) {
+                assignment.runtimeErrors[i] += "Maximum lines of output (" + maxOutputLines
+                        + ") exceeded.  Output truncated.\n";
+            }
+
+            //store the execution time in the assignment object
+            assignment.executionTimes[i] = execResult.execTimeSec;
+        }
+    }
+
+
+    /* ======================================================================
+     * execAssignment()
+     *
+     * ===================================================================== */
+    private void execAssignment(Assignment assignment) {
+        /* numTests = the number of test cases.  This is either 1 if there
+         * are no test files, or equal to the # of test files. */
+        int numTests;
+        boolean bNoTestFiles;       //set a flag to denote no test files
+
+        if (assignment.testFiles == null)
+        {
+            //assignment.testFiles is null.  Assume there are no test
+            //files.  Set numTests to 1.
+            numTests = 1;
+            bNoTestFiles = true;
+        }
+        else {
+            numTests = assignment.testFiles.size();
+
+            if (numTests == 0) {
+                /* while there are no test files, we must set numTests to 1 in order to
+                 * enter the for loop.  We set it to 1 so that the loop executes only
+                 * once.  We will use the boolean flag bNoTestFiles inside the loop
+                 * to indicate whether or not test data files are to be used. */
+                numTests = 1;   //we will have a single test w/o test files
+                bNoTestFiles = true;
+            }
+            else {
+                // here, numTests > 0.  Set bNoTestFiles to false
+                bNoTestFiles = false;
+            }
+        }
+
+        //create arrays to hold test results
+        assignment.runtimeErrors = new String[numTests];
+        assignment.progOutputs = new String[numTests];
+        assignment.executionTimes = new Double[numTests];
+
+        if (assignment.language.equals(IAGConstant.LANGUAGE_PYTHON3))
+            pythonSubProcess(assignment, numTests, bNoTestFiles);
+        else if (assignment.language.equals(IAGConstant.LANGUAGE_CPP))
+            cppSubProcess(assignment, numTests, bNoTestFiles);
+
+        /*
+        //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
+        //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
+
+        if (assignment.primaryAssignmentFile == null) return;
+        //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
+        String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();
+
+        /x* we have to add logic that handles the case where no test files are required differently
+        * from the cases where test files are needed.  In the former case, there is no input
+        * redirection (no user input).  In the latter case, we redirect stdin from the test
+        * data files.  The command line includes a "< testFile" argument. *x/
+
+        //run the code for each test case.
+        for (int i = 0; i < numTests; i++) {
+            String cmd;
+
+            //use bNoTestFiles to determine the format of the command string, cmd
+            if (bNoTestFiles) {
+                //if we have no test files, do not include input redirection in the exec command
+                cmd = "\"" + python3Interpreter + "\" " +
+                        "\"" + sourceFile + "\"";
+            }
+            else {
+                //we have test files: use them to redirect stdin in the exec command
+                String dataFileName = assignment.testFiles.get(i);
+                cmd = "\"" + python3Interpreter + "\" " +
+                        "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
+            }
+
+            //the command string, cmd
+            execResult = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile, assignment.assignmentDirectory);
+
+            //store the output in the assignment object
+            assignment.progOutputs[i] = execResult.output;
+
+            //store any runtime/compiler errors in the assignment object
+            assignment.runtimeErrors[i] = "";   //initialize the runtimeErrors string
+            if (execResult.bTimedOut) {
+                assignment.runtimeErrors[i] += "Maximum execution time of " + maxRunTime
+                        + " seconds exceeded.  Process forcefully terminated... output may be lost.\n";
+            }
+            if (execResult.bMaxLinesExceeded) {
+                assignment.runtimeErrors[i] += "Maximum lines of output (" + maxOutputLines
+                        + ") exceeded.  Output truncated.\n";
+            }
+
+            //store the execution time in the assignment object
+            assignment.executionTimes[i] = execResult.execTimeSec;
+        }
+*/
 
         //tag the assignemnt as "auto-graded"
         assignment.bAutoGraded = true;
