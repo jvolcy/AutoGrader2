@@ -603,63 +603,17 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         assignment.executionTimes = new Double[numTests];
 
         if (assignment.language.equals(IAGConstant.LANGUAGE_PYTHON3))
-            pythonSubProcess(assignment, numTests, bNoTestFiles);
+            if (python3Interpreter == null || python3Interpreter == "")
+                assignment.compilerErrors = "No Python interpreter found.";
+            else
+                pythonSubProcess(assignment, numTests, bNoTestFiles);
         else if (assignment.language.equals(IAGConstant.LANGUAGE_CPP))
-            cppSubProcess(assignment, numTests, bNoTestFiles);
+            if (cppCompiler == null || cppCompiler == "")
+                assignment.compilerErrors = "No C++ compiler found.";
+            else
+                cppSubProcess(assignment, numTests, bNoTestFiles);
 
-        /*
-        //int maxRunTime = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_RUNTIME));
-        //int maxLines = Integer.valueOf(AutoGrader2.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES));
-
-        if (assignment.primaryAssignmentFile == null) return;
-        //********* TEMP ******** For python, there should only be one assignment file;  for C++, it doesn't matter
-        String sourceFile = assignment.primaryAssignmentFile.getAbsolutePath();
-
-        /x* we have to add logic that handles the case where no test files are required differently
-        * from the cases where test files are needed.  In the former case, there is no input
-        * redirection (no user input).  In the latter case, we redirect stdin from the test
-        * data files.  The command line includes a "< testFile" argument. *x/
-
-        //run the code for each test case.
-        for (int i = 0; i < numTests; i++) {
-            String cmd;
-
-            //use bNoTestFiles to determine the format of the command string, cmd
-            if (bNoTestFiles) {
-                //if we have no test files, do not include input redirection in the exec command
-                cmd = "\"" + python3Interpreter + "\" " +
-                        "\"" + sourceFile + "\"";
-            }
-            else {
-                //we have test files: use them to redirect stdin in the exec command
-                String dataFileName = assignment.testFiles.get(i);
-                cmd = "\"" + python3Interpreter + "\" " +
-                        "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
-            }
-
-            //the command string, cmd
-            execResult = shellExec(cmd, maxRunTime, maxOutputLines, sourceFile, assignment.assignmentDirectory);
-
-            //store the output in the assignment object
-            assignment.progOutputs[i] = execResult.output;
-
-            //store any runtime/compiler errors in the assignment object
-            assignment.runtimeErrors[i] = "";   //initialize the runtimeErrors string
-            if (execResult.bTimedOut) {
-                assignment.runtimeErrors[i] += "Maximum execution time of " + maxRunTime
-                        + " seconds exceeded.  Process forcefully terminated... output may be lost.\n";
-            }
-            if (execResult.bMaxLinesExceeded) {
-                assignment.runtimeErrors[i] += "Maximum lines of output (" + maxOutputLines
-                        + ") exceeded.  Output truncated.\n";
-            }
-
-            //store the execution time in the assignment object
-            assignment.executionTimes[i] = execResult.execTimeSec;
-        }
-*/
-
-        //tag the assignemnt as "auto-graded"
+        //tag the assignment as "auto-graded"
         assignment.bAutoGraded = true;
 
     }

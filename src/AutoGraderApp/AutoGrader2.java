@@ -15,6 +15,7 @@ class AGDocument implements java.io.Serializable {
     public String assignmentName;
     public GradingEngine gradingEngine;
     public String htmlReport;
+    public File moodleDirectory;
         }
 
 /* ======================================================================
@@ -36,7 +37,6 @@ public class AutoGrader2 implements IAGConstant {
      * constructor
      * ===================================================================== */
      AutoGrader2() {
-
         console("AutoGraderApp constructor...");
 
         //---------- set the path to the JSON config file ----------
@@ -50,7 +50,6 @@ public class AutoGrader2 implements IAGConstant {
         //---------- initialize the grading engine ----------
          agDocument = new AGDocument();
          agDocument.gradingEngine = new GradingEngine();
-
     }
 
     /* ======================================================================
@@ -144,9 +143,7 @@ public class AutoGrader2 implements IAGConstant {
             //console("", e);
             console(e.toString());
         }
-
         return cppPath;
-
     }
 
     /* ======================================================================
@@ -272,86 +269,47 @@ public class AutoGrader2 implements IAGConstant {
     /* ======================================================================
      * xxx
      * ===================================================================== */
-    public GradingEngine getGradingEngine() {
-        return agDocument.gradingEngine;
+    public AGDocument getAgDocument() {
+        return agDocument;
     }
-
-
-    /* ======================================================================
-     * xxx
-     * ===================================================================== */
-    public String getHtmlReport() {
-        return agDocument.htmlReport;
-    }
-
-
-    /* ======================================================================
-     * xxx
-     * ===================================================================== */
-    public void setHtmlReport(String report) {
-        agDocument.htmlReport = report;
-    }
-
 
     /* ======================================================================
      * menuFileOpen()
      * Callback for File->Open
      * ===================================================================== */
     public void deSerializeFromDisk(String fileName) throws Exception {
-        // Deserialization
-        /*
-        try
-        {*/
-            // Reading the object from a file
-            FileInputStream file = new FileInputStream(fileName);
-            ObjectInputStream in = new ObjectInputStream(file);
+        //De-serialization
+        // Reading the object from a file
+        FileInputStream file = new FileInputStream(fileName);
+        ObjectInputStream in = new ObjectInputStream(file);
 
-            // Method for deserialization of object
-            agDocument = (AGDocument)in.readObject();
+        // Method for deserialization of object
+        agDocument = (AGDocument) in.readObject();
 
-            in.close();
-            file.close();
+        in.close();
+        file.close();
 
-            console("Grading Engine successfully de-serialized.");
-/*       }
-
-        catch(Exception e)
-        {
-            console(e.toString());
-        }
-*/
+        console("Grading Engine successfully de-serialized.");
     }
+
 
     /* ======================================================================
      * menuFileSave()
      * Callback for File->Save
      * ===================================================================== */
-    public void serializeToDisk (String fileName) throws Exception  {
+    public void serializeToDisk (String fileName) throws Exception {
         // Serialization
-        /*
-        try
-        {*/
-            //Saving of object in a file
-            FileOutputStream file = new FileOutputStream(fileName);
-            ObjectOutputStream out = new ObjectOutputStream(file);
+        //Saving of object in a file
+        FileOutputStream file = new FileOutputStream(fileName);
+        ObjectOutputStream out = new ObjectOutputStream(file);
 
-            // Method for serialization of object
-            out.writeObject(agDocument);
+        // Method for serialization of object
+        out.writeObject(agDocument);
 
-            out.close();
-            file.close();
+        out.close();
+        file.close();
 
-            console("Grading Engine successfully serialized.");
-/*
-        }
-
-        catch(Exception e)
-        {
-            console(e.toString());
-            throw (e);
-        }
-*/
-
+        console("Grading Engine successfully serialized.");
     }
 
 }

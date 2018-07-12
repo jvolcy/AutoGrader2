@@ -120,6 +120,39 @@ public class ReportGenerator implements IAGConstant {
     }
 
     /* ======================================================================
+     * generateAnnotatedReport()
+     * Given an AGDocument object, this function annotates the object's
+     * HTML report with the grade and instructor comments from the
+     * object's Assignment member.  The function returns an annotated HTML
+     * report suitable for saving to an HTML file.
+     * ===================================================================== */
+    public static String generateAnnotatedReport(AGDocument agDocument) {
+        String htmlReport = agDocument.htmlReport;
+
+        for (Assignment assignment : agDocument.gradingEngine.assignments) {
+            String gradeID = assignment.studentName + HTML_GRADE_ID_SUFFIX;
+            String commentID = assignment.studentName + HTML_COMMENT_ID_SUFFIX;
+
+            //For the grade, the entry is part of the the "value=" statement.
+            //The insertion point is right before the closing ">" of the
+            //"input" HTML tag.
+            Integer gradeLoc = htmlReport.indexOf(gradeID);
+            gradeLoc = htmlReport.indexOf(">", gradeLoc);
+            htmlReport = htmlReport.substring(0,gradeLoc) + assignment.grade + htmlReport.substring(gradeLoc);
+
+            //For the comment, the entry is part of a textarea.
+            //The insertion point is right after the closing ">" of the
+            //"textarea" HTML tag.  We add 1 to the location of the commentID.
+            Integer commentLoc = htmlReport.indexOf(commentID);
+            commentLoc = htmlReport.indexOf(">", commentLoc);
+            htmlReport = htmlReport.substring(0,commentLoc+1) + assignment.instructorComment + htmlReport.substring(commentLoc+1);
+        }
+
+        return htmlReport;
+    }
+
+
+    /* ======================================================================
      * generateSummaryFromDocument()
      * Given an HTML document created by a previous invokation of
      * generateDocument(), this function replaces the internal document

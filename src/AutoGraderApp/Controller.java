@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -17,7 +18,9 @@ import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -42,6 +45,8 @@ public class Controller implements IAGConstant {
     public MenuItem menuFileSave;
     public MenuItem menuFileSaveAs;
     public MenuItem menuFileExportHtml;
+    public MenuItem menuHelpHelp;
+    public MenuItem menuHelpAbout;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -337,6 +342,9 @@ public class Controller implements IAGConstant {
         //if the user cancels, do nothing
         if (f == null) return;
 
+        //set the moodle directory to whatever the directory of the opened file is
+        AutoGraderApp.autoGrader.getAgDocument().moodleDirectory = f.getParentFile();
+
         // Deserialization
         try {
             AutoGraderApp.autoGrader.deSerializeFromDisk(f.getAbsolutePath());
@@ -400,6 +408,13 @@ public class Controller implements IAGConstant {
                     new FileChooser.ExtensionFilter("AutoGrader 2 file (*.ag2)", "*.ag2");
             fileChooser.getExtensionFilters().add(extFilter);
 
+            String baseDirectory = AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getParent();
+            fileChooser.setInitialDirectory(new File(baseDirectory));
+            fileChooser.setInitialFileName(AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getName());
+            //String baseFileName = new File(documentFileName).getName();
+            //baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
+            //fileChooser.setInitialFileName(baseFileName);
+
             fileChooser.setTitle("Save Assignment");
             File f = fileChooser.showSaveDialog(stage);
 
@@ -413,7 +428,7 @@ public class Controller implements IAGConstant {
         }
 
         //update the grading engine's assignment with the entries from the web view.
-        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+        for (Assignment assignment : AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments) {
             xferGradesFromWebViewToAssignmentObject(assignment);
         }
 
@@ -468,11 +483,53 @@ public class Controller implements IAGConstant {
      * Callback for File->Export HTML
      * ===================================================================== */
     public void menuFileExportHtml() {
-        //update the grading engine's assignment with the entries from the web view.
-        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
-            xferGradesFromWebViewToAssignmentObject(assignment);
+        //get the app's stage
+        Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+        message("Export HTML...");
+
+        FileChooser fileChooser = new FileChooser();
+
+        // create an extension filter
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("AutoGrader 2 file (*.htm, html)", "*.html", "*.htm");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        String baseDirectory = AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getParent();
+        fileChooser.setInitialDirectory(new File(baseDirectory));
+        fileChooser.setInitialFileName(AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getName());
+
+        /*
+        fileChooser.setInitialDirectory(new File(documentFileName).getParentFile());
+        String baseFileName = new File(documentFileName).getName();
+        baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf('.'));
+        fileChooser.setInitialFileName(baseFileName);
+        */
+
+        fileChooser.setTitle("Export HTML");
+        File f = fileChooser.showSaveDialog(stage);
+
+        //if the user cancels, do nothing
+        if (f == null) {
+            message("Export HTML Canceled.");
+            return;
         }
 
+
+        //update the grading engine's assignment with the entries from the web view.
+        for (Assignment assignment : AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments) {
+            xferGradesFromWebViewToAssignmentObject(assignment);
+        }
+        String annotatedReport = ReportGenerator.generateAnnotatedReport(AutoGraderApp.autoGrader.getAgDocument());
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
+            bw.write(annotatedReport);
+            bw.close();
+            console("Writing file %s.", f.getAbsolutePath());
+        } catch (IOException e) {
+            console(e.toString());
+        }
+
+        message("HTML Exported.");
     }
 
     /* ======================================================================
@@ -488,6 +545,30 @@ public class Controller implements IAGConstant {
         stage.close();
 
     }
+
+    /* ======================================================================
+     * menuHelpHelp()
+     * ===================================================================== */
+    public void menuHelpHelp() {
+        //point the web engine to the html help text
+        wvOutput.getEngine().loadContent(AutoGraderApp.HelpHtml);
+        tabMain.getSelectionModel().select(IAGConstant.OUTPUT_TAB);
+        //----------  ----------
+    }
+
+
+    /* ======================================================================
+     * menuHelpAbout()
+     * ===================================================================== */
+    public void menuHelpAbout() {
+        //----------  ----------
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(AutoGraderApp.appName);
+        alert.setHeaderText(AutoGraderApp.appName);
+        alert.setContentText("Version " + AutoGraderApp.version + "\n" + AutoGraderApp.copyrightText);
+        alert.showAndWait();
+    }
+
 
     /* ======================================================================
      * menuSettingsConfig()
@@ -744,7 +825,7 @@ public class Controller implements IAGConstant {
              * document.  The summary report must then be re-generated. */
 
             //update the grading engine's assignment with the entries from the web view.
-            for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+            for (Assignment assignment : AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments) {
                 xferGradesFromWebViewToAssignmentObject(assignment);
             }
 
@@ -802,6 +883,71 @@ public class Controller implements IAGConstant {
      * detected.  The function then populates the primaryAssignmentFile
      * member of the Assignment object accordingly.
      * ===================================================================== */
+    // Set the button types.
+    private void selectMainPythonFile(Assignment assignment) {
+        //create a list of choices that
+        List<String> choices = new ArrayList<>();;
+
+        for (File f : assignment.assignmentFiles) {
+            choices.add(f.getName());
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+
+        dialog.setTitle(assignment.studentName);
+        dialog.setHeaderText("More than one python source was found with "
+                + assignment.studentName
+                + "'s submission.\nPlease select the name of the top level python file from the list below.\n"
+                + "Select [Cancel] to skip this submission (not graded).");
+        dialog.setContentText("Primary source:");
+
+        ButtonType UseSelected = new ButtonType("Applies For This Submission Only", ButtonBar.ButtonData.OK_DONE);
+        ButtonType UseForAllButtonType = new ButtonType("Applies For All Submissions", ButtonBar.ButtonData.OK_DONE);
+        ButtonType SkipSubmission = new ButtonType("Do Not Grade This Submission", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().remove(0);      //remove OK button
+        dialog.getDialogPane().getButtonTypes().remove(0);      //remove Cancel button
+        dialog.getDialogPane().getButtonTypes().add( 0, UseSelected );
+        dialog.getDialogPane().getButtonTypes().add(1, SkipSubmission);
+        dialog.getDialogPane().getButtonTypes().add( 1, UseForAllButtonType );
+
+        /**/
+        case needed here
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == UseSelected) {
+                return "UseSelected";
+            }
+            if (dialogButton == UseForAllButtonType) {
+                return "UseForAllButtonType";
+            }
+
+            return "SkipSubmission";
+        });
+
+        String result = dialog.showAndWait().get();
+comment needed
+        if (!result.equals("SkipSubmission")) {
+            for (File f : assignment.assignmentFiles) {
+                if (dialog.getSelectedItem().equals(f.getName())) {
+                    console(f.getAbsolutePath());
+                    assignment.primaryAssignmentFile = f;
+                    console("*******" + f.getAbsolutePath());
+                    break;
+                }
+            }
+            //now check if we should add this choice to the pythonTopLevelFilename list
+            if (result.equals("UseForAllButtonType")) {
+                //user has elected to apply to all
+                console("Apply to all!");
+            }
+        }
+        else
+        {
+            //user hit cancel
+            assignment.primaryAssignmentFile = null;
+            System.out.println("no choice");
+        }
+    }
+    /*
     private void selectMainPythonFile(Assignment assignment) {
         //create a list of choices that
         List<String> choices = new ArrayList<>();;
@@ -836,7 +982,7 @@ public class Controller implements IAGConstant {
             System.out.println("no choice");
         }
     }
-
+*/
     /* ======================================================================
      * populateStudentNameChoiceBox()
      * populates the cbName choice box on the output tab using the
@@ -845,7 +991,7 @@ public class Controller implements IAGConstant {
     public void populateStudentNameChoiceBox() {
 
         try {
-            GradingEngine gradingEngine = AutoGraderApp.autoGrader.getGradingEngine();
+            GradingEngine gradingEngine = AutoGraderApp.autoGrader.getAgDocument().gradingEngine;
 
             //---------- Initialize the student name choice box ----------
             // This ChoiceBox appears on the output tab and contains student names.
@@ -878,7 +1024,7 @@ public class Controller implements IAGConstant {
         // Create aliases for the autoGrader and gradingEngine members of
         // AutoGraderApp.  These are used extensively below.
         AutoGrader2 autoGrader = AutoGraderApp.autoGrader;
-        GradingEngine gradingEngine = autoGrader.getGradingEngine();
+        GradingEngine gradingEngine = autoGrader.getAgDocument().gradingEngine;
 
         //---------- null the documentFileName ----------
         /* setting documentFileName to null tells us that the document has not
@@ -891,7 +1037,8 @@ public class Controller implements IAGConstant {
 
         // The pre-processor extracts assignment files and student names
         // from the downloaded and uncompressed Moodle submissions download.
-        MoodlePreprocessor mpp = new MoodlePreprocessor(txtSourceDirectory.getText(),
+        autoGrader.getAgDocument().moodleDirectory = new File (txtSourceDirectory.getText());
+        MoodlePreprocessor mpp = new MoodlePreprocessor(autoGrader.getAgDocument().moodleDirectory.getAbsolutePath(),
                 autoGrader.getConfiguration(AG_CONFIG.LANGUAGE),
                 autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
@@ -927,8 +1074,7 @@ public class Controller implements IAGConstant {
         gradingEngine.setCppCompiler(autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER));
         gradingEngine.setPython3Interpreter(autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         gradingEngine.setShellInterpreter(autoGrader.getConfiguration(AG_CONFIG.SHELL));
-        gradingEngine.setTempOutputDirectory(txtSourceDirectory.getText());
-        //gradingEngine.setOutputFileName(txtSourceDirectory.getText() + ".html");
+        gradingEngine.setTempOutputDirectory(autoGrader.getAgDocument().moodleDirectory.getAbsolutePath());
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
@@ -947,7 +1093,7 @@ public class Controller implements IAGConstant {
         }
 
         //---------- indicate the current hmtlReport is invalid ----------
-        AutoGraderApp.autoGrader.setHtmlReport(null);
+        AutoGraderApp.autoGrader.getAgDocument().htmlReport = null;
 
         //disable the 'Start' button
         btnStart.setDisable(true);
@@ -1016,36 +1162,34 @@ public class Controller implements IAGConstant {
         /* if we are loading from file, getHtmlReport will return a non-null
         * value.  If we are processing new data, we will need to generate
         * a report.  getHmtlReport() will be null.*/
-        if (AutoGraderApp.autoGrader.getHtmlReport() == null) {
+        if (AutoGraderApp.autoGrader.getAgDocument().htmlReport == null) {
             reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
-                    txtSourceDirectory.getText(),       //header text
-                    AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getAbsolutePath(),       //header text
+                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments);   //assignments
 
             //we are processing new data so we need to generate a new report
             reportGenerator.generateReport();
-            AutoGraderApp.autoGrader.setHtmlReport(reportGenerator.getDocument());
+            AutoGraderApp.autoGrader.getAgDocument().htmlReport = reportGenerator.getDocument();
         } else {
             reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                     "",       //header text
-                    AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments);   //assignments
 
             //Here, we are uploading an existing report.  We do not call reportGenerator.generateReport()
             //Doing so would likely cause an error as file references are likely invalid.
-            AutoGraderApp.autoGrader.setHtmlReport(AutoGraderApp.autoGrader.getHtmlReport());
+
         }
 
 
         //point the web engine to the generated html report
-        wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.getHtmlReport());
+        wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.getAgDocument().htmlReport);
 
         //switch to the output tab
         btnOutputClick();
 
 
         //dump the assignments to the console  ************ TEMP **************
-        AutoGraderApp.autoGrader.getGradingEngine().dumpAssignments();
-
-        //reportGenerator.writeReportToFile(txtSourceDirectory.getText() + ".html");
+        AutoGraderApp.autoGrader.getAgDocument().gradingEngine.dumpAssignments();
 
     }
 
@@ -1115,7 +1259,7 @@ public class Controller implements IAGConstant {
     private void xferAGDocumentToWebView() {
 
         //update the grading engine's assignment with the entries from the web view.
-        for (Assignment assignment : AutoGraderApp.autoGrader.getGradingEngine().assignments) {
+        for (Assignment assignment : AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments) {
             xferGradesFromAssignmentObjectToWebView(assignment);
         }
     }
@@ -1139,7 +1283,7 @@ public class Controller implements IAGConstant {
         @Override
         public void handle(ActionEvent event) {
             //create a ProcessingStatus object to monitor the status of the grading processor
-            ProcessingStatus ps = AutoGraderApp.autoGrader.getGradingEngine().getProcessingStatus();
+            ProcessingStatus ps = AutoGraderApp.autoGrader.getAgDocument().gradingEngine.getProcessingStatus();
 
             /* we will keep running so long as the grading engine is still
             * processing. This is indicated by the bRunning member of the
@@ -1172,14 +1316,7 @@ public class Controller implements IAGConstant {
 
                 //re-enable the 'Start' button
                 btnStart.setDisable(false);
-/*
-                reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
-                        txtSourceDirectory.getText(),       //header text
-                        AutoGraderApp.autoGrader.getGradingEngine().assignments);   //assignments
 
-                reportGenerator.generateReport();
-                AutoGraderApp.autoGrader.sethtmlReport(reportGenerator.getDocument());
-*/
                 //---------- Initialize the student name choice box ----------
                 // This ChoiceBox appears on the output tab and contains student names.
                 // Along with the "Prev" and "Next" buttons, t is used to navigate
