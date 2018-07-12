@@ -65,21 +65,10 @@ public class AutoGraderApp extends Application implements IAGConstant {
         console("Exiting main()...");
     }
 
-    /*
-    public static final String AboutHtml = "<!DOCTYPE html PUBLIC \\\"-//W3C//DTD HTML 4.01//EN\\\" \\\"http://www.w3.org/TR/html4/strict.dtd\\\">\n" +
-            "<html><head><meta content=\\\"text/html; charset=ISO-8859-1\\\" http-equiv=\\\"content-type\\\"><title>About AutoGrader 2</title></head><body>\n" +
-            "<div style=\\\"text-align: center;\\\"><big style=\\\"color: rgb(51, 51, 255);\\\">Spelman AutoGrader 2</big><br>\n" +
-            "<br>\n" +
-            "<span style=\\\"font-weight: bold;\\\">Version 2.0</span><br>\n" +
-            "<small>copyright 2016 - 2018</small><br>\n" +
-            "<small>J Volcy</small><br>\n" +
-            "</div>\n" +
-            "<br>\n" +
-            "<br>\n" +
-            "\n" +
-            "\n" +
-            "</body></html>";
-    */
+
+    /* ======================================================================
+     * Help HTML string
+     * ===================================================================== */
     public static final String HelpHtml = "<!DOCTYPE html PUBLIC \\\"-//W3C//DTD HTML 4.01//EN\\\" \\\"http://www.w3.org/TR/html4/strict.dtd\\\">\n" +
             "<html><head><meta content=\\\"text/html; charset=ISO-8859-1\\\" http-equiv=\\\"content-type\\\"><title>AutoGrader 2.0 Help</title></head><body>\n" +
             "<div style=\\\"text-align: center; color: rgb(51, 51, 255);\\\"><big style=\\\"font-weight: bold;\\\">Spelman AutoGrader 2.0</big><br>\n" +
@@ -139,14 +128,12 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "</body></html>";
 }
 
+
+
 /* ======================================================================
  * To Do
- * C++ support
- * #1 Need to set the CWD on the Java grading thread
- * #2 Add document to serialized output
  * JSON configuration
  * AG directives (add appropriate entries to Assignment class prior to release)
- * For multiple python files, AG should remember the name of the main python file from submission to submission.  AG should assume that the top level python file is named main.py
  * ===================================================================== */
 
 

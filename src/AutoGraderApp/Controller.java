@@ -4,7 +4,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -18,14 +17,10 @@ import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.Duration;
-import javafx.util.Pair;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 /* ======================================================================
@@ -89,6 +84,12 @@ public class Controller implements IAGConstant {
     private ReportGenerator reportGenerator;
     private String documentFileName;
     private boolean bShowingSummary;
+    private ArrayList<String> primaryPythonFiles;
+
+    /* the bConfigMayHaveChanged is a boolean that is set to true whenever we
+    * visit the config tab.  It is used to save the configuration when a tab
+    * other than the config tab is selected. */
+    private Boolean bConfigMayHaveChanged;
 
     /* ======================================================================
      * initialize()
@@ -179,7 +180,9 @@ public class Controller implements IAGConstant {
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
         listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
 
-        //set the main tab to the input/setup tab by invoking the btnInputSetupClick callback
+        //set the main tab to the input/setup tab by invoking the btnInputSetupClick callback.
+        //then, set the bConfigMayHaveChanged flag.
+        bConfigMayHaveChanged = false;
         btnInputSetupClick();
 
         //disable the Output button
@@ -225,7 +228,7 @@ public class Controller implements IAGConstant {
      * unselected
      * ===================================================================== */
     public void configChanged() {
-        //if (tabMain.getSelectionModel().isSelected(IAGConstant.CONFIGURATION_TAB)) return;
+
         try {
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
@@ -242,6 +245,7 @@ public class Controller implements IAGConstant {
             console("", e.toString());
         }
     }
+
 
     /* ======================================================================
      * console()
@@ -590,7 +594,7 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
-
+        bConfigMayHaveChanged = true;
     }
 
     /* ======================================================================
@@ -604,6 +608,10 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("blue"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
+        if (bConfigMayHaveChanged) {
+            bConfigMayHaveChanged = false;
+            AutoGraderApp.autoGrader.saveConfiguration();
+        }
     }
 
     /* ======================================================================
@@ -617,6 +625,10 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
         btnConsole.setTextFill(Paint.valueOf("black"));
+        if (bConfigMayHaveChanged) {
+            bConfigMayHaveChanged = false;
+            AutoGraderApp.autoGrader.saveConfiguration();
+        }
         //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
     }
 
@@ -629,6 +641,10 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("blue"));
+        if (bConfigMayHaveChanged) {
+            bConfigMayHaveChanged = false;
+            AutoGraderApp.autoGrader.saveConfiguration();
+        }
     }
 
     /* ======================================================================
@@ -836,16 +852,6 @@ public class Controller implements IAGConstant {
             bShowingSummary = true;
         }
 
-        /* whether switching from report to summary or vice-versa, we need
-         * update the scroll position on the display based on the student
-         * name choice box. */
-
-
-        /* Not clear why the call to cbNameClick() does not cause the window
-         * to scroll to the selected name.  Instead, simply set cbName to
-         * the first item to match the state of the window. */
-        //cbNameClick();
-        //cbName.getSelectionModel().selectFirst();
 
         /* whether switching from report to summary or vice-versa, we need
          * update the scroll position on the display based on the student
@@ -881,19 +887,41 @@ public class Controller implements IAGConstant {
      * This function creates a dialog box that permits the user to
      * select the top-level python script when multiple python files are
      * detected.  The function then populates the primaryAssignmentFile
-     * member of the Assignment object accordingly.
+     * member of the Assignment object accordingly.  It also allows the
+     * user to store her choice for use with future submissions.
      * ===================================================================== */
     // Set the button types.
     private void selectMainPythonFile(Assignment assignment) {
-        //create a list of choices that
+
+        /*First, check to see if any of the files match a name on the
+        * primaryPythonFiles name list.  If it does, use it and quit.*/
+        for (File f : assignment.assignmentFiles) {     //go through every file in the assignment
+            //compare the select filename with each filename in assignment
+            if (primaryPythonFiles.equals(f.getName())) {
+                //if we have a match, we are done: store it in
+                // primaryAssignment?File and quit the loop
+                assignment.primaryAssignmentFile = f;
+                console("Primary file is" + f.getAbsolutePath());
+                return;
+            }
+        }
+
+
+        /* create a list of choices that will hold the names of the multiple
+        * python files. */
         List<String> choices = new ArrayList<>();;
 
+        // add the names of each file to the list
         for (File f : assignment.assignmentFiles) {
             choices.add(f.getName());
         }
 
+        /* Create a standard ChoiceDialog object.  We will customize this
+        * dialog box by replacing its two 'Ok' and 'Cancel' buttons with
+        * custom buttons. */
         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
 
+        /* Setup the different messaging texts for the dialog box. */
         dialog.setTitle(assignment.studentName);
         dialog.setHeaderText("More than one python source was found with "
                 + assignment.studentName
@@ -901,88 +929,87 @@ public class Controller implements IAGConstant {
                 + "Select [Cancel] to skip this submission (not graded).");
         dialog.setContentText("Primary source:");
 
+        /* The dialog box will offer the user 3 options when multiple python files are
+        * are found.  First, the user may simply ignore the problem, in which case the
+        * submission is not graded.  Second, the user can select among the different
+        * files which is the primary.  Third, the user can select the primary and specify
+        * that the file identified as primary will be the same for future submissions.
+        * Here, we create 3 custom buttons corresponding to these 3 choices. */
         ButtonType UseSelected = new ButtonType("Applies For This Submission Only", ButtonBar.ButtonData.OK_DONE);
         ButtonType UseForAllButtonType = new ButtonType("Applies For All Submissions", ButtonBar.ButtonData.OK_DONE);
         ButtonType SkipSubmission = new ButtonType("Do Not Grade This Submission", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().remove(0);      //remove OK button
-        dialog.getDialogPane().getButtonTypes().remove(0);      //remove Cancel button
-        dialog.getDialogPane().getButtonTypes().add( 0, UseSelected );
-        dialog.getDialogPane().getButtonTypes().add(1, SkipSubmission);
-        dialog.getDialogPane().getButtonTypes().add( 1, UseForAllButtonType );
 
-        /**/
-        case needed here
+        //remove ok and cancel buttons
+        dialog.getDialogPane().getButtonTypes().removeAll(ButtonType.OK); //remove OK button
+        dialog.getDialogPane().getButtonTypes().removeAll(ButtonType.CANCEL); //remove Cancel button
+
+        //add our 3 custom buttons
+        dialog.getDialogPane().getButtonTypes().add(SkipSubmission);
+        dialog.getDialogPane().getButtonTypes().add(UseSelected );
+        dialog.getDialogPane().getButtonTypes().add(UseForAllButtonType );
+
+        /* Rather than returning the selected item from the choice list, we want to
+        * return the button the user selected. */
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == UseSelected) {
+                //user selected "use selected file only for current submission"
                 return "UseSelected";
             }
+
             if (dialogButton == UseForAllButtonType) {
+                //user selected "use for all future submission"
                 return "UseForAllButtonType";
             }
 
+            //user opted to not grade the assignment
             return "SkipSubmission";
         });
 
+        /* present the dialog box and wait for the user's choice
+        * which will be a String assigned to result. */
         String result = dialog.showAndWait().get();
-comment needed
-        if (!result.equals("SkipSubmission")) {
-            for (File f : assignment.assignmentFiles) {
+
+        /* We have to consider all 3 possible outcomes: User canceled,
+        * user selected "for this assignment only" or user selected
+        * "use for all assignments". */
+        if (result.equals("SkipSubmission")) {
+            //user opted to skip the assignment.  Indicate that there
+            //is no primary assignment file for this submission.
+            //The submission cannot be graded.
+            assignment.primaryAssignmentFile = null;
+            console("Skipping submission for " + assignment.studentName + ".");
+        }
+        else {
+            /* Here, the user did NOT opt to skip the assignment.  Either
+            * the primary python file was selected for the current submission
+            * for for the current and all future submissions.
+            * The drop-down list box on the choice dialog contains only
+            * the file name of the python files, not the full path name.
+            * We need to assign the full path name to the primaryAssignmentFile
+            * member of 'assignment'.  We search every filename for a match,
+            * then store the corresponding full pathname. */
+            for (File f : assignment.assignmentFiles) {     //go through every file in the assignment
+                //compare the select filename with each filename in assignment
                 if (dialog.getSelectedItem().equals(f.getName())) {
-                    console(f.getAbsolutePath());
+                    //if we have a match, we are done: store it in
+                    // primaryAssignment?File and quit the loop
                     assignment.primaryAssignmentFile = f;
-                    console("*******" + f.getAbsolutePath());
+                    console("Primary file is" + f.getAbsolutePath());
                     break;
                 }
             }
+
             //now check if we should add this choice to the pythonTopLevelFilename list
             if (result.equals("UseForAllButtonType")) {
-                //user has elected to apply to all
+                //user has elected to apply to all: add the selection to the
+                //primaryPythonFiles name list
+                primaryPythonFiles.add(dialog.getSelectedItem());
                 console("Apply to all!");
             }
         }
-        else
-        {
-            //user hit cancel
-            assignment.primaryAssignmentFile = null;
-            System.out.println("no choice");
-        }
+
     }
-    /*
-    private void selectMainPythonFile(Assignment assignment) {
-        //create a list of choices that
-        List<String> choices = new ArrayList<>();;
 
-        for (File f : assignment.assignmentFiles) {
-            choices.add(f.getName());
-        }
-
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
-
-        dialog.setTitle(assignment.studentName);
-        dialog.setHeaderText("More than one python source was found with "
-                + assignment.studentName
-                + "'s submission.\nPlease select the top level python file from the list.\n"
-                + "Select [Cancel] to skip this submission (not graded).");
-        dialog.setContentText("Primary source:");
-
-        Optional<String> result = dialog.showAndWait();
-
-        if (result.isPresent()) {
-            for (File f : assignment.assignmentFiles) {
-                if (result.get().equals(f.getName())) {
-                    console(f.getAbsolutePath());
-                    assignment.primaryAssignmentFile = f;
-                    return;
-                }
-            }
-        }
-        else
-        {
-            assignment.primaryAssignmentFile = null;
-            System.out.println("no choice");
-        }
-    }
-*/
     /* ======================================================================
      * populateStudentNameChoiceBox()
      * populates the cbName choice box on the output tab using the
@@ -1031,6 +1058,10 @@ comment needed
         * been saved (has not been named).  This will also determine the
         * enable/disable status of the "Save As" menu option. */
         setDocumentFileName(null);
+
+        //---------- Reset the primaryPythonFile list to the default value ----------
+        primaryPythonFiles = new ArrayList<>();
+        primaryPythonFiles.add(IAGConstant.DEFAULT_MAIN_PYTHON_FILE);   //"main.py"
 
         //---------- Invoke the Moodle file pre-processor ----------
         message("Pre-processing Moodle files...");

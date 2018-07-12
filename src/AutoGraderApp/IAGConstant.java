@@ -52,6 +52,7 @@ public interface IAGConstant {
 
     //---------- Misc Constants ----------
     public final String CONFIG_FILENAME = "ag2Config.json";
+    public final String DEFAULT_MAIN_PYTHON_FILE = "main.py";
 }
 
 

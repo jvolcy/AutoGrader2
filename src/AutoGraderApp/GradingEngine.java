@@ -605,6 +605,9 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         if (assignment.language.equals(IAGConstant.LANGUAGE_PYTHON3))
             if (python3Interpreter == null || python3Interpreter == "")
                 assignment.compilerErrors = "No Python interpreter found.";
+            else if (assignment.primaryAssignmentFile == null || assignment.primaryAssignmentFile.equals("")) {
+                assignment.compilerErrors = "Submission not graded.";
+            }
             else
                 pythonSubProcess(assignment, numTests, bNoTestFiles);
         else if (assignment.language.equals(IAGConstant.LANGUAGE_CPP))
