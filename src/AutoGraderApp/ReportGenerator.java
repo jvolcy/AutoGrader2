@@ -84,6 +84,7 @@ public class ReportGenerator implements IAGConstant {
             insertGradingBoxes(assignment);
         }
         reportClosingInfo(assignments);
+        closeHtmlHeader();
     }
 
     /* ======================================================================
@@ -224,6 +225,8 @@ public class ReportGenerator implements IAGConstant {
 
     /* ======================================================================
      * makeHtmlHeader()
+     * use the closeHtmlHeader() in conjuction with this function to properly
+     * close tabs opened in the header.
      * ===================================================================== */
     private void makeHtmlHeader() {
         //create the html header in the output file
@@ -242,11 +245,22 @@ public class ReportGenerator implements IAGConstant {
                 "</head>",
                 "",
                 "<body style=\"background: white; font-family: Helvetica\">",
-                //"<form encrypt=\"multipart/form-data\" action=\"\" method=\"POST\">",
+                "<form encrypt=\"multipart/form-data\" action=\"\" method=\"POST\">",
                 "<h2>" + fileNameFromPathName(headerText) + "</h2>"
         );
 
     }
+
+    /* ======================================================================
+     * closeHtmlHeader()
+     * use this function to close out tabs opened by a previous call to
+     * makeHtmlHeader()
+     * ===================================================================== */
+    private void closeHtmlHeader() {
+        document += "</form></body></html>";
+
+    }
+
 
     /* ======================================================================
      * reportFileAnalytics()
@@ -458,7 +472,7 @@ public class ReportGenerator implements IAGConstant {
                 + " project(s) processed. ****</b><br><font face=\"verdana\">"
                 + "Report Generator: AutoGrader v" + AutoGraderApp.version  + "<br>"
                 + "C++ Compiler: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) + "<br>"
-                + "Python Interpreter: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "<br>");
+                + "Python Interpreter: " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) + "<br></font>");
     }
 
 
