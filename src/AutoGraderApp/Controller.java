@@ -129,15 +129,42 @@ public class Controller implements IAGConstant {
         else
             choiceBoxConfigLanguage.setValue(LANGUAGE_AUTO);
 
+        //add a listener to choiceBoxConfigLanguage to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        choiceBoxConfigLanguage.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [a]...");
+            }
+        });
+
         //---------- set the "max run time" value ----------
         spinnerMaxRunTime.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME) != null)
             spinnerMaxRunTime.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
+        //add a listener to spinnerMaxRunTime to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        spinnerMaxRunTime.valueProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [b]...");
+            }
+        });
+
         //---------- set the "max output lines" value ----------
         spinnerMaxLines.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0));
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES) != null)
             spinnerMaxLines.getValueFactory().setValue(Integer.valueOf(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
+
+        //add a listener to spinnerMaxLines to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        spinnerMaxLines.valueProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [c]...");
+            }
+        });
 
         //---------- set the "include source" value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.INCLUDE_SOURCE) != null)
@@ -145,11 +172,29 @@ public class Controller implements IAGConstant {
         else
             choiceBoxConfigIncludeSource.setValue(YES);
 
+        //add a listener to choiceBoxConfigIncludeSource to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        choiceBoxConfigIncludeSource.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [d]...");
+            }
+        });
+
         //---------- set the "auto uncompress" value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS) != null)
             choiceBoxConfigAutoUncompress.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS));
         else
             choiceBoxConfigAutoUncompress.setValue(YES);
+
+        //add a listener to choiceBoxConfigAutoUncompress to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        choiceBoxConfigAutoUncompress.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [e]...");
+            }
+        });
 
         //---------- set the "recursive process" value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PROCESS_RECURSIVELY) != null)
@@ -157,11 +202,30 @@ public class Controller implements IAGConstant {
         else
             choiceBoxConfigRecursive.setValue(YES);
 
+        //add a listener to choiceBoxConfigRecursive to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        choiceBoxConfigRecursive.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [f]...");
+            }
+        });
+
+
         //---------- set the python3 interpreter path value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER) != null)
             txtPython3Interpreter.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.PYTHON3_INTERPRETER));
         else
             txtPython3Interpreter.setText("");
+
+        //add a listener to txtPython3Interpreter to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtPython3Interpreter.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [g]...");
+            }
+        });
 
         //---------- set the c++ compiler path value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.CPP_COMPILER) != null)
@@ -169,11 +233,29 @@ public class Controller implements IAGConstant {
         else
             txtCppCompiler.setText("");
 
+        //add a listener to txtCppCompiler to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtCppCompiler.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                //console("Config may have changed [h]...");
+                bConfigMayHaveChanged = true;
+            }
+        });
+
         //---------- set the shell interpreter path value ----------
         if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.SHELL) != null)
             txtShell.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.SHELL));
         else
             txtShell.setText("");
+
+        //add a listener to txtShell to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtShell.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
 
         //---------- configure the "Test Data" list view to allow multiple selections ----------
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -241,6 +323,7 @@ public class Controller implements IAGConstant {
             AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
             lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+            bConfigMayHaveChanged = false;
         } catch (Exception e) {
             console("", e.toString());
         }
@@ -594,7 +677,6 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
-        bConfigMayHaveChanged = true;
     }
 
     /* ======================================================================
@@ -609,7 +691,7 @@ public class Controller implements IAGConstant {
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
         if (bConfigMayHaveChanged) {
-            bConfigMayHaveChanged = false;
+            configChanged();
             AutoGraderApp.autoGrader.saveConfiguration();
         }
     }
@@ -626,7 +708,7 @@ public class Controller implements IAGConstant {
         btnOutput.setTextFill(Paint.valueOf("blue"));
         btnConsole.setTextFill(Paint.valueOf("black"));
         if (bConfigMayHaveChanged) {
-            bConfigMayHaveChanged = false;
+            configChanged();
             AutoGraderApp.autoGrader.saveConfiguration();
         }
         //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
@@ -642,7 +724,7 @@ public class Controller implements IAGConstant {
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("blue"));
         if (bConfigMayHaveChanged) {
-            bConfigMayHaveChanged = false;
+            configChanged();
             AutoGraderApp.autoGrader.saveConfiguration();
         }
     }
