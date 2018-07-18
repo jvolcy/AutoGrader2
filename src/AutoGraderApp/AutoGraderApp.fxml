@@ -88,7 +88,7 @@
                     </children></HBox>
                 <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
                     <tabs>
-                        <Tab text="0. Configure">
+                        <Tab onSelectionChanged="#configChanged" text="0. Configure">
                             <content>
                                 <ScrollPane fitToHeight="true" fitToWidth="true">
                                     <content>

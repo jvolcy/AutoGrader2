@@ -89,7 +89,7 @@ public class Controller implements IAGConstant {
     /* the bConfigMayHaveChanged is a boolean that is set to true whenever we
     * visit the config tab.  It is used to save the configuration when a tab
     * other than the config tab is selected. */
-    private Boolean bConfigMayHaveChanged;
+    private Boolean bConfigMayHaveChanged = false;
 
     /* ======================================================================
      * initialize()
@@ -308,27 +308,33 @@ public class Controller implements IAGConstant {
      * configChanged()
      * function called whenever the configuration tab is selected or
      * unselected
+     * The boolean bConfigMayHaveChanged is set to true whenever one of the
+     * configuration parameters (comobo boxes, text fields, etc.) on the
+     * configuration tab is changed.  This is accomplished using change
+     * listeners on each of the input controls on the configuration tab.
      * ===================================================================== */
     public void configChanged() {
 
-        try {
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_OUTPUT_LINES, spinnerMaxLines.getValue().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.INCLUDE_SOURCE, choiceBoxConfigIncludeSource.getSelectionModel().getSelectedItem().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.AUTO_UNCOMPRESS, choiceBoxConfigAutoUncompress.getSelectionModel().getSelectedItem().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PROCESS_RECURSIVELY, choiceBoxConfigRecursive.getSelectionModel().getSelectedItem().toString());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
-            AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
+        if (bConfigMayHaveChanged) {
+            try {
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.LANGUAGE, choiceBoxConfigLanguage.getSelectionModel().getSelectedItem().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_RUNTIME, spinnerMaxRunTime.getValue().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MAX_OUTPUT_LINES, spinnerMaxLines.getValue().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.INCLUDE_SOURCE, choiceBoxConfigIncludeSource.getSelectionModel().getSelectedItem().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.AUTO_UNCOMPRESS, choiceBoxConfigAutoUncompress.getSelectionModel().getSelectedItem().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PROCESS_RECURSIVELY, choiceBoxConfigRecursive.getSelectionModel().getSelectedItem().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
 
-            lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
-            bConfigMayHaveChanged = false;
-        } catch (Exception e) {
-            console("", e.toString());
+                lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
+                bConfigMayHaveChanged = false;
+                AutoGraderApp.autoGrader.saveConfiguration();
+            } catch (Exception e) {
+                console("", e.toString());
+            }
         }
     }
-
 
     /* ======================================================================
      * console()
@@ -565,7 +571,7 @@ public class Controller implements IAGConstant {
     }
 
 
-        /* ======================================================================
+    /* ======================================================================
      * menuFileExportHtml()
      * Callback for File->Export HTML
      * ===================================================================== */
@@ -690,10 +696,6 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("blue"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
-        if (bConfigMayHaveChanged) {
-            configChanged();
-            AutoGraderApp.autoGrader.saveConfiguration();
-        }
     }
 
     /* ======================================================================
@@ -707,11 +709,6 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
         btnConsole.setTextFill(Paint.valueOf("black"));
-        if (bConfigMayHaveChanged) {
-            configChanged();
-            AutoGraderApp.autoGrader.saveConfiguration();
-        }
-        //wvOutput.getEngine().load("file://" + AutoGraderApp.autoGrader.getGradingEngine().getOutputFileName());
     }
 
     /* ======================================================================
@@ -723,10 +720,6 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("blue"));
-        if (bConfigMayHaveChanged) {
-            configChanged();
-            AutoGraderApp.autoGrader.saveConfiguration();
-        }
     }
 
     /* ======================================================================
