@@ -19,6 +19,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1116,6 +1119,87 @@ public class Controller implements IAGConstant {
         }
     }
 
+
+    /* ======================================================================
+     * readFromFile()
+     * reads the entire content of the specified file and returns it as a
+     * string.
+     * ===================================================================== */
+    private String readFromFile(String filepath) {
+        try {
+            String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
+            return text;
+        } catch (Exception e) {
+            console(e.toString());
+        }
+        return null;
+    }
+
+    /* ======================================================================
+     * writeToFile()
+     * destructively writes a string to specified file
+     * ===================================================================== */
+    private void writeToFile(String fileName, String data) {
+        // writing string to file
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
+            bw.write(data);
+            //bw.close();
+        } catch (IOException e) {
+            console(e.toString());
+        }
+
+    }
+
+    /* ======================================================================
+     * fileNameFromPathName()
+     * extracts the filename given the absolute path
+     * ===================================================================== */
+    private String fileNameFromPathName(String pathName) {
+        //extract the filename from the path name
+        File f = new File(pathName);
+        return f.getName();
+    }
+
+    /* ======================================================================
+     * breakOutTestFiles()
+     * function that returns the list of test files in the listTestData
+     * list box.  If any of the files contain multiple test cases, these
+     * are separated into as many test cases in the supplied output
+     * directory.  Multiple test cases within a single file are separated
+     * by a TEST_CASE_SEPARATOR string.
+     * ===================================================================== */
+    private ArrayList<File> breakOutTestFiles(File outputDirectory) {
+
+        ArrayList<File> testFiles = new ArrayList<>();
+
+        //go through every file in the listTestData list box
+        for (Object s : listTestData.getItems()) {
+            String filename = s.toString();
+
+            //read the content of the test file
+            String content = readFromFile(filename);
+
+            //search for test case separators
+            String [] subCases = content.split(IAGConstant.TEST_CASE_SEPARATOR);
+
+            //if none are found, the length of subCases array will be 1.
+            //In that case, add the test files from the 'ListTestData' to the testFiles list
+            if (subCases.length == 1) {
+                testFiles.add(new File(filename));
+            }
+            else {
+                //create temporary files in the output directory for each sub-case
+                for (int counter=1; counter <= subCases.length; counter++) {
+                    String testDataFileName = outputDirectory.getAbsolutePath() + "/" + fileNameFromPathName(filename) + "-" + counter;
+                    writeToFile(testDataFileName, subCases[counter-1]);
+                    testFiles.add(new File(testDataFileName));
+                    console("creating sub-test case file " + testDataFileName);
+                }
+            }
+        }
+        return testFiles;
+    }
+
     /* ======================================================================
      * btnStart()
      * Callback for 'Start' button on Input/Setup tab
@@ -1184,6 +1268,9 @@ public class Controller implements IAGConstant {
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
+        //---------- break out test files ----------
+        ArrayList<File> testFiles = breakOutTestFiles(autoGrader.getAgDocument().moodleDirectory);
+
         //---------- Add test files to the Assignment objects ----------
         // Here, we add test files from the 'listTestData' ListView.
         for (Assignment assignment : gradingEngine.assignments) {
@@ -1191,12 +1278,19 @@ public class Controller implements IAGConstant {
             //initialize the test files array list
             assignment.testFiles = new ArrayList<>();
 
-            //add the test files from the 'ListTestData' ListView
-            for (Object s : listTestData.getItems()) {
-                assignment.testFiles.add(s.toString());
+            //add the test files to each assignment object
+            for (File f : testFiles) {
+                assignment.testFiles.add(f.getAbsolutePath());
             }
-
         }
+
+        //---------- To Do : clean up break out test files ----------
+        /* we should clean up the break out test files added to the moodle
+        * directory.  For now, these simply remain on disk when we are done.
+        * The easiest way to eliminate these files is to compare the files
+        * in testFiles against the files in the listTestData list box.
+        * Any file not in the listTestData should be deleted. */
+
 
         //---------- indicate the current hmtlReport is invalid ----------
         AutoGraderApp.autoGrader.getAgDocument().htmlReport = null;

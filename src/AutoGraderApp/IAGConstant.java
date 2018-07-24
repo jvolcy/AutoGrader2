@@ -51,6 +51,7 @@ public interface IAGConstant {
     public final String DATA_DIRECTIVE =    "@@Data";
 
     //---------- Misc Constants ----------
+    public final String TEST_CASE_SEPARATOR = "@@";
     public final String CONFIG_FILENAME = "ag2Config.json";
     public final String DEFAULT_MAIN_PYTHON_FILE = "main.py";
 }
