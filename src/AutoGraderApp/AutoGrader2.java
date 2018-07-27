@@ -3,6 +3,7 @@ package AutoGraderApp;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -22,7 +23,9 @@ class AGDocument implements java.io.Serializable {
     public GradingEngine gradingEngine;
     public String htmlReport;
     public File moodleDirectory;
-        }
+    public ArrayList<File> testDataFiles;         //the length of this list is the # of test cases
+
+}
 
 /* ======================================================================
  * AutoGraderApp class

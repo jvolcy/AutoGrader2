@@ -132,8 +132,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
 
 /* ======================================================================
  * To Do
- * JSON configuration
- * AG directives (add appropriate entries to Assignment class prior to release)
+ * Auto version incrementing
  * ===================================================================== */
 
 

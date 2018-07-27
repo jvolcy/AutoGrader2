@@ -23,7 +23,6 @@ public class Assignment implements java.io.Serializable {
     public String compilerErrors;
     public String[] runtimeErrors;     //there are as many entries as we have test cases
     //---------- processing/execution members ----------
-    public ArrayList<String> testFiles;         //the length of this list is the # of test cases
     public String[] progOutputs;     //there are as many entries as we have test cases
     public Double[] executionTimes;      //the # of seconds required to complete execution
     //---------- grading members ----------

@@ -54,6 +54,7 @@ public class ReportGenerator implements IAGConstant {
     private final String LINE_NUMBER_COLOR = "gray";  //color for code line numbers
 
     private ArrayList<Assignment> assignments;
+    private ArrayList<File> testDataFiles;
     private String title;
     private String headerText;
 
@@ -65,10 +66,11 @@ public class ReportGenerator implements IAGConstant {
      * ReportGenerator()
      * ReportGenerator constructor.
      * ===================================================================== */
-    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments) {
+    ReportGenerator(String title, String headerText, ArrayList<Assignment> assignments, ArrayList<File> testDataFiles) {
         this.title = title;
         this.headerText = headerText;
         this.assignments = assignments;
+        this.testDataFiles = testDataFiles;
     }
 
     /* ======================================================================
@@ -380,25 +382,37 @@ public class ReportGenerator implements IAGConstant {
             if (assignment.compilerErrors != null)
                 reportErrorMsg(assignment.compilerErrors);
 
-            for (int i = 0; i < assignment.testFiles.size(); i++) {
-                //add the name of the test file to the document
-                document += "<font face=\"verdana\" color=\" " + HEADER_COLOR2
-                        + "\"><br>\n------------- "
-                        + fileNameFromPathName(assignment.testFiles.get(i))
-                        + " -------------</font>\n";
-
-                //add the corresponding test file output to the document
-                document += "<pre><font face=\"courier\" color=\"" + OUTPUT_COLOR + "\">";
-                if (assignment.progOutputs[i] != null)
-                    document += assignment.progOutputs[i];
-                document += "</font></pre>";
-
+            //if we only have no test files, we still need to report runtime and exec times
+            if (testDataFiles.size() == 0) {
                 //report any runtime error messages here
-                if (assignment.runtimeErrors[i] != null)
-                    reportErrorMsg(assignment.runtimeErrors[i]);
+                if (assignment.runtimeErrors[0] != null)
+                    reportErrorMsg(assignment.runtimeErrors[0]);
 
-                if (assignment.executionTimes[i] != null)
-                    reportExecutionTime(assignment.executionTimes[i]);
+                if (assignment.executionTimes[0] != null)
+                    reportExecutionTime(assignment.executionTimes[0]);
+            }
+            else {
+                //here we have 1 or more test data files to report
+                for (int i = 0; i < testDataFiles.size(); i++) {
+                    //add the name of the test file to the document
+                    document += "<font face=\"verdana\" color=\" " + HEADER_COLOR2
+                            + "\"><br>\n------------- "
+                            + testDataFiles.get(i).getName() /*fileNameFromPathName(assignment.testFiles.get(i))*/
+                            + " -------------</font>\n";
+
+                    //add the corresponding test file output to the document
+                    document += "<pre><font face=\"courier\" color=\"" + OUTPUT_COLOR + "\">";
+                    if (assignment.progOutputs[i] != null)
+                        document += assignment.progOutputs[i];
+                    document += "</font></pre>";
+
+                    //report any runtime error messages here
+                    if (assignment.runtimeErrors[i] != null)
+                        reportErrorMsg(assignment.runtimeErrors[i]);
+
+                    if (assignment.executionTimes[i] != null)
+                        reportExecutionTime(assignment.executionTimes[i]);
+                }
             }
         }
     }

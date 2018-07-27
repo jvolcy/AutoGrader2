@@ -80,7 +80,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
     public ArrayList<File> testDataFiles;
     //private String outputFileName;
     private String tempOutputDirectory;
-    public boolean bIncludeSourceInOutput;
+    private boolean bIncludeSourceInOutput;
     private int maxRunTime;
     private int maxOutputLines;
     private String cppCompiler;
@@ -465,7 +465,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             }
             else {
                 //we have test files: use them to redirect stdin in the exec command
-                String dataFileName = assignment.testFiles.get(i);
+                String dataFileName = testDataFiles.get(i).getAbsolutePath();
                 cmd = "\"" + python3Interpreter + "\" " +
                         "\"" + sourceFile + "\"" + " < \"" + dataFileName + "\"";
             }
@@ -536,7 +536,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             }
             else {
                 //we have test files: use them to redirect stdin in the exec command
-                String dataFileName = assignment.testFiles.get(i);
+                String dataFileName = testDataFiles.get(i).getAbsolutePath();
                 cmd = "\"" + exeFile + "\" " + " < \"" + dataFileName + "\"";
             }
 
@@ -573,7 +573,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         int numTests;
         boolean bNoTestFiles;       //set a flag to denote no test files
 
-        if (assignment.testFiles == null)
+        if (testDataFiles == null)
         {
             //assignment.testFiles is null.  Assume there are no test
             //files.  Set numTests to 1.
@@ -581,7 +581,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             bNoTestFiles = true;
         }
         else {
-            numTests = assignment.testFiles.size();
+            numTests = testDataFiles.size();
 
             if (numTests == 0) {
                 /* while there are no test files, we must set numTests to 1 in order to
@@ -697,13 +697,13 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             }
             console("primaryAssignmentFile = " + assignment.primaryAssignmentFile);
 
-            if (assignment.testFiles != null)           //TEMP*******
-                if (assignment.testFiles.size() == 0) {
+            if (assignment.assignmentFiles != null)           //TEMP*******
+                if (assignment.assignmentFiles.size() == 0) {
                     console("No programming files found.");
                 }
                 else {
-                    for (int i = 0; i < assignment.testFiles.size(); i++) {
-                        console("---> Results for test file %s: ", fileNameFromPathName(assignment.testFiles.get(i)));
+                    for (int i = 0; i < testDataFiles.size(); i++) {
+                        console("---> Results for test file %s: ", testDataFiles.get(i).getName());
                         if (assignment.runtimeErrors != null)
                             console("Compiler/Limit Errors: %s", assignment.runtimeErrors[i]);
 

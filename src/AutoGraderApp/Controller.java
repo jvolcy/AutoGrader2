@@ -1268,28 +1268,9 @@ public class Controller implements IAGConstant {
         gradingEngine.setMaxOutputLines(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_OUTPUT_LINES)));
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
-        //---------- break out test files ----------
-        ArrayList<File> testFiles = breakOutTestFiles(autoGrader.getAgDocument().moodleDirectory);
-
-        //---------- Add test files to the Assignment objects ----------
-        // Here, we add test files from the 'listTestData' ListView.
-        for (Assignment assignment : gradingEngine.assignments) {
-
-            //initialize the test files array list
-            assignment.testFiles = new ArrayList<>();
-
-            //add the test files to each assignment object
-            for (File f : testFiles) {
-                assignment.testFiles.add(f.getAbsolutePath());
-            }
-        }
-
-        //---------- To Do : clean up break out test files ----------
-        /* we should clean up the break out test files added to the moodle
-        * directory.  For now, these simply remain on disk when we are done.
-        * The easiest way to eliminate these files is to compare the files
-        * in testFiles against the files in the listTestData list box.
-        * Any file not in the listTestData should be deleted. */
+        //---------- generate break out test files ----------
+        autoGrader.getAgDocument().testDataFiles = breakOutTestFiles(autoGrader.getAgDocument().moodleDirectory);
+        gradingEngine.testDataFiles = autoGrader.getAgDocument().testDataFiles;
 
 
         //---------- indicate the current hmtlReport is invalid ----------
@@ -1365,7 +1346,8 @@ public class Controller implements IAGConstant {
         if (AutoGraderApp.autoGrader.getAgDocument().htmlReport == null) {
             reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                     AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getAbsolutePath(),       //header text
-                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments);   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments,   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().testDataFiles);    //test data
 
             //we are processing new data so we need to generate a new report
             reportGenerator.generateReport();
@@ -1373,7 +1355,8 @@ public class Controller implements IAGConstant {
         } else {
             reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                     "",       //header text
-                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments);   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments,   //assignments
+                    AutoGraderApp.autoGrader.getAgDocument().testDataFiles);    //test data
 
             //Here, we are uploading an existing report.  We do not call reportGenerator.generateReport()
             //Doing so would likely cause an error as file references are likely invalid.
@@ -1516,6 +1499,15 @@ public class Controller implements IAGConstant {
 
                 //re-enable the 'Start' button
                 btnStart.setDisable(false);
+
+                //---------- To Do : clean up break out test files ----------
+                /* we should clean up the break out test files added to the moodle
+                 * directory.  For now, these simply remain on disk when we are done.
+                 * The easiest way to eliminate these files is to compare the files
+                 * in autoGrader.getAgDocument().testDataFiles against the files
+                 * in the listTestData list box.
+                 * Any file not in the listTestData should be deleted. */
+
 
                 //---------- Initialize the student name choice box ----------
                 // This ChoiceBox appears on the output tab and contains student names.
