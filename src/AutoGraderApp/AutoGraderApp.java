@@ -15,7 +15,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
 
     public static AutoGrader2 autoGrader;
     public static final String appName = "Spelman AutoGrader 2";
-    public static final String version = "2.0";
+    public static final String version = "2.0.1";
     public static final String copyrightText = "copyright 2016-2018";
     public static final String credits = "J Volcy";
 
@@ -38,7 +38,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
         //controller.setGradingEngine(autoGrader.getGradingEngine());
         //controller.setAutoGraderRef(autoGrader);
 
-        primaryStage.setTitle("Spelman AutoGrader 2.0");
+        primaryStage.setTitle("Spelman AutoGrader 2");
         primaryStage.setScene(new Scene(root, MIN_STAGE_WIDTH, MIN_STAGE_HEIGHT));
         primaryStage.setMinWidth(MIN_STAGE_WIDTH);
         primaryStage.setMinHeight(MIN_STAGE_HEIGHT);

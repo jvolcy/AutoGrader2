@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
@@ -76,10 +77,15 @@ public class Controller implements IAGConstant {
     public Button btnPrev;
     public Button btnNext;
     public ChoiceBox cbName;
+    //public HBox hBoxWebViewTopButtons;
+    //public HBox hBoxWebViewBottomButtons;
 
     //---------- Console Tab ----------
     public ListView listConsole;
     private static ListView consolePtr;
+
+    //---------- Help Tab ----------
+    public WebView wvHelp;
 
     //---------- Misc members ----------
     private Alert gradingThreadStatusAlert;     //alert box displayed while processing assignments
@@ -262,8 +268,8 @@ public class Controller implements IAGConstant {
 
         //---------- configure the "Test Data" list view to allow multiple selections ----------
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
-        listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
+        //listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
+        //listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
 
         //set the main tab to the input/setup tab by invoking the btnInputSetupClick callback.
         //then, set the bConfigMayHaveChanged flag.
@@ -277,6 +283,14 @@ public class Controller implements IAGConstant {
         lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
 
         lblMessage.setText("AutoGrader " + AutoGraderApp.version);
+
+        //---------- Initialize web view button visibility ----------
+        //hBoxWebViewTopButtons.setVisible(true);
+        //hBoxWebViewBottomButtons.setVisible(true);
+
+        //point the web engine to the html help text
+        //wvHelp.getEngine().loadContent(AutoGraderApp.HelpHtml);
+        wvHelp.getEngine().load("http://www.google.com");
 
         //************* TEMP **************
         txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
@@ -646,9 +660,12 @@ public class Controller implements IAGConstant {
      * menuHelpHelp()
      * ===================================================================== */
     public void menuHelpHelp() {
-        //point the web engine to the html help text
-        wvOutput.getEngine().loadContent(AutoGraderApp.HelpHtml);
-        tabMain.getSelectionModel().select(IAGConstant.OUTPUT_TAB);
+        btnSettings.setTextFill(Paint.valueOf("black"));
+        btnInputSetup.setTextFill(Paint.valueOf("black"));
+        btnOutput.setTextFill(Paint.valueOf("black"));
+        btnConsole.setTextFill(Paint.valueOf("black"));
+        tabMain.getSelectionModel().select(IAGConstant.HELP_TAB);
+
         //----------  ----------
     }
 
@@ -707,6 +724,9 @@ public class Controller implements IAGConstant {
      * This function sets the main tab to the OUTPUT_TAB.
      * ===================================================================== */
     public void btnOutputClick() {
+        //hBoxWebViewTopButtons.setVisible(true);
+        //hBoxWebViewBottomButtons.setVisible(true);
+
         tabMain.getSelectionModel().select(OUTPUT_TAB);
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
