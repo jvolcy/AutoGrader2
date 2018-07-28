@@ -21,9 +21,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane fx:id="anchorPaneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AutoGraderApp.Controller">
+<AnchorPane fx:id="anchorPaneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="440.0" minWidth="-Infinity" prefHeight="440.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AutoGraderApp.Controller">
     <children>
-        <VBox layoutX="84.0" layoutY="57.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <VBox layoutX="84.0" layoutY="57.0" minHeight="-Infinity" prefHeight="410.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <HBox minHeight="40.0" spacing="4.0" style="-fx-border-style: solid; -fx-border-color: lightgray; -fx-border-width: 1; -fx-background-color: #e8e8f2;">
                     <children>
@@ -251,18 +251,36 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <ListView fx:id="listTestData" editable="true" layoutX="39.0" layoutY="128.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="153.0" prefWidth="515.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
-                              <Button fx:id="btnAdd" layoutX="165.0" layoutY="96.0" mnemonicParsing="false" onAction="#btnAddClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                              <ListView fx:id="listTestData" editable="true" layoutX="134.0" layoutY="128.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="95.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
+                              <Button fx:id="btnAdd" layoutX="39.0" layoutY="143.0" mnemonicParsing="false" onAction="#btnAddClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
                               <Button layoutX="39.0" layoutY="28.0" mnemonicParsing="false" onAction="#btnSourceDirectoryClick" prefHeight="27.0" prefWidth="154.0" text="Source Directory" />
-                              <Button fx:id="btnRemove" layoutX="242.0" layoutY="96.0" mnemonicParsing="false" onAction="#btnTestDataRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
+                              <Button fx:id="btnRemove" layoutX="39.0" layoutY="170.0" mnemonicParsing="false" onAction="#btnTestDataRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
                               <Button fx:id="btnStart" layoutX="454.0" layoutY="67.0" mnemonicParsing="false" onAction="#btnStart" prefHeight="49.0" prefWidth="100.0" text="Start" textFill="#270bdb">
                                  <font>
                                     <Font name="System Bold" size="15.0" />
                                  </font></Button>
                               <TextField fx:id="txtSourceDirectory" layoutX="200.0" layoutY="28.0" onKeyReleased="#txtSourceDirectoryOnKeyReleased" prefHeight="27.0" prefWidth="355.0" />
-                              <Label layoutX="45.0" layoutY="101.0" prefHeight="27.0" prefWidth="91.0" text="Test Data">
+                              <Label layoutX="45.0" layoutY="116.0" prefHeight="27.0" prefWidth="91.0" text="Test Data">
                                  <font>
                                     <Font name="Arial Bold Italic" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="39.0" layoutY="232.0" prefHeight="27.0" prefWidth="91.0" text="Data Files">
+                                 <font>
+                                    <Font name="Arial Bold Italic" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Button fx:id="btnAddDataFiles" layoutX="39.0" layoutY="259.0" mnemonicParsing="false" onAction="#btnAddDataFilesClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                              <Button fx:id="btnRemoveDataFiles" layoutX="39.0" layoutY="286.0" mnemonicParsing="false" onAction="#btnDataFilesRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
+                              <ListView fx:id="listDataFiles" editable="true" layoutX="134.0" layoutY="243.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="72.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
+                              <Label layoutX="139.0" layoutY="315.0" text="Data files are files that may need to be read by the programs under test.">
+                                 <font>
+                                    <Font name="Arial Italic" size="10.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="139.0" layoutY="223.0" text="Test data files substitute for keyboard inputs to the programs under test.">
+                                 <font>
+                                    <Font name="Arial Italic" size="10.0" />
                                  </font>
                               </Label>
                            </children></AnchorPane>

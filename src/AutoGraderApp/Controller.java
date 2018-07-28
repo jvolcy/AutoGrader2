@@ -72,6 +72,10 @@ public class Controller implements IAGConstant {
     public Button btnRemove;
     public TextField txtSourceDirectory;
 
+    public ListView listDataFiles;
+    public Button btnAddDataFiles;
+    public Button btnRemoveDataFiles;
+
     //---------- Output Tab ----------
     public WebView wvOutput;
     public Button btnPrev;
@@ -266,8 +270,9 @@ public class Controller implements IAGConstant {
             }
         });
 
-        //---------- configure the "Test Data" list view to allow multiple selections ----------
+        //---------- configure the "Test Data" and "Data Files" list view to allow multiple selections ----------
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        listDataFiles.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data.txt");  //TEMP******\n");
         //listTestData.getItems().add("/Users/jvolcy/work/Spelman/Projects/data/data2.txt");  //TEMP******\n");
 
@@ -289,13 +294,13 @@ public class Controller implements IAGConstant {
         //hBoxWebViewBottomButtons.setVisible(true);
 
         //point the web engine to the html help text
-        //wvHelp.getEngine().loadContent(AutoGraderApp.HelpHtml);
-        wvHelp.getEngine().load("http://www.google.com");
+        wvHelp.getEngine().loadContent(AutoGraderApp.HelpHtml);
+        //wvHelp.getEngine().load("http://www.google.com");
 
         //************* TEMP **************
-        txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
-        setStartButtonStatus();
+        //txtSourceDirectory.setText("/Users/jvolcy/Downloads/201709-94470-Homework 7b, P0502 - Number Pyramid, due 1021 (will count as Lab 5)-259033");
         //*********************************
+        setStartButtonStatus();
 
         menuFileSave.setDisable(true);      //enable after successful processing
         menuFileExportHtml.setDisable(true);
@@ -765,8 +770,28 @@ public class Controller implements IAGConstant {
             listTestData.getItems().remove(selectedItem);
         }
 
-        //adjust the status of the Start button
-        //setStartButtonStatus();
+    }
+
+
+    /* ======================================================================
+     * btnDataFilesRemoveClick()
+     * Callback for "Remove" button associated with the Data Files list view.
+     * Clicking this button is equivalent to pressing the delete or
+     * backspace key to remove selected data files from the list.
+     * ===================================================================== */
+    public void btnDataFilesRemoveClick() {
+        /* Because we can't safely iterate through a list while we are deleting
+         * items from it, we create a copy of the selected items in the list,
+         * then we iterate through this non-changing list.  Note that it is
+         * not possible to carry out this process using indexes instead of
+         * the contents of the list because, again, the indexes would change
+         * as we modify the list. */
+        Object[] selectedItems = listDataFiles.getSelectionModel().getSelectedItems().toArray();
+
+        //go through the list of selected items and delete each one
+        for (Object selectedItem : selectedItems) {
+            listDataFiles.getItems().remove(selectedItem);
+        }
 
     }
 
@@ -865,6 +890,28 @@ public class Controller implements IAGConstant {
         //save the selected file objects in the test data list view
         for (File file : files) {
             listTestData.getItems().add(file);
+        }
+
+    }
+
+    /* ======================================================================
+     * btnAddDataFilesClick()
+     * Callback for the second "Add" button on the Input/Setup tab.  This
+     * add button is used to add data files to the data files list.
+     * ===================================================================== */
+    public void btnAddDataFilesClick() {
+        //get the app's stage
+        Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+
+        //open the file chooser dialog box
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Add Data Files");
+        List<File> files = fileChooser.showOpenMultipleDialog(stage);
+
+        if (files == null) return;
+        //save the selected file objects in the test data list view
+        for (File file : files) {
+            listDataFiles.getItems().add(file);
         }
 
     }
@@ -1289,9 +1336,31 @@ public class Controller implements IAGConstant {
         gradingEngine.setMaxRunTime(Integer.valueOf(autoGrader.getConfiguration(AG_CONFIG.MAX_RUNTIME)));
 
         //---------- generate break out test files ----------
-        autoGrader.getAgDocument().testDataFiles = breakOutTestFiles(autoGrader.getAgDocument().moodleDirectory);
+        //first make a directory named ag_data in the moodle directory
+        File testDataDirectory = new File( autoGrader.getAgDocument().moodleDirectory.getAbsolutePath() + "/.ag_data");
+        testDataDirectory.mkdir();
+
+        //now put the break out test files in the ag_data directory
+        autoGrader.getAgDocument().testDataFiles = breakOutTestFiles(testDataDirectory);
         gradingEngine.testDataFiles = autoGrader.getAgDocument().testDataFiles;
 
+        //---------- copy all data files into each submission directory ----------
+        //go through every data file in the listDataFiles list box
+        for (Object s : listDataFiles.getItems()) {
+            String src = s.toString();
+
+            //copy each data file to each of the assignment directories
+            for (Assignment assignment : gradingEngine.assignments) {
+                String dst = assignment.assignmentDirectory + "/" + (new File(src)).getName();
+                try {
+                    console("copying \"" + src + "\" to \"" + dst + "\"");
+                    Files.copy((new File(src)).toPath(), (new File(dst)).toPath());
+                }
+                catch (Exception e){
+                    console(e.toString());
+                }
+            }
+        }
 
         //---------- indicate the current hmtlReport is invalid ----------
         AutoGraderApp.autoGrader.getAgDocument().htmlReport = null;
@@ -1521,13 +1590,44 @@ public class Controller implements IAGConstant {
                 btnStart.setDisable(false);
 
                 //---------- To Do : clean up break out test files ----------
-                /* we should clean up the break out test files added to the moodle
-                 * directory.  For now, these simply remain on disk when we are done.
-                 * The easiest way to eliminate these files is to compare the files
-                 * in autoGrader.getAgDocument().testDataFiles against the files
-                 * in the listTestData list box.
-                 * Any file not in the listTestData should be deleted. */
+                //get the name of the temporary test data directory
+                File testDataDirectory = new File( AutoGraderApp.autoGrader.getAgDocument().moodleDirectory.getAbsolutePath() + "/.ag_data");
+                //first, remove all files in the test data directory
 
+                // Get all files in directory
+                File[] files = testDataDirectory.listFiles();
+                for (File file : files) {
+                    // Delete each file
+                    console("deleting \"" + file + "\"");
+                    if (!file.delete()) {
+                        // report files we couldn't delete
+                        console("Failed to delete test data file \"" + file + "\"");
+                    }
+                }
+                //now, remove the testDataDirectory
+                console ("removing temp test data directory \"" + testDataDirectory.getName() + "\"");
+                testDataDirectory.delete();
+
+                //---------- clean up data files ----------
+                //go through every data file in the listDataFiles list box
+                for (Object s : listDataFiles.getItems()) {
+                    String src = s.toString();
+
+                    //delete each data file to each of the assignment directories
+                    for (Assignment assignment : AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments) {
+                        String dst = assignment.assignmentDirectory + "/" + (new File(src)).getName();
+                        try {
+                            console("deleting \"" + dst + "\"");
+                            if (! ((new File(dst)).delete()) ) {
+                                // report files we couldn't delete
+                                console("Failed to delete test data file \"" + dst + "\"");
+                            }
+                        }
+                        catch (Exception e){
+                            console(e.toString());
+                        }
+                    }
+                }
 
                 //---------- Initialize the student name choice box ----------
                 // This ChoiceBox appears on the output tab and contains student names.
