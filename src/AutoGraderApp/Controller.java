@@ -1471,6 +1471,11 @@ public class Controller implements IAGConstant {
      * given assignment and transfers them to the Assignment object.
      * ===================================================================== */
     private void xferGradesFromWebViewToAssignmentObject(Assignment assignment) {
+
+        //if we are on the summary page, the grades have already been transferred
+        //from the web view page to the assignment object.  In that case, do nothing.
+        if (bShowingSummary) return;
+
         String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
