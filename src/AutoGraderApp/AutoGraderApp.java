@@ -69,7 +69,11 @@ public class AutoGraderApp extends Application implements IAGConstant {
     /* ======================================================================
      * Help HTML string
      * ===================================================================== */
-    public static final String HelpHtml = "<body style=\"background-color: white;\" lang=\"EN-US\">" +
+    public static final String HelpHtml = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">" +
+            "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" +
+            "<title>AutoGrader 2 Help</title></head>" +
+            "<body style=\"background: white; font-family: Cambria\">" +
             "<div class=\"WordSection1\">" +
             "<div style=\"text-align: center;\"><b>" +
             "<span style=\"font-size: 18pt; color: rgb(0, 112, 192);\">Spelman AutoGrader 2</span></b><br>" +
@@ -276,7 +280,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "used under dual MIT and GPL licenses<br><br>" +
 
             "</div>" +
-            "</body>";
+            "</body></html>";
 
 
 }
