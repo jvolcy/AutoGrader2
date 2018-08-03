@@ -46,6 +46,7 @@ public class Controller implements IAGConstant {
     public MenuItem menuFileExportHtml;
     public MenuItem menuHelpHelp;
     public MenuItem menuHelpAbout;
+    public MenuItem menuFileExportConsoleLog;
 
     //---------- Config Tab ----------
     public ChoiceBox choiceBoxConfigLanguage;
@@ -304,6 +305,7 @@ public class Controller implements IAGConstant {
 
         menuFileSave.setDisable(true);      //enable after successful processing
         menuFileExportHtml.setDisable(true);
+        menuFileExportConsoleLog.setDisable(true);  //enable only on console tab
         setDocumentFileName("null");
         bShowingSummary = false;
 
@@ -647,6 +649,57 @@ public class Controller implements IAGConstant {
         message("HTML Exported.");
     }
 
+
+    /* ======================================================================
+     * menuFileExportConsoleLog()
+     * Callback for File->Export Console Log
+     * ===================================================================== */
+    public void menuFileExportConsoleLog()
+    {
+        //get the app's stage
+        Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+        message("Export Console Log...");
+
+        FileChooser fileChooser = new FileChooser();
+
+        // create an extension filter
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("Console log (*.log)", "*.log");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        String baseDirectory = System.getProperty("user.home") + "/Desktop";
+        fileChooser.setInitialDirectory(new File(baseDirectory));
+        fileChooser.setInitialFileName("ag2-console-" + java.time.LocalDate.now());
+
+
+        fileChooser.setTitle("Export Console Log");
+        File f = fileChooser.showSaveDialog(stage);
+
+        //if the user cancels, do nothing
+        if (f == null) {
+            message("Export Console Log Canceled.");
+            return;
+        }
+
+
+        //write all entries from the console to the file
+        console("Exporting console log...");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
+            console("Writing file %s.", f.getAbsolutePath());
+            for (Object li :  listConsole.getItems()) {
+                bw.write(li.toString() + "\n");
+            }
+            //bw.close();
+        }
+        catch (IOException e) {
+            console(e.toString());
+            message("Console Log Export Failed.");
+        }
+
+        message("Console Log Export Completed.");
+
+    }
+
     /* ======================================================================
      * menuFileQuit()
      * Callback for File->Quit
@@ -659,19 +712,6 @@ public class Controller implements IAGConstant {
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
         stage.close();
 
-    }
-
-    /* ======================================================================
-     * menuHelpHelp()
-     * ===================================================================== */
-    public void menuHelpHelp() {
-        btnSettings.setTextFill(Paint.valueOf("black"));
-        btnInputSetup.setTextFill(Paint.valueOf("black"));
-        btnOutput.setTextFill(Paint.valueOf("black"));
-        btnConsole.setTextFill(Paint.valueOf("black"));
-        tabMain.getSelectionModel().select(IAGConstant.HELP_TAB);
-
-        //----------  ----------
     }
 
 
@@ -697,6 +737,22 @@ public class Controller implements IAGConstant {
         btnSettingsClick();
     }
 
+
+    /* ======================================================================
+     * menuHelpHelp()
+     * ===================================================================== */
+    public void menuHelpHelp() {
+        btnSettings.setTextFill(Paint.valueOf("black"));
+        btnInputSetup.setTextFill(Paint.valueOf("black"));
+        btnOutput.setTextFill(Paint.valueOf("black"));
+        btnConsole.setTextFill(Paint.valueOf("black"));
+        tabMain.getSelectionModel().select(IAGConstant.HELP_TAB);
+        menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
+
+        //----------  ----------
+    }
+
+
     /* ======================================================================
      * btnSettingsClick()
      * Callback for Settings button.
@@ -708,6 +764,7 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
+        menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
 
     /* ======================================================================
@@ -721,6 +778,7 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("blue"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("black"));
+        menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
 
     /* ======================================================================
@@ -737,6 +795,7 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("blue"));
         btnConsole.setTextFill(Paint.valueOf("black"));
+        menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
 
     /* ======================================================================
@@ -748,6 +807,7 @@ public class Controller implements IAGConstant {
         btnInputSetup.setTextFill(Paint.valueOf("black"));
         btnOutput.setTextFill(Paint.valueOf("black"));
         btnConsole.setTextFill(Paint.valueOf("blue"));
+        menuFileExportConsoleLog.setDisable(false);  //enable only when on the console tab
     }
 
     /* ======================================================================
@@ -1363,14 +1423,15 @@ public class Controller implements IAGConstant {
         }
 
         //---------- indicate the current hmtlReport is invalid ----------
+        //put us on the report output page, not the summary page
+        if (bShowingSummary)
+            btnGradeSummaryClick();
+
         AutoGraderApp.autoGrader.getAgDocument().htmlReport = null;
 
         //disable the 'Start' button
         btnStart.setDisable(true);
 
-        //put us on the report output page, not the summary page
-        if (bShowingSummary)
-            btnGradeSummaryClick();
 
         //---------- invoke the grader ----------
         message("Processing assignments...");
@@ -1461,7 +1522,7 @@ public class Controller implements IAGConstant {
 
 
         //dump the assignments to the console  ************ TEMP **************
-        AutoGraderApp.autoGrader.getAgDocument().gradingEngine.dumpAssignments();
+        //AutoGraderApp.autoGrader.getAgDocument().gradingEngine.dumpAssignments();
 
     }
 
@@ -1486,7 +1547,7 @@ public class Controller implements IAGConstant {
         }
         catch (Exception e) {
             //if the id is not found or the conversion from str->int fails, set the grade to null
-            console(assignment.studentName + " : " + e.toString());
+            console(assignment.studentName + " [xfer w2a]: " + e.toString());
             assignment.grade = null;
         }
 
@@ -1509,6 +1570,10 @@ public class Controller implements IAGConstant {
      * to the corresponding fields in the web view.
      * ===================================================================== */
     private void xferGradesFromAssignmentObjectToWebView(Assignment assignment) {
+        //if we are on the summary page, the grades were transferred
+        //from the web view page to the assignment object.  In that case, do nothing.
+        if (bShowingSummary) return;
+
         String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
@@ -1517,7 +1582,7 @@ public class Controller implements IAGConstant {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
             wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
-            console(assignment.studentName + " : " + e.toString());
+            console(assignment.studentName + " [xfer a2w]: " + e.toString());
         }
     }
 
@@ -1642,6 +1707,10 @@ public class Controller implements IAGConstant {
 
                 //call the post-processing function
                 doPostGradingProcessing();
+
+                //dump the assignments to the console
+                AutoGraderApp.autoGrader.getAgDocument().gradingEngine.dumpAssignments();
+
             }
         }
     }));

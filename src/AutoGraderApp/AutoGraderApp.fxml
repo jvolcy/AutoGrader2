@@ -35,6 +35,7 @@
                                         <MenuItem fx:id="menuFileSave" disable="true" mnemonicParsing="false" onAction="#menuFileSave" text="Save" />
                               <MenuItem fx:id="menuFileSaveAs" disable="true" mnemonicParsing="false" onAction="#menuFileSaveAs" text="Save as" />
                               <MenuItem fx:id="menuFileExportHtml" disable="true" mnemonicParsing="false" onAction="#menuFileExportHtml" text="Export HTML" />
+                              <MenuItem fx:id="menuFileExportConsoleLog" mnemonicParsing="false" onAction="#menuFileExportConsoleLog" text="Export Console Log" />
                                         <MenuItem fx:id="menuFileQuit" mnemonicParsing="false" onAction="#menuFileQuit" text="Quit">
                                             <accelerator>
                                                 <KeyCodeCombination alt="UP" code="Q" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
