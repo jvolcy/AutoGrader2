@@ -1102,7 +1102,7 @@ public class Controller implements IAGConstant {
         * primaryPythonFiles name list.  If it does, use it and quit.*/
         for (File f : assignment.assignmentFiles) {     //go through every file in the assignment
             //compare the select filename with each filename in assignment
-            if (primaryPythonFiles.equals(f.getName())) {
+            if (primaryPythonFiles.contains(f.getName())){
                 //if we have a match, we are done: store it in
                 // primaryAssignment?File and quit the loop
                 assignment.primaryAssignmentFile = f;
