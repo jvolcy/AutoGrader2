@@ -384,6 +384,12 @@ public class ReportGenerator implements IAGConstant {
 
             //if we only have no test files, we still need to report runtime and exec times
             if (testDataFiles.size() == 0) {
+                //add the corresponding test file output to the document
+                document += "<pre><font face=\"courier\" color=\"" + OUTPUT_COLOR + "\">";
+                if (assignment.progOutputs[0] != null)
+                    document += assignment.progOutputs[0];
+                document += "</font></pre>";
+
                 //report any runtime error messages here
                 if (assignment.runtimeErrors[0] != null)
                     reportErrorMsg(assignment.runtimeErrors[0]);
