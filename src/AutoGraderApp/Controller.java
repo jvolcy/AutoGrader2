@@ -306,7 +306,7 @@ public class Controller implements IAGConstant {
         menuFileSave.setDisable(true);      //enable after successful processing
         menuFileExportHtml.setDisable(true);
         menuFileExportConsoleLog.setDisable(true);  //enable only on console tab
-        setDocumentFileName("null");
+        setDocumentFileName(null);
         bShowingSummary = false;
 
         cbName.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
@@ -906,6 +906,14 @@ public class Controller implements IAGConstant {
     private void setDocumentFileName(String fileName) {
         documentFileName = fileName;
 
+        //Now, add the document file name to the App's title:
+        if (documentFileName != null) {
+            //get the app's stage
+            Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
+            stage.setTitle(AutoGraderApp.appName + " - " + documentFileName);
+        }
+
+        //enable/disable the "save" and "save as" menu options as appropriate
         if (menuFileSave.isDisable()) {
             // can't have a "Save as" without a "Save"
             menuFileSaveAs.setDisable(true);
