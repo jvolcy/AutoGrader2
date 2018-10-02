@@ -158,6 +158,9 @@ public class MoodlePreprocessor implements IAGConstant {
             if (!f.isHidden() || !omitHiddenFiles)
                 filesInFolder.add(f);
         }
+
+        //sort the list of files
+        Collections.sort(filesInFolder);
         return filesInFolder;
     }
 
@@ -367,8 +370,10 @@ public class MoodlePreprocessor implements IAGConstant {
             return null;
         }
 
-        if ( moodleDirectoryName.substring(0, 2).equals("__") ) {
-             return null;
+        if (moodleDirectoryName.length() > 1) {
+            if (moodleDirectoryName.substring(0, 2).equals("__")) {
+                return null;
+            }
         }
 
         String[] data = moodleDirectoryName.split("_");

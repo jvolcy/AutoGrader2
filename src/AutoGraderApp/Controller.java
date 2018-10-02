@@ -1044,7 +1044,6 @@ public class Controller implements IAGConstant {
             //generate the report
             doPostGradingProcessing();
 
-
             btnGradeSummary.setText("View Summary");
             bShowingSummary = false;
         } else {

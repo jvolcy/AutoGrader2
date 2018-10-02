@@ -208,8 +208,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "-3<br>" +
             "44</span>" +
             "<br><br>Note that in the case above, the program would be executed twice, once for each test case." +
-            "<br><br>The test data file is insensitive to blank lines.&nbsp; You may add " +
-            "these anywhere in the file.&nbsp; You may also add comments at the end " +
+            "<br><br>You may add comments at the end " +
             "of the file beyond the expected keyboard inputs.&nbsp; In our example, " +
             "anything beyond the 3rd integer should be ignored by the program under " +
             "test .&nbsp; However, be mindful that an ill-behaved program could interpret this as " +
@@ -217,14 +216,14 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "equivalent test data file:<br><br>" +
             "<span style=\"font-style: italic; color: rgb(102, 102, 0);\">" +
             "12<br>" +
-            "72<br><br>" +
+            "72<br>" +
             "2<br>This is a comment.&nbsp; It should have no effect on " +
             "a program that reads only 3 integers." +
             "<br><br>" +
             "@@<br>103<br>" +
-            "-3<br><br>44<br>" +
+            "-3<br>44<br>" +
             "This is another comment." +
-            "<br>Note the blank lines in this test data files have no effect.</span><br><br>" +
+            "</span><br><br>" +
             "Note that specifying test data is optional.&nbsp; Some programs do not " +
             "require user input.&nbsp; When test data is required, but not " +
             "specified, the likely outcome is a “max execution time exceeded” error for each " +
