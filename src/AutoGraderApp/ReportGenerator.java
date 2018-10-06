@@ -667,6 +667,8 @@ public class ReportGenerator implements IAGConstant {
             ".syntaxhighlighter.collapsed .toolbar span a.expandSource {",
             "  display: inline !important;",
             "}",
+            /* 2.0.4 - eliminate syntaxHighlighter link that shows up on the html for each assignment.
+            *
             ".syntaxhighlighter .toolbar {",
             "  position: absolute !important;",
             "  right: 1px !important;",
@@ -674,6 +676,16 @@ public class ReportGenerator implements IAGConstant {
             "  width: 11px !important;",
             "  height: 11px !important;",
             "  font-size: 10px !important;",
+            "  z-index: 10 !important;",
+            "}",
+            */
+            ".syntaxhighlighter .toolbar {",
+            "  position: absolute !important;",
+            "  right: 0px !important;",
+            "  top: 0px !important;",
+            "  width: 0px !important;",
+            "  height: 0px !important;",
+            "  font-size: 0px !important;",
             "  z-index: 10 !important;",
             "}",
             ".syntaxhighlighter .toolbar span.title {",

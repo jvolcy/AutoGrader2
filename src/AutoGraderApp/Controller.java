@@ -104,6 +104,7 @@ public class Controller implements IAGConstant {
     * other than the config tab is selected. */
     private Boolean bConfigMayHaveChanged = false;
 
+
     /* ======================================================================
      * initialize()
      * Called automatically upon creation of the GUI
@@ -343,6 +344,7 @@ public class Controller implements IAGConstant {
 
     }
 
+
     /* ======================================================================
      * configChanged()
      * function called whenever the configuration tab is selected or
@@ -375,6 +377,7 @@ public class Controller implements IAGConstant {
         }
     }
 
+
     /* ======================================================================
      * console()
      * function that attempts to write the supplied formatted object
@@ -394,6 +397,7 @@ public class Controller implements IAGConstant {
         }
     }
 
+
     /* ======================================================================
      * message()
      * function that attempts to update the message lable at the bottom
@@ -409,8 +413,8 @@ public class Controller implements IAGConstant {
         } catch (Exception e) {
             console("[m]" + msg);
         }
-
     }
+
 
     /* ======================================================================
      * cbNameClick()
@@ -501,8 +505,8 @@ public class Controller implements IAGConstant {
         option will only be enabled if "Save" is first enabled.  That happens inside
         of doPostGradingProcessing. */
         setDocumentFileName(f.getAbsolutePath());
-
    }
+
 
     /* ======================================================================
      * menuFileSave()
@@ -558,7 +562,6 @@ public class Controller implements IAGConstant {
     }
 
 
-
     /* ======================================================================
      * menuFileSave()
      * Callback for File->Save
@@ -584,7 +587,6 @@ public class Controller implements IAGConstant {
             previous document name. */
             setDocumentFileName(oldDocumentFileName);
         }
-
     }
 
 
@@ -623,7 +625,6 @@ public class Controller implements IAGConstant {
             message("Export HTML Canceled.");
             return;
         }
-
 
         //update the grading engine's assignment with the entries from the web view.
         xferWebViewToAGDocument();
@@ -673,7 +674,6 @@ public class Controller implements IAGConstant {
             return;
         }
 
-
         //write all entries from the console to the file
         console("Exporting console log...");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
@@ -689,8 +689,8 @@ public class Controller implements IAGConstant {
         }
 
         message("Console Log Export Completed.");
-
     }
+
 
     /* ======================================================================
      * menuFileQuit()
@@ -703,7 +703,6 @@ public class Controller implements IAGConstant {
         control to AutoGraderApp.main(). */
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
         stage.close();
-
     }
 
 
@@ -759,6 +758,7 @@ public class Controller implements IAGConstant {
         menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
 
+
     /* ======================================================================
      * btnInputSetupClick()
      * Callback for the Input/Setup button.
@@ -772,6 +772,7 @@ public class Controller implements IAGConstant {
         btnConsole.setTextFill(Paint.valueOf("black"));
         menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
+
 
     /* ======================================================================
      * btnOutputClick()
@@ -790,6 +791,7 @@ public class Controller implements IAGConstant {
         menuFileExportConsoleLog.setDisable(true);  //enable only when on the console tab
     }
 
+
     /* ======================================================================
      * btnConsoleClick()
      * ===================================================================== */
@@ -801,6 +803,7 @@ public class Controller implements IAGConstant {
         btnConsole.setTextFill(Paint.valueOf("blue"));
         menuFileExportConsoleLog.setDisable(false);  //enable only when on the console tab
     }
+
 
     /* ======================================================================
      * btnTestDataRemoveClick()
@@ -847,6 +850,7 @@ public class Controller implements IAGConstant {
 
     }
 
+
     /* ======================================================================
      * listTestDataKeyPressed()
      * Callback for the test data list that is invoked when a key is
@@ -861,6 +865,7 @@ public class Controller implements IAGConstant {
             btnTestDataRemoveClick();
         }
     }
+
 
     /* ======================================================================
      * setStartButtonStatus()
@@ -885,6 +890,7 @@ public class Controller implements IAGConstant {
         }
     }
 
+
     /* ======================================================================
      * setDocumentFileName()
      * setting documentFileName to null tells us that the document has not
@@ -906,7 +912,8 @@ public class Controller implements IAGConstant {
 
             if (documentFileName == null) {
                 stage.setTitle(AutoGraderApp.appName);
-            } else {
+            }
+            else {
                 stage.setTitle(AutoGraderApp.appName + " - " + documentFileName);
             }
         }
@@ -927,6 +934,7 @@ public class Controller implements IAGConstant {
         }
     }
 
+
     /* ======================================================================
      * getDocumentFileName()
      * returns the document file name.
@@ -936,7 +944,6 @@ public class Controller implements IAGConstant {
      * "File-Save As" menu options.
      * ===================================================================== */
     private String getDocumentFileName() { return documentFileName; }
-
 
 
     /* ======================================================================
@@ -960,6 +967,7 @@ public class Controller implements IAGConstant {
         }
 
     }
+
 
     /* ======================================================================
      * btnAddDataFilesClick()
@@ -1045,7 +1053,8 @@ public class Controller implements IAGConstant {
 
             btnGradeSummary.setText("View Summary");
             bShowingSummary = false;
-        } else {
+        }
+        else {
             //we are on the report page: switch to the summary page.
             /* transitioning from the report page to the summary page first requires
              * that any edits to the grade and comment input controls be updated in the
@@ -1060,7 +1069,6 @@ public class Controller implements IAGConstant {
             btnGradeSummary.setText("View Report");
             bShowingSummary = true;
         }
-
 
         /* whether switching from report to summary or vice-versa, we need
          * update the scroll position on the display based on the student
@@ -1219,6 +1227,7 @@ public class Controller implements IAGConstant {
 
     }
 
+
     /* ======================================================================
      * populateStudentNameChoiceBox()
      * populates the cbName choice box on the output tab using the
@@ -1266,6 +1275,7 @@ public class Controller implements IAGConstant {
         return null;
     }
 
+
     /* ======================================================================
      * writeToFile()
      * destructively writes a string to specified file
@@ -1281,6 +1291,7 @@ public class Controller implements IAGConstant {
 
     }
 
+
     /* ======================================================================
      * fileNameFromPathName()
      * extracts the filename given the absolute path
@@ -1290,6 +1301,7 @@ public class Controller implements IAGConstant {
         File f = new File(pathName);
         return f.getName();
     }
+
 
     /* ======================================================================
      * breakOutTestFiles()
@@ -1330,6 +1342,7 @@ public class Controller implements IAGConstant {
         }
         return testFiles;
     }
+
 
     /* ======================================================================
      * btnStart()
@@ -1479,6 +1492,7 @@ public class Controller implements IAGConstant {
          * Timeline. */
     }
 
+
     /* ======================================================================
      * doPostGradingProcessing()
      * This function is called after the grading engine has completed its
@@ -1509,7 +1523,8 @@ public class Controller implements IAGConstant {
 
             //point the web engine to the generated html report
             wvOutput.getEngine().loadContent(AutoGraderApp.autoGrader.getAgDocument().htmlReport);
-        } else {
+        }
+        else {
             reportGenerator = new ReportGenerator("AutoGrader 2.0",         //title
                     "",       //header text
                     AutoGraderApp.autoGrader.getAgDocument().gradingEngine.assignments,   //assignments
@@ -1534,6 +1549,7 @@ public class Controller implements IAGConstant {
         //AutoGraderApp.autoGrader.getAgDocument().gradingEngine.dumpAssignments();
 
     }
+
 
     /* ======================================================================
      * xferGradesFromWebViewToAssignmentObject()
@@ -1569,8 +1585,8 @@ public class Controller implements IAGConstant {
             //if the id is not found, set the comment to null
             assignment.instructorComment = null;
         }
-
     }
+
 
     /* ======================================================================
      * xferWebViewToAGDocument()
@@ -1607,6 +1623,7 @@ public class Controller implements IAGConstant {
         }
     }
 
+
     /* ======================================================================
      * xferAGDocumentToWebView()
      * transfers all grades and comments from the AG Document
@@ -1626,7 +1643,6 @@ public class Controller implements IAGConstant {
             xferGradesFromAssignmentObjectToWebView(assignment);
         }
     }
-
 
 
     /* ======================================================================
