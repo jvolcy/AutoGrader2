@@ -165,8 +165,8 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "to automatically detect a suitable python 3 interpreter.&nbsp; If none " +
             "is found, you will have to manually enter the path to the interpreter " +
             "here.&nbsp; Also, if you have multiple Python interpreters installed, " +
-            "the selected interpreter is randomly selected.&nbsp; You may want to " +
-            "change the selected interpreter.<br>" +
+            "the default interpreter is randomly selected among the possible options.&nbsp; You may " +
+            "change the default interpreter here.<br>" +
             "</li></ul>" +
             "<ul><li><span style=\"font-weight: bold;\">C++ compiler </span>- When " +
             "first run, the AutoGrader will attempt to" +
