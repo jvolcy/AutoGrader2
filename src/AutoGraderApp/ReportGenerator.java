@@ -90,7 +90,7 @@ public class ReportGenerator implements IAGConstant {
     }
 
     /* ======================================================================
-     * getDocument()
+     * generateSummary()
      * ===================================================================== */
     public void generateSummary() {
         summary = String.join("\n",

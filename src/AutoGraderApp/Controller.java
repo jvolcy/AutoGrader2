@@ -372,7 +372,7 @@ public class Controller implements IAGConstant {
                 bConfigMayHaveChanged = false;
                 AutoGraderApp.autoGrader.saveConfiguration();
             } catch (Exception e) {
-                console("", e.toString());
+                console("[101]", e.toString());
             }
         }
     }
@@ -1615,17 +1615,25 @@ public class Controller implements IAGConstant {
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
         //set the grade and comment on the webview
+        //v 2.0.5 - separete the xfer of grades and comments.  This way, comments will xfer even if
+        //no grade is entered.  Previously, the try-catch would throw an exception if the grade was
+        //missing, never having the opportunity to xfer the comment.
         try {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
+        } catch (Exception e) {
+            //comment out (too verbose in console)
+            //console(assignment.studentName + " [xfer a2w]: No grade found.");
+        }
 
+
+        try {
             //for v 2.0.4, we replace newlines with "\n" for display on the web view.  This fixes the bug of
             //the instructor comment disappearing when switching between the report and summary.
             String s = assignment.instructorComment.replace("\n", "\\n");
             wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + s +"\"");
-
-            //wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
-            //console(assignment.studentName + " [xfer a2w]: " + e.toString());
+            //comment out (too verbose in console)
+            //console(assignment.studentName + " [xfer a2w]: No Instructor Comment found.");
         }
     }
 
