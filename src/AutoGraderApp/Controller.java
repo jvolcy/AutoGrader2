@@ -1617,7 +1617,13 @@ public class Controller implements IAGConstant {
         //set the grade and comment on the webview
         try {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
-            wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + assignment.instructorComment+"\"");
+
+            //for v 2.0.4, we replace newlines with "\n" for display on the web view.  This fixes the bug of
+            //the instructor comment disappearing when switching between the report and summary.
+            String s = assignment.instructorComment.replace("\n", "\\n");
+            wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + s +"\"");
+
+            //wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + assignment.instructorComment+"\"");
         } catch (Exception e) {
             //console(assignment.studentName + " [xfer a2w]: " + e.toString());
         }

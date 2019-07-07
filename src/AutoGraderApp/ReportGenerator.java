@@ -105,8 +105,10 @@ public class ReportGenerator implements IAGConstant {
 
         for (Assignment assignment : assignments){
             String grade = assignment.grade == null ? "---" : assignment.grade.toString();
+
+            //for v 2.0.4, we replace the \n with <br> so that the instructor comment is properly formatted on the summary view.
             String instructorComment = (assignment.instructorComment == null || assignment.instructorComment.equals(""))
-                    ? "None" : assignment.instructorComment;
+                    ? "None" : assignment.instructorComment.replace("\n", "<br>");
 
             summary += "<a id=\"" + assignment.studentName + "\"></a>\n";
 //            summary += "<hr width=\"100%\" align=\"left\">";

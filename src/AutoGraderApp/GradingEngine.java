@@ -344,7 +344,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
      * returns the output of the shell session which is a combination of
      * the stdout and stderr.
      * The identifyingToken is an optional string that is part of
-     * the command to be executed.  This should be as unique as string
+     * the command to be executed.  This should be as unique a string
      * as possible.  It is used to determine the ID of the launched
      * process by searching the output of "ps -eo pid,command" which
      * lists PID and the command line used to launch the corresponding
@@ -375,7 +375,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         for (String s : cmd) {
             cmdStr += s + " ";
         }
-        console("Executing " + args + "\n  as  " + cmdStr );
+        //xxx console("Executing " + args + "\n  as  " + cmdStr );
 
         try {
             //attempt to execute the command
@@ -657,7 +657,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 @Override
                 protected Void call() throws Exception {
 
-                    console("Grading service started...");
+                    //xxx console("Grading service started...");
                     for (Assignment assignment : assignments) {
                         processingStatus.message = assignment.studentName;
                         execAssignment(assignment);
