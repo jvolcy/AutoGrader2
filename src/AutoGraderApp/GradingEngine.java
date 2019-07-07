@@ -182,7 +182,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
             String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
             return text;
         } catch (Exception e) {
-            console(e.toString());
+            console("readFromFile(): " + e.toString());
         }
         return null;
     }
@@ -218,7 +218,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
 
             if (numLines == maxLines) { bLastReadExceedsMaxLines = true; }
         } catch (Exception e) {
-            console(e.toString());
+            console("readFromFile():" + e.toString());
         }
         return text;
     }
@@ -279,7 +279,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 }
             }
         } catch (Exception e) {
-            console(e.toString());
+            console("getPidFromToken():" + e.toString());
         }
         return pids;
     }
@@ -417,7 +417,7 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
                 }
             }
         } catch (Exception e) {
-            console(e.toString());
+            console("shellExec(): " + e.toString());
         }
 
         //read in the output of the executed command from the temp file

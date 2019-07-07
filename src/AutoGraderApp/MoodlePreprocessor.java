@@ -262,7 +262,7 @@ public class MoodlePreprocessor implements IAGConstant {
                     //Process p = r.exec("unzip -u \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b.zip\34 -d \34/Users/jvolcy/work/test/JordanStill_1124140_assignsubmission_file_/P0502b\34");
                     p.waitFor();
                 } catch (Exception e) {
-                    console("", e);
+                    console("[findAssignmentFiles()]", e);
                 }
             }
         }

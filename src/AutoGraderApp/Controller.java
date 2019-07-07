@@ -350,7 +350,7 @@ public class Controller implements IAGConstant {
      * function called whenever the configuration tab is selected or
      * unselected
      * The boolean bConfigMayHaveChanged is set to true whenever one of the
-     * configuration parameters (comobo boxes, text fields, etc.) on the
+     * configuration parameters (combo boxes, text fields, etc.) on the
      * configuration tab is changed.  This is accomplished using change
      * listeners on each of the input controls on the configuration tab.
      * ===================================================================== */
@@ -372,7 +372,7 @@ public class Controller implements IAGConstant {
                 bConfigMayHaveChanged = false;
                 AutoGraderApp.autoGrader.saveConfiguration();
             } catch (Exception e) {
-                console("[101]", e.toString());
+                console("configChanged(): " + e.toString());
             }
         }
     }
@@ -553,7 +553,7 @@ public class Controller implements IAGConstant {
             message("Report Saved.");
 
         } catch (Exception e) {
-            console(e.toString());
+            console("menuFileSave(): " + e.toString());
             message("Save Failed.");
             //the serialization process failed.  Invalidate the filename
             setDocumentFileName(null);
@@ -636,7 +636,7 @@ public class Controller implements IAGConstant {
             bw.close();
             console("Writing file %s.", f.getAbsolutePath());
         } catch (IOException e) {
-            console(e.toString());
+            console("menuFileExportHtml(): " + e.toString());
         }
 
         message("HTML Exported.");
@@ -684,7 +684,7 @@ public class Controller implements IAGConstant {
             //bw.close();
         }
         catch (IOException e) {
-            console(e.toString());
+            console("menuFileExportConsoleLog(): " + e.toString());
             message("Console Log Export Failed.");
         }
 
@@ -917,7 +917,7 @@ public class Controller implements IAGConstant {
                 stage.setTitle(AutoGraderApp.appName + " - " + documentFileName);
             }
         }
-        catch (Exception e) { console(e.toString()); }
+        catch (Exception e) { console("setDocumentFileName( <%s> ): No stage.", AutoGraderApp.appName+":"+fileName); }
 
         //enable/disable the "save" and "save as" menu options as appropriate
         if (menuFileSave.isDisable()) {
@@ -1255,7 +1255,7 @@ public class Controller implements IAGConstant {
             cbName.getSelectionModel().selectFirst();
         }
         catch (Exception e) {
-            console(e.toString());
+            console("populateStudentNameChoiceBox(): " + e.toString());
         }
     }
 
@@ -1270,7 +1270,7 @@ public class Controller implements IAGConstant {
             String text = new String(Files.readAllBytes(Paths.get(filepath)), StandardCharsets.UTF_8);
             return text;
         } catch (Exception e) {
-            console(e.toString());
+            console("readFromFile(): " + e.toString());
         }
         return null;
     }
@@ -1286,7 +1286,7 @@ public class Controller implements IAGConstant {
             bw.write(data);
             //bw.close();
         } catch (IOException e) {
-            console(e.toString());
+            console("writeToFile(): " + e.toString());
         }
 
     }
@@ -1614,14 +1614,14 @@ public class Controller implements IAGConstant {
         String gradeId = assignment.studentName + ReportGenerator.HTML_GRADE_ID_SUFFIX;
         String commentId = assignment.studentName + ReportGenerator.HTML_COMMENT_ID_SUFFIX;
 
-        //set the grade and comment on the webview
-        //v 2.0.5 - separete the xfer of grades and comments.  This way, comments will xfer even if
+        //set the grade and comment on the web view
+        //v 2.0.5 - separate the xfer of grades and comments.  This way, comments will xfer even if
         //no grade is entered.  Previously, the try-catch would throw an exception if the grade was
         //missing, never having the opportunity to xfer the comment.
         try {
             wvOutput.getEngine().executeScript("document.getElementById(\"" + gradeId + "\").value =\"" + assignment.grade.toString()+"\"");
         } catch (Exception e) {
-            //comment out (too verbose in console)
+            //comment this out (too verbose in console)
             //console(assignment.studentName + " [xfer a2w]: No grade found.");
         }
 
@@ -1632,7 +1632,7 @@ public class Controller implements IAGConstant {
             String s = assignment.instructorComment.replace("\n", "\\n");
             wvOutput.getEngine().executeScript("document.getElementById(\"" + commentId + "\").value = \"" + s +"\"");
         } catch (Exception e) {
-            //comment out (too verbose in console)
+            //comment this out (too verbose in console)
             //console(assignment.studentName + " [xfer a2w]: No Instructor Comment found.");
         }
     }

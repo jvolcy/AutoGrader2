@@ -98,7 +98,7 @@ public class AutoGrader2 implements IAGConstant {
             }
 
         } catch (Exception e) {
-            console("", e);
+            console("autoLocatePython3Interpreter(): " + e.toString());
         }
 
         return python3Path;
@@ -150,7 +150,7 @@ public class AutoGrader2 implements IAGConstant {
 
         } catch (Exception e) {
             //console("", e);
-            console(e.toString());
+            console("autoLocateCppCompiler(): " + e.toString());
         }
         return cppPath;
     }
@@ -182,7 +182,7 @@ public class AutoGrader2 implements IAGConstant {
 
         } catch (Exception e) {
             //console("", e);
-            console(e.toString());
+            console("autoLocateShell(): " + e.toString());
         }
 
         return shellPath;
@@ -317,7 +317,7 @@ public class AutoGrader2 implements IAGConstant {
             bw.write(jo.toJSONString());
             bw.close();
         } catch (IOException e) {
-            console(e.toString());
+            console("saveConfiguration(): " +  e.toString());
         }
     }
 
