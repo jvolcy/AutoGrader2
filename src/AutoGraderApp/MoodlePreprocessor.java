@@ -14,7 +14,7 @@ import static AutoGraderApp.Controller.console;
  * the file).
  * MoodlePreprocessor contains functions to extract the student names
  * from the Moodle-assigned subfolder names.  It also recursively
- * identifies all programming files withing these directories.
+ * identifies all programming files within these directories.
  * MoodlePreprocessor pre-populates and ArrayList of Assignment objects
  * with the extracted student names, the program directories and the
  * list of programming files contained in each directory.
