@@ -30,9 +30,14 @@ public class AutoGraderApp extends Application implements IAGConstant {
     public void start(Stage primaryStage) throws Exception {
         console("start...");
 
-        //Parent root = FXMLLoader.load(getClass().getResource("AutoGraderApp.fxml"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AutoGraderApp.fxml"));
-        Parent root = loader.load();
+        /* original */
+        //FXMLLoader loader = new FXMLLoader(getClass().getResource("AutoGraderApp.fxml"));
+        //Parent root = loader.load();
+        /***********/
+
+        Parent root = FXMLLoader.load(getClass().getResource("AutoGraderApp.fxml"));
+
+        //Parent root = loader.load();
 
         // Get the Controller from the FXMLLoader
         //Controller controller = loader.getController();
