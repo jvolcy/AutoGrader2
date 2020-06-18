@@ -49,7 +49,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
         primaryStage.setMinWidth(MIN_STAGE_WIDTH);
         primaryStage.setMinHeight(MIN_STAGE_HEIGHT);
 
-        primaryStage.getIcons().add(new Image("/ag2_icon.png"));
+        //primaryStage.getIcons().add(new Image("/ag2_icon.png"));
         primaryStage.show();
     }
 
