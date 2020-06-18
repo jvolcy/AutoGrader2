@@ -9,5 +9,8 @@
         <module name="AutoGrader2" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="AutoGrader2" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -20,6 +20,11 @@
             <artifactId>javafx-fxml</artifactId>
             <version>13</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>13</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -37,6 +42,7 @@
                 <version>0.0.3</version>
                 <configuration>
                     <mainClass>AutoGraderApp.App</mainClass>
+                    <launcher>AutoGrader.sh</launcher>
                 </configuration>
             </plugin>
         </plugins>
