@@ -20,7 +20,7 @@ import static AutoGraderApp.Controller.console;
  * ===================================================================== */
 class AGDocument implements java.io.Serializable {
     public String assignmentName;
-    ////public GradingEngine gradingEngine;
+    public GradingEngine gradingEngine;
     public String htmlReport;
     public File moodleDirectory;
     public ArrayList<File> testDataFiles;         //the length of this list is the # of test cases
@@ -58,7 +58,7 @@ public class AutoGrader2 implements IAGConstant {
 
         //---------- initialize the grading engine ----------
          agDocument = new AGDocument();
-         ////agDocument.gradingEngine = new GradingEngine();
+         agDocument.gradingEngine = new GradingEngine();
     }
 
     /* ======================================================================
