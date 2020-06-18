@@ -14,7 +14,7 @@ import static AutoGraderApp.Controller.console;
  * ===================================================================== */
 public class AutoGraderApp extends Application implements IAGConstant {
 
-    ////public static AutoGrader2 autoGrader;
+    public static AutoGrader2 autoGrader;
     public static final String appName = "Spelman AutoGrader 2";
     public static final String version = "pre 2.0.6";
     public static final String copyrightText = "copyright 2016-2018";
@@ -60,14 +60,14 @@ public class AutoGraderApp extends Application implements IAGConstant {
     public static void main(String[] args) {
 
         console("main...");
-        ////autoGrader = new AutoGrader2();
+        autoGrader = new AutoGrader2();
 
         console("launching...");
         //---------- start the GUI ----------
         launch(args);
 
         //---------- Commit the AG options to the JSON file ----------
-        ////autoGrader.saveConfiguration();
+        autoGrader.saveConfiguration();
 
         console("Exiting main()...");
     }
