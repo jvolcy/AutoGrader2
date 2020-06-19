@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
+//import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import static AutoGraderApp.Controller.console;
@@ -16,7 +16,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
 
     public static AutoGrader2 autoGrader;
     public static final String appName = "Spelman AutoGrader 2";
-    public static final String version = "pre 2.0.6";
+    public static final String version = "2.1.0";
     public static final String copyrightText = "copyright 2016-2018";
     public static final String credits = "J Volcy";
 
@@ -30,26 +30,13 @@ public class AutoGraderApp extends Application implements IAGConstant {
     public void start(Stage primaryStage) throws Exception {
         console("start...");
 
-        /* original */
-        //FXMLLoader loader = new FXMLLoader(getClass().getResource("AutoGraderApp.fxml"));
-        //Parent root = loader.load();
-        /***********/
-
         Parent root = FXMLLoader.load(getClass().getResource("AutoGraderApp.fxml"));
-
-        //Parent root = loader.load();
-
-        // Get the Controller from the FXMLLoader
-        //Controller controller = loader.getController();
-        //controller.setGradingEngine(autoGrader.getGradingEngine());
-        //controller.setAutoGraderRef(autoGrader);
 
         primaryStage.setTitle(appName);
         primaryStage.setScene(new Scene(root, MIN_STAGE_WIDTH, MIN_STAGE_HEIGHT));
         primaryStage.setMinWidth(MIN_STAGE_WIDTH);
         primaryStage.setMinHeight(MIN_STAGE_HEIGHT);
 
-        //primaryStage.getIcons().add(new Image("/ag2_icon.png"));
         primaryStage.show();
     }
 
