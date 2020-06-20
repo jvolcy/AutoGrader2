@@ -49,7 +49,10 @@ public class AutoGrader2 implements IAGConstant {
         console("AutoGraderApp constructor...");
 
         //---------- set the path to the JSON config file ----------
-        String cwd = System.getProperty("user.dir");
+        // v. 2.1.1, json file now hidden and stored in user.home instead of user.dir
+        //"user.dir" = the current working directory
+        //"user.home" = the user's home directory
+        String cwd = System.getProperty("user.home");
         configFileName = Paths.get(cwd, CONFIG_FILENAME).toString();
         console("Config file path = '" + configFileName + "'");
 

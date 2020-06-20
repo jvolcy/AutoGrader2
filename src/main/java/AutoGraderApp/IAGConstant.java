@@ -52,7 +52,8 @@ public interface IAGConstant {
 
     //---------- Misc Constants ----------
     public final String TEST_CASE_SEPARATOR = "@@\n";
-    public final String CONFIG_FILENAME = "ag2Config.json";
+    // v. 2.1.1: config json file is now hidden (starts with a ".")
+    public final String CONFIG_FILENAME = ".ag2Config.json";
     public final String DEFAULT_MAIN_PYTHON_FILE = "main.py";
 }
 

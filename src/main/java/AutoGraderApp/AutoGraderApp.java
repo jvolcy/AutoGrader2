@@ -16,7 +16,7 @@ public class AutoGraderApp extends Application implements IAGConstant {
 
     public static AutoGrader2 autoGrader;
     public static final String appName = "Spelman AutoGrader 2";
-    public static final String version = "pre-2.1.1";
+    public static final String version = "2.1.1";
     public static final String copyrightText = "copyright 2016-2018";
     public static final String credits = "J Volcy";
 
@@ -271,6 +271,10 @@ public class AutoGraderApp extends Application implements IAGConstant {
             "Copyright (C) 2004-2010 Alex Gorbatchev<br>" +
             "http://alexgorbatchev.com/SyntaxHighlighter<br>" +
             "used under dual MIT and GPL licenses<br><br>" +
+
+            "<u>json-simple 1.1.1</u><br>" +
+            "Fang Yidong<br>" +
+            "fangyidong@yahoo.com.cn<br>" +
 
             "</div>" +
             "</body></html>";

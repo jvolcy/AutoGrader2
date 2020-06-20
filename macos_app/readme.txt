@@ -5,7 +5,6 @@ The directory AutoGrader2.app is a shell application only.  To create a working 
 3) copy the image directory found under {project_directory}/target
 4) right click on the copy of AutoGrader2.app in the build directory and show its contents.
 5) paste the image directory in the Contents/macOS/ directory of AutoGrader2.app
-6) delete the file ag2Config.json if it exists in the image directory
-7) delete any existing AutoGrader2.app.zip file it exists in the build directory
-8) compress AutoGrader2.app to create a new zip file
-9) delete AutoGrader2.app or move it to a location outside of the git directory
+6) delete any existing AutoGrader2.app.zip file it exists in the build directory
+7) compress AutoGrader2.app to create a new zip file
+8) delete AutoGrader2.app or move it to a location outside of the git directory
