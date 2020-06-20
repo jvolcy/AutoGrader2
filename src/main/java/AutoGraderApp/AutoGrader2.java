@@ -223,22 +223,29 @@ public class AutoGrader2 implements IAGConstant {
     private void setupConfiguration() {
         //---------- auto-locate python3 interpreter ----------
         String python3Path = autoLocatePython3Interpreter();
-        if (python3Path == null)
+
+        if (python3Path == null) {
+            python3Path = "";   //2.1.1
             console("No auto-detected python3 interpreter.");
+        }
         else
             console("Found a Python3 interpreter at '" + python3Path + "'");
 
         //---------- auto-locate c++ compiler ----------
         String cppPath = autoLocateCppCompiler();
-        if (cppPath == null)
+        if (cppPath == null) {
+            cppPath = "";       //2.1.1
             console("No auto-detected c++ compiler.");
+        }
         else
             console("Found a c++ compiler at '" + cppPath + "'");
 
         //---------- auto-locate shell interpreter ----------
         String shellPath = autoLocateShell();
-        if (shellPath == null)
+        if (shellPath == null) {
+            shellPath = "";     //2.1.1
             console("No auto-detected shell interpreter.");
+        }
         else
             console("Found a shell interpreter at '" + shellPath + "'");
 
