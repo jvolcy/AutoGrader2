@@ -9,6 +9,17 @@ import javafx.stage.Stage;
 
 import static AutoGraderApp.Controller.console;
 
+/* ==================---------- TO DO ----------========================
+ * List of potential features for future major releases
+ * 
+ * LMS integration
+ * Moss integration
+ * Auto-grading (vs auto-execute) options with regex
+ * Web and/or browser deployment
+ * iOS deployment
+ * Windows version
+ * ===================================================================== */
+
 /* ======================================================================
  * AutoGraderApp class
  * ===================================================================== */
