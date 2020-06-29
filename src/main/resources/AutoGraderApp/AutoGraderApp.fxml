@@ -9,10 +9,12 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -93,7 +95,7 @@
                             <content>
                                 <ScrollPane fitToHeight="true" fitToWidth="true">
                                     <content>
-                                        <VBox>
+                                        <VBox alignment="TOP_CENTER">
                                             <children>
                                                 <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;" VBox.vgrow="NEVER">
                                                     <children>
@@ -234,6 +236,118 @@
                                              </padding>
                                           </Label>
                                           <TextField fx:id="txtShell" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <Separator prefWidth="200.0">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                       <effect>
+                                          <InnerShadow />
+                                       </effect>
+                                    </Separator>
+                                    <Label alignment="CENTER" contentDisplay="CENTER" text="MOSS" textAlignment="CENTER" textFill="#257c32">
+                                       <font>
+                                          <Font name="Arial Bold Italic" size="20.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Use MOSS" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <ChoiceBox fx:id="choiceBoxConfigUseMoss" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="MOSS User ID" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <TextField fx:id="txtMossUserId" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Maximum Matches (-m)" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <ChoiceBox fx:id="choiceBoxMossOptionM" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Num Match Files Displayed (-n)" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <ChoiceBox fx:id="choiceBoxMossOptionMchoiceBoxMossOptionN" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="MOSS Server" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <TextField fx:id="txtMossServer" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
+                                       <children>
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="MOSS Server Port" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets left="8.0" right="4.0" />
+                                             </padding>
+                                          </Label>
+                                          <TextField fx:id="txtMossPort" HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />

@@ -6,3 +6,6 @@
 /out/
 /target/
 ag2Config.json
+/src/main/java/AutoGraderApp/moji/MossException.java
+/src/main/java/AutoGraderApp/moji/SocketClient.java
+/src/main/java/AutoGraderApp/moji/Stage.java
