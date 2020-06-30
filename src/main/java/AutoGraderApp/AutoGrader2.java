@@ -3,9 +3,7 @@ package AutoGraderApp;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -259,6 +257,13 @@ public class AutoGrader2 implements IAGConstant {
         ag_config.put(AG_CONFIG.PYTHON3_INTERPRETER, python3Path);
         ag_config.put(AG_CONFIG.CPP_COMPILER, cppPath);
         ag_config.put(AG_CONFIG.SHELL, shellPath);
+        ag_config.put(AG_CONFIG.ENABLE_MOSS, NO);
+        ag_config.put(AG_CONFIG.MOSS_USERID, "");
+        ag_config.put(AG_CONFIG.MOSS_MAX_MATCHES, "10");
+        ag_config.put(AG_CONFIG.MOSS_NUM_MATCH_FILES, "250");
+        ag_config.put(AG_CONFIG.MOSS_USE_MOSS, NO);
+        ag_config.put(AG_CONFIG.MOSS_SERVER, MossClient.DEFAULT_MOSS_SERVER);
+        ag_config.put(AG_CONFIG.MOSS_PORT, String.valueOf(MossClient.DEFAULT_MOSS_PORT));
 
         //---------- Overwrite the default AG options with data from the JSON file ----------
         loadConfiguration();
@@ -284,6 +289,15 @@ public class AutoGrader2 implements IAGConstant {
             //String lastName = (String) jo.get("lastName");
 
             //read the configuration
+            ArrayList<String> configKeys = Collections.list(ag_config.keys());
+
+            for (String key : configKeys) {
+                //if the key is not currently specified in the file, use the default.
+                //also, if the key's value is null, use the default.
+                if (jo.containsKey(key) && (jo.get(key) != ""))
+                    ag_config.put(key, (String)jo.get(key));
+            }
+            /*
             ag_config.put(AG_CONFIG.LANGUAGE, (String) jo.get(AG_CONFIG.LANGUAGE));
             ag_config.put(AG_CONFIG.MAX_RUNTIME, (String) jo.get(AG_CONFIG.MAX_RUNTIME));
             ag_config.put(AG_CONFIG.MAX_OUTPUT_LINES, (String) jo.get(AG_CONFIG.MAX_OUTPUT_LINES));
@@ -293,6 +307,10 @@ public class AutoGrader2 implements IAGConstant {
             ag_config.put(AG_CONFIG.PYTHON3_INTERPRETER, (String) jo.get(AG_CONFIG.PYTHON3_INTERPRETER));
             ag_config.put(AG_CONFIG.CPP_COMPILER, (String) jo.get(AG_CONFIG.CPP_COMPILER));
             ag_config.put(AG_CONFIG.SHELL, (String) jo.get(AG_CONFIG.SHELL));
+            ag_config.put(AG_CONFIG.MOSS_SERVER, (String) jo.get(AG_CONFIG.MOSS_SERVER));
+            ag_config.put(AG_CONFIG.MOSS_PORT, (String) jo.get(AG_CONFIG.MOSS_PORT));
+
+             */
         }
         catch (Exception e) {
             console("loadConfiguration(): " + e.toString());
@@ -311,7 +329,16 @@ public class AutoGrader2 implements IAGConstant {
         // creating JSONObject
         JSONObject jo = new JSONObject();
 
-       // putting data to JSONObject
+        //putting data to JSONObject
+        //note that this will overwrite existing keys, but will not delete unknown keys
+        //that may exist in a different version of the json file
+        ArrayList<String> configKeys = Collections.list(ag_config.keys());
+
+        for (String key : configKeys) {
+            jo.put(key, ag_config.get(key));
+        }
+
+        /*
         jo.put(AG_CONFIG.LANGUAGE, ag_config.get(AG_CONFIG.LANGUAGE));
         jo.put(AG_CONFIG.MAX_RUNTIME, ag_config.get(AG_CONFIG.MAX_RUNTIME));
         jo.put(AG_CONFIG.MAX_OUTPUT_LINES, ag_config.get(AG_CONFIG.MAX_OUTPUT_LINES));
@@ -321,6 +348,7 @@ public class AutoGrader2 implements IAGConstant {
         jo.put(AG_CONFIG.PYTHON3_INTERPRETER, ag_config.get(AG_CONFIG.PYTHON3_INTERPRETER));
         jo.put(AG_CONFIG.CPP_COMPILER, ag_config.get(AG_CONFIG.CPP_COMPILER));
         jo.put(AG_CONFIG.SHELL, ag_config.get(AG_CONFIG.SHELL));
+         */
 
         // writing JSON to file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(configFileName))) {

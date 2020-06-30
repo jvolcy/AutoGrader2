@@ -19,6 +19,9 @@ public interface IAGConstant {
     public final String YES = "Yes";
     public final String NO = "No";
 
+    public final String ENABLED = "Enabled";
+    public final String DISABLED = "Disabled";
+
     public final String LANGUAGE_AUTO = "Auto";
     public final String LANGUAGE_PYTHON3 = "Python 3";
     public final String LANGUAGE_CPP = "C++";
@@ -41,6 +44,13 @@ public interface IAGConstant {
         public static final String PYTHON3_INTERPRETER = "PYTHON3_INTERPRETER";
         public static final String CPP_COMPILER = "CPP_COMPILER";
         public static final String SHELL = "SHELL";
+        public static final String ENABLE_MOSS = "ENABLE_MOSS";
+        public static final String MOSS_USERID = "MOSS_USERID";
+        public static final String MOSS_MAX_MATCHES = "MOSS_MAX_MATCHES";
+        public static final String MOSS_NUM_MATCH_FILES = "MOSS_NUM_MATCH_FILES";
+        public static final String MOSS_USE_MOSS = "MOSS_USE_MOSS";
+        public static final String MOSS_SERVER = "MOSS_SERVER";
+        public static final String MOSS_PORT = "MOSS_PORT";
     }
 
     //---------- AG Directives ----------

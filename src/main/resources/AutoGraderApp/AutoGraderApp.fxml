@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -89,7 +90,7 @@
                      </HBox.margin>
                   </Button>
                     </children></HBox>
-                <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" prefHeight="200.0" prefWidth="200.0" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
+                <TabPane fx:id="tabMain" focusTraversable="false" onKeyPressed="#tabMainOnKeyPressed" style="-fx-tab-max-height: -10; -fx-tab-max-width: -10;" VBox.vgrow="ALWAYS">
                     <tabs>
                         <Tab onSelectionChanged="#configChanged" text="0. Configure">
                             <content>
@@ -259,7 +260,7 @@
                                     </Label>
                                     <HBox maxWidth="600.0" style="-fx-border-style: solid; -fx-border-width: 1; -fx-border-color: lightgray;">
                                        <children>
-                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Use MOSS" textAlignment="RIGHT" HBox.hgrow="NEVER">
+                                          <Label alignment="CENTER" minWidth="-Infinity" prefHeight="27.0" prefWidth="240.0" text="Enable MOSS" textAlignment="RIGHT" HBox.hgrow="NEVER">
                                              <HBox.margin>
                                                 <Insets />
                                              </HBox.margin>
@@ -267,7 +268,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <ChoiceBox fx:id="choiceBoxConfigUseMoss" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                          <ChoiceBox fx:id="choiceBoxConfigEnableMoss" minWidth="200.0" HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -283,7 +284,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <TextField fx:id="txtMossUserId" HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="txtMossUserId" promptText="000000000" HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -299,7 +300,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <ChoiceBox fx:id="choiceBoxMossOptionM" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="txtMossOptionM" promptText="Leave Blank for Default." HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -315,7 +316,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <ChoiceBox fx:id="choiceBoxMossOptionMchoiceBoxMossOptionN" minWidth="200.0" HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="txtMossOptionN" promptText="Leave Blank for Default." HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -331,7 +332,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <TextField fx:id="txtMossServer" HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="txtMossServer" promptText="Leave Blank for Default." HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -347,7 +348,7 @@
                                                 <Insets left="8.0" right="4.0" />
                                              </padding>
                                           </Label>
-                                          <TextField fx:id="txtMossPort" HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="txtMossPort" promptText="Leave Blank for Default." HBox.hgrow="ALWAYS" />
                                        </children>
                                        <VBox.margin>
                                           <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -364,41 +365,74 @@
                         </Tab>
                         <Tab text="1. Input/Setup">
                             <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <ListView fx:id="listTestData" editable="true" layoutX="134.0" layoutY="128.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="95.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
-                              <Button fx:id="btnAdd" layoutX="39.0" layoutY="143.0" mnemonicParsing="false" onAction="#btnAddClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
-                              <Button layoutX="39.0" layoutY="28.0" mnemonicParsing="false" onAction="#btnSourceDirectoryClick" prefHeight="27.0" prefWidth="154.0" text="Source Directory" />
-                              <Button fx:id="btnRemove" layoutX="39.0" layoutY="170.0" mnemonicParsing="false" onAction="#btnTestDataRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
-                              <Button fx:id="btnStart" layoutX="454.0" layoutY="67.0" mnemonicParsing="false" onAction="#btnStart" prefHeight="49.0" prefWidth="100.0" text="Start" textFill="#270bdb">
-                                 <font>
-                                    <Font name="System Bold" size="15.0" />
-                                 </font></Button>
-                              <TextField fx:id="txtSourceDirectory" layoutX="200.0" layoutY="28.0" onKeyReleased="#txtSourceDirectoryOnKeyReleased" prefHeight="27.0" prefWidth="355.0" />
-                              <Label layoutX="45.0" layoutY="116.0" prefHeight="27.0" prefWidth="91.0" text="Test Data">
-                                 <font>
-                                    <Font name="Arial Bold Italic" size="13.0" />
-                                 </font>
-                              </Label>
-                              <Label layoutX="39.0" layoutY="232.0" prefHeight="27.0" prefWidth="91.0" text="Data Files">
-                                 <font>
-                                    <Font name="Arial Bold Italic" size="13.0" />
-                                 </font>
-                              </Label>
-                              <Button fx:id="btnAddDataFiles" layoutX="39.0" layoutY="259.0" mnemonicParsing="false" onAction="#btnAddDataFilesClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
-                              <Button fx:id="btnRemoveDataFiles" layoutX="39.0" layoutY="286.0" mnemonicParsing="false" onAction="#btnDataFilesRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
-                              <ListView fx:id="listDataFiles" editable="true" layoutX="134.0" layoutY="243.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="72.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
-                              <Label layoutX="139.0" layoutY="315.0" text="Data files are files that may need to be read by the programs under test.">
-                                 <font>
-                                    <Font name="Arial Italic" size="10.0" />
-                                 </font>
-                              </Label>
-                              <Label layoutX="139.0" layoutY="223.0" text="Test data files substitute for keyboard inputs to the programs under test.">
-                                 <font>
-                                    <Font name="Arial Italic" size="10.0" />
-                                 </font>
-                              </Label>
-                           </children></AnchorPane>
+                        <ScrollPane fitToWidth="true">
+                           <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
+                                 <children>
+                                    <ListView fx:id="listTestData" editable="true" layoutX="134.0" layoutY="128.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="95.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
+                                    <Button fx:id="btnAdd" layoutX="39.0" layoutY="143.0" mnemonicParsing="false" onAction="#btnAddClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                                    <Button layoutX="39.0" layoutY="28.0" mnemonicParsing="false" onAction="#btnSourceDirectoryClick" prefHeight="27.0" prefWidth="154.0" text="Source Directory" />
+                                    <Button fx:id="btnRemove" layoutX="39.0" layoutY="170.0" mnemonicParsing="false" onAction="#btnTestDataRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
+                                    <Button fx:id="btnStart" layoutX="454.0" layoutY="67.0" mnemonicParsing="false" onAction="#btnStart" prefHeight="49.0" prefWidth="100.0" text="Start" textFill="#270bdb">
+                                       <font>
+                                          <Font name="System Bold" size="15.0" />
+                                       </font>
+                                    </Button>
+                                    <TextField fx:id="txtSourceDirectory" layoutX="200.0" layoutY="28.0" onKeyReleased="#txtSourceDirectoryOnKeyReleased" prefHeight="27.0" prefWidth="355.0" />
+                                    <Label layoutX="45.0" layoutY="116.0" prefHeight="27.0" prefWidth="91.0" text="Test Data">
+                                       <font>
+                                          <Font name="Arial Bold Italic" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Label layoutX="39.0" layoutY="232.0" prefHeight="27.0" prefWidth="91.0" text="Data Files">
+                                       <font>
+                                          <Font name="Arial Bold Italic" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Button fx:id="btnAddDataFiles" layoutX="39.0" layoutY="259.0" mnemonicParsing="false" onAction="#btnAddDataFilesClick" prefHeight="27.0" prefWidth="69.0" text="Add" />
+                                    <Button fx:id="btnRemoveDataFiles" layoutX="39.0" layoutY="286.0" mnemonicParsing="false" onAction="#btnDataFilesRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" />
+                                    <ListView fx:id="listDataFiles" editable="true" layoutX="134.0" layoutY="243.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="72.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
+                                    <Label layoutX="139.0" layoutY="315.0" text="Data files are files that may need to be read by the programs under test.">
+                                       <font>
+                                          <Font name="Arial Italic" size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label layoutX="139.0" layoutY="223.0" text="Test data files substitute for keyboard inputs to the programs under test.">
+                                       <font>
+                                          <Font name="Arial Italic" size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label layoutX="39.0" layoutY="386.0" prefHeight="27.0" prefWidth="91.0" text="Base FIles" textFill="#257c32">
+                                       <font>
+                                          <Font name="Arial Bold Italic" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Button fx:id="btnAddBaseFiles" layoutX="39.0" layoutY="413.0" mnemonicParsing="false" onAction="#btnAddDataFilesClick" prefHeight="27.0" prefWidth="69.0" text="Add" textFill="#257c32" />
+                                    <Button fx:id="btnRemoveBaseFiles" layoutX="39.0" layoutY="440.0" mnemonicParsing="false" onAction="#btnDataFilesRemoveClick" prefHeight="27.0" prefWidth="69.0" text="Remove" textFill="#257c32" />
+                                    <ListView fx:id="listDataFiles1" editable="true" layoutX="134.0" layoutY="397.0" onKeyPressed="#listTestDataKeyPressed" prefHeight="72.0" prefWidth="420.0" style="-fx-border-style: solid; -fx-border-color: #a0a0a0; -fx-border-width: 1;" />
+                                    <Label layoutX="139.0" layoutY="469.0" text="Base files are any starter code files that students may have been provided." textFill="#257c32">
+                                       <font>
+                                          <Font name="Arial Italic" size="10.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets bottom="40.0" />
+                                       </padding>
+                                    </Label>
+                                    <CheckBox fx:id="chkBoxUseMoss" layoutX="348.0" layoutY="97.0" mnemonicParsing="false" text="Use Moss" textFill="#257c32" />
+                                    <Separator layoutX="40.0" layoutY="353.0" prefWidth="500.0">
+                                       <effect>
+                                          <InnerShadow />
+                                       </effect>
+                                    </Separator>
+                                    <Label alignment="CENTER" contentDisplay="CENTER" layoutX="270.0" layoutY="368.0" text="MOSS" textAlignment="CENTER" textFill="#257c32">
+                                       <font>
+                                          <Font name="Arial Bold Italic" size="20.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </ScrollPane>
                             </content>
                         </Tab>
                         <Tab text="2. Output">

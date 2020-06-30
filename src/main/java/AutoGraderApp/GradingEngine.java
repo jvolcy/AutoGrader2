@@ -642,9 +642,6 @@ public class GradingEngine implements IAGConstant, java.io.Serializable {
         message("Attempting to launch grading service...");
         gradingService.start();
 
-        MossClient mossClient = new MossClient("userid goes here");
-        //mossClient.x();
-
     }
 
 

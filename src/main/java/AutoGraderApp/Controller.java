@@ -57,6 +57,7 @@ public class Controller implements IAGConstant {
     public TextField txtPython3Interpreter;
     public TextField txtCppCompiler;
     public TextField txtShell;
+    public ChoiceBox choiceBoxConfigEnableMoss;
     public Button btnSettings;
     public Button btnInputSetup;
     public Button btnOutput;
@@ -103,6 +104,7 @@ public class Controller implements IAGConstant {
     * visit the config tab.  It is used to save the configuration when a tab
     * other than the config tab is selected. */
     private Boolean bConfigMayHaveChanged = false;
+    private String mossUrl;
 
 
     /* ======================================================================
@@ -133,6 +135,10 @@ public class Controller implements IAGConstant {
         //---------- setup "recursive" config options ----------
         choiceBoxConfigRecursive.getItems().add(YES);
         choiceBoxConfigRecursive.getItems().add(NO);
+
+        //---------- setup "enable MOSS" config options ----------
+        choiceBoxConfigEnableMoss.getItems().add(ENABLED);
+        choiceBoxConfigEnableMoss.getItems().add(DISABLED);
 
 
         //---------- update the different configuration fields with the actual user-specified values ----------
@@ -1375,6 +1381,37 @@ public class Controller implements IAGConstant {
         MoodlePreprocessor mpp = new MoodlePreprocessor(autoGrader.getAgDocument().moodleDirectory.getAbsolutePath(),
                 autoGrader.getConfiguration(AG_CONFIG.LANGUAGE),
                 autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
+
+        //---------- xfer to MOSS server to begin immediate background processing ----------
+        //MossClient mossClient = new MossClient(autoGrader.getConfiguration(AG_CONFIG.MOSS_USERID));
+        MossClient mossClient = new MossClient("456234332");  //******* TEMP *******
+        mossClient.setLanguage("python");
+        mossClient.setCommentString("AutoGrader 2");
+        mossClient.setDirectoryMode("1");   //submitted files are in individual submission directories
+
+        mossClient.addBaseFile("/Users/jvolcy/Desktop/moss_test/P1021-common.py");
+        //add user files
+        for (Assignment assignment : mpp.getAssignments()) {
+            //mossClient.addFiles((String[]) assignment.assignmentFiles.toArray());
+            for (File file : assignment.assignmentFiles ) {
+                mossClient.addFile(file.getAbsolutePath());
+            }
+        }
+
+        //****** TO DO ****** add base files
+
+        //****** TO DO ******  This needs to happen in the background
+        //execute send() in the background
+        try {
+            mossUrl = mossClient.send();
+        }
+        catch (Exception e) {
+            console("mossClient.send(): " + e.toString());
+            mossUrl = "";
+        }
+
+        console("MOSS URL = " + mossUrl);
+
 
         //---------- handle multiple Python files ----------
         /* for Python files, if there are more than 1 source files, the user must

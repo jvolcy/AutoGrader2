@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Arrays;
 import java.net.*;
+import static AutoGraderApp.Controller.console;
 
 /* ======================================================================
  * This file implements a client for the Stanford MOSS (Measurement Of
@@ -53,8 +54,8 @@ import java.net.*;
  * ===================================================================== */
 public class MossClient {
     //---------- class members ----------
-    private static final String DEFAULT_MOSS_SERVER = "moss.stanford.edu";
-    private static final int DEFAULT_MOSS_PORT = 7690;
+    public static final String DEFAULT_MOSS_SERVER = "moss.stanford.edu";
+    public static final int DEFAULT_MOSS_PORT = 7690;
 
     private String userid;      //moss userid
     private String server;      //moss server
@@ -94,6 +95,7 @@ public class MossClient {
     * ===================================================================== */
     public MossClient(String userid, String server, int port)
     {
+        console("MOSS: Setting User ID to " + userid);
         //store the userid, server and port #
         this.userid = userid;
         this.server = server;
@@ -107,7 +109,7 @@ public class MossClient {
         //System.out.println(userid + language);
         options = new Hashtable<>();
 
-        options.put("l", "");       //seleced language
+        options.put("l", "");       //selected language
         options.put("m", "10");     //the maximum number of times a given passage may appear before it is ignored
         options.put("d", "0");      //The -d option specifies that submissions are by directory, not by file.
                                     //That is, files in a directory are taken to be part of the same program,
@@ -120,9 +122,19 @@ public class MossClient {
      * Use addFile to add a student programming file to the list of files
      * to be compared.
      * ===================================================================== */
-    void addFile(String filePath)
-    {
+    void addFile(String filePath) {
+        console("MOSS: Adding file " + filePath);
         files.add(filePath);
+    }
+
+    /* ======================================================================
+     * Use addFiles to add multiple student programming files to the list of
+     * files to be compared.
+     * ===================================================================== */
+    void addFiles(String [] filePaths) {
+        for (String filePath : filePaths) {
+            addFile(filePath);
+        }
     }
 
     /* ======================================================================
@@ -135,9 +147,20 @@ public class MossClient {
      * are not usually necessary for obtaining useful information.
      * The -b option names a "base file" when the request is sent to the server.
      * ===================================================================== */
-    void addBaseFile(String filePath)
-    {
+    void addBaseFile(String filePath) {
+        console("MOSS: Adding base file " + filePath);
         baseFiles.add(filePath);
+    }
+
+
+    /* ======================================================================
+     * Use addBaseFiles to add multiple base files to the list of base files.
+     * ===================================================================== */
+    void addBaseFiles(String [] filePaths)
+    {
+        for (String filePath : filePaths) {
+            addBaseFile(filePath);
+        }
     }
 
     /* ======================================================================
@@ -198,6 +221,8 @@ public class MossClient {
      * The -d option specifies that submissions are by directory, not by file.
      * That is, files in a directory are taken to be part of the same program,
      * and reported matches are organized accordingly by directory.
+     * "0" = directory mode not set
+     * "1" = directory mode set
      * ===================================================================== */
     public void setDirectoryMode(String mode) {
         options.put("d", mode);
@@ -207,6 +232,8 @@ public class MossClient {
     # The -x option sends queries to the current experimental version of the server.
     # The experimental server has the most recent Moss features and is also usually
     # less stable (read: may have more bugs).
+    # "0" = do not use experimental server
+    # "1" = use experimental server
      * ===================================================================== */
     public void setExperimentalServer(String opt) {
         options.put("x", opt);
@@ -281,7 +308,7 @@ public class MossClient {
      * ===================================================================== */
     private void uploadFile(String file_path, String display_name, int file_id) throws Exception {
         /*Note: socket must be open before calling this function. */
-        if (display_name.equals("")) {
+        if (display_name.isBlank()) {
             //If no display name added by user,default to file path
             //Display name cannot accept \,replacing it with /
             display_name = file_path.replace(" ", "_").replace("\\", "/");
@@ -331,24 +358,24 @@ public class MossClient {
         if (recv.equals("no")) {
             socketWrite("end\n");
             closeSocket();
-            System.out.println("send() => Language not accepted by server");
+            console("MOSS: send() => Language not accepted by server");
             return "";
         }
         else
         {
-            System.out.println("confirmation >>"+recv+"<<");
+            console("MOSS: confirmation >>"+recv+"<<");
         }
-        System.out.println("Uploading baseFiles...");
+        console("MOSS: Uploading baseFiles...");
         for (String file_path : baseFiles) {
             //print("sending -->", file_path, display_name)
-            uploadFile(file_path, file_path, 0);
+            uploadFile(file_path, "", 0);
         }
 
-        System.out.println("Uploading Files...");
+        console("MOSS: Uploading Files...");
         int index = 1;
         for (String file_path : files) {
             //print("sending -->",file_path, display_name, index )
-            uploadFile(file_path, file_path, index);
+            uploadFile(file_path, "", index);
             index += 1;
 
         }
@@ -356,7 +383,7 @@ public class MossClient {
         //print("sending --> query 0 {}\n".format(self.options['c']).encode())
         socketWrite(String.format("query 0 %s\n", options.get("c")));
 
-        System.out.println("Retrieving response...");
+        console("MOSS: Retrieving response...");
         String response = socketRead();
 
         //print("sending --> {}\n".format("end\n").encode())
