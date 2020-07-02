@@ -58,6 +58,12 @@ public class Controller implements IAGConstant {
     public TextField txtCppCompiler;
     public TextField txtShell;
     public ChoiceBox choiceBoxConfigEnableMoss;
+    public TextField txtMossUserId;
+    public TextField txtMossOptionM;
+    public TextField txtMossOptionN;
+    public TextField txtMossServer;
+    public TextField txtMossPort;
+    public CheckBox chkBoxUseMoss;
     public Button btnSettings;
     public Button btnInputSetup;
     public Button btnOutput;
@@ -101,8 +107,8 @@ public class Controller implements IAGConstant {
     private ArrayList<String> primaryPythonFiles;
 
     /* the bConfigMayHaveChanged is a boolean that is set to true whenever we
-    * visit the config tab.  It is used to save the configuration when a tab
-    * other than the config tab is selected. */
+     * visit the config tab.  It is used to save the configuration when a tab
+     * other than the config tab is selected. */
     private Boolean bConfigMayHaveChanged = false;
     private String mossUrl;
 
@@ -277,6 +283,116 @@ public class Controller implements IAGConstant {
             }
         });
 
+
+        //---------- set the "Enable MOSS" value ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.ENABLE_MOSS) != null)
+            choiceBoxConfigEnableMoss.setValue(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.ENABLE_MOSS));
+        else
+            choiceBoxConfigEnableMoss.setValue(DISABLED);
+
+        //add a listener to choiceBoxConfigRecursive to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        choiceBoxConfigEnableMoss.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [f]...");
+            }
+        });
+
+
+        //---------- set MOSS  User ID value ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USERID) != null)
+            txtMossUserId.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USERID));
+        else
+            txtMossUserId.setText("");
+
+        //add a listener to txtMossUserId to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtMossUserId.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
+
+        //---------- set MOSS_MAX_MATCHES value (-m) ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_MAX_MATCHES) != null)
+            txtMossOptionM.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_MAX_MATCHES));
+        else
+            txtMossOptionM.setText("");
+
+        //add a listener to txtMossOptionM to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtMossOptionM.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
+        //---------- set MOSS_NUM_MATCH_FILES value (-n) ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_NUM_MATCH_FILES) != null)
+            txtMossOptionN.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_NUM_MATCH_FILES));
+        else
+            txtMossOptionN.setText("");
+
+        //add a listener to txtMossOptionN to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtMossOptionN.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
+        //---------- set MOSS Server value ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_SERVER) != null)
+            txtMossServer.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_SERVER));
+        else
+            txtMossServer.setText("");
+
+        //add a listener to txtMossServer to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtMossServer.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
+        //---------- set MOSS Port value ----------
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_PORT) != null)
+            txtMossPort.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_PORT));
+        else
+            txtMossPort.setText("");
+
+        //add a listener to txtMossPort to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        txtMossPort.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [i]...");
+            }
+        });
+
+        //---------- set the "Use MOSS" checkbox value ----------
+        console("MOSS_USE_MOSS = " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS));
+        if (AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS) != null) {
+            chkBoxUseMoss.setSelected(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS).equals(YES));
+            console("AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS) = " + AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS));
+        } else {
+            chkBoxUseMoss.setSelected(false);
+            console("chkBoxUseMoss unchecked.");
+        }
+        //add a listener to chkBoxUseMoss to set bConfigMayHaveChanged = true indicating that a configuration has changed
+        chkBoxUseMoss.selectedProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                bConfigMayHaveChanged = true;
+                //console("Config may have changed [f]...");
+            }
+        });
+
+        //set the original state of the "Use Moss" checkbox
+        chkBoxUseMoss.setDisable(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.ENABLE_MOSS).equals(DISABLED));
+
         //---------- configure the "Test Data" and "Data Files" list view to allow multiple selections ----------
         listTestData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listDataFiles.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -373,9 +489,20 @@ public class Controller implements IAGConstant {
                 AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.PYTHON3_INTERPRETER, txtPython3Interpreter.getText());
                 AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.CPP_COMPILER, txtCppCompiler.getText());
                 AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.SHELL, txtShell.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.ENABLE_MOSS, choiceBoxConfigEnableMoss.getSelectionModel().getSelectedItem().toString());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_USERID, txtMossUserId.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_MAX_MATCHES, txtMossOptionM.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_NUM_MATCH_FILES, txtMossOptionN.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_SERVER, txtMossServer.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_PORT, txtMossPort.getText());
+                AutoGraderApp.autoGrader.setConfiguration(AG_CONFIG.MOSS_USE_MOSS, chkBoxUseMoss.isSelected() ? YES : NO);
 
+                console("configChanged()");
+
+                chkBoxUseMoss.setDisable(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.ENABLE_MOSS).equals(DISABLED));
                 lblLanguage.setText(AutoGraderApp.autoGrader.getConfiguration(AG_CONFIG.LANGUAGE));
                 bConfigMayHaveChanged = false;
+
                 AutoGraderApp.autoGrader.saveConfiguration();
             } catch (Exception e) {
                 console("configChanged(): " + e.toString());
@@ -490,8 +617,7 @@ public class Controller implements IAGConstant {
         // Deserialization
         try {
             AutoGraderApp.autoGrader.deSerializeFromDisk(f.getAbsolutePath());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             //here, we won't change the current document name
             return;
         }
@@ -511,7 +637,7 @@ public class Controller implements IAGConstant {
         option will only be enabled if "Save" is first enabled.  That happens inside
         of doPostGradingProcessing. */
         setDocumentFileName(f.getAbsolutePath());
-   }
+    }
 
 
     /* ======================================================================
@@ -575,7 +701,7 @@ public class Controller implements IAGConstant {
     public void menuFileSaveAs() {
         if (getDocumentFileName() == null) {
             /* this should never happen: the "Save As" menu option should not be enabled
-            * if the document has no name. */
+             * if the document has no name. */
             console("Assertion error: documentFileName == null in call to menuFileSaveAs.");
         }
 
@@ -653,8 +779,7 @@ public class Controller implements IAGConstant {
      * menuFileExportConsoleLog()
      * Callback for File->Export Console Log
      * ===================================================================== */
-    public void menuFileExportConsoleLog()
-    {
+    public void menuFileExportConsoleLog() {
         //get the app's stage
         Stage stage = (Stage) anchorPaneMain.getScene().getWindow();
         message("Export Console Log...");
@@ -684,12 +809,11 @@ public class Controller implements IAGConstant {
         console("Exporting console log...");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
             console("Writing file %s.", f.getAbsolutePath());
-            for (Object li :  listConsole.getItems()) {
+            for (Object li : listConsole.getItems()) {
                 bw.write(li.toString() + "\n");
             }
             //bw.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             console("menuFileExportConsoleLog(): " + e.toString());
             message("Console Log Export Failed.");
         }
@@ -801,7 +925,7 @@ public class Controller implements IAGConstant {
     /* ======================================================================
      * btnConsoleClick()
      * ===================================================================== */
-    public void btnConsoleClick(){
+    public void btnConsoleClick() {
         tabMain.getSelectionModel().select(CONSOLE_TAB);
         btnSettings.setTextFill(Paint.valueOf("black"));
         btnInputSetup.setTextFill(Paint.valueOf("black"));
@@ -890,8 +1014,7 @@ public class Controller implements IAGConstant {
         try {
             File f = new File(txtSourceDirectory.getText());
             btnStart.setDisable(!(f.isDirectory()));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             btnStart.setDisable(true);
         }
     }
@@ -918,12 +1041,12 @@ public class Controller implements IAGConstant {
 
             if (documentFileName == null) {
                 stage.setTitle(AutoGraderApp.appName);
-            }
-            else {
+            } else {
                 stage.setTitle(AutoGraderApp.appName + " - " + documentFileName);
             }
+        } catch (Exception e) {
+            console("setDocumentFileName( <%s> ): No stage.", AutoGraderApp.appName + ":" + fileName);
         }
-        catch (Exception e) { console("setDocumentFileName( <%s> ): No stage.", AutoGraderApp.appName+":"+fileName); }
 
         //enable/disable the "save" and "save as" menu options as appropriate
         if (menuFileSave.isDisable()) {
@@ -934,8 +1057,7 @@ public class Controller implements IAGConstant {
 
         if (documentFileName == null) {
             menuFileSaveAs.setDisable(true);
-        }
-        else {
+        } else {
             menuFileSaveAs.setDisable(false);
         }
     }
@@ -949,7 +1071,9 @@ public class Controller implements IAGConstant {
      * keep track of the enable/disable status of the "File->Save" and
      * "File-Save As" menu options.
      * ===================================================================== */
-    private String getDocumentFileName() { return documentFileName; }
+    private String getDocumentFileName() {
+        return documentFileName;
+    }
 
 
     /* ======================================================================
@@ -1059,8 +1183,7 @@ public class Controller implements IAGConstant {
 
             btnGradeSummary.setText("View Summary");
             bShowingSummary = false;
-        }
-        else {
+        } else {
             //we are on the report page: switch to the summary page.
             /* transitioning from the report page to the summary page first requires
              * that any edits to the grade and comment input controls be updated in the
@@ -1117,10 +1240,10 @@ public class Controller implements IAGConstant {
     private void selectMainPythonFile(Assignment assignment) {
 
         /*First, check to see if any of the files match a name on the
-        * primaryPythonFiles name list.  If it does, use it and quit.*/
+         * primaryPythonFiles name list.  If it does, use it and quit.*/
         for (File f : assignment.assignmentFiles) {     //go through every file in the assignment
             //compare the select filename with each filename in assignment
-            if (primaryPythonFiles.contains(f.getName())){
+            if (primaryPythonFiles.contains(f.getName())) {
                 //if we have a match, we are done: store it in
                 // primaryAssignment?File and quit the loop
                 assignment.primaryAssignmentFile = f;
@@ -1131,8 +1254,9 @@ public class Controller implements IAGConstant {
 
 
         /* create a list of choices that will hold the names of the multiple
-        * python files. */
-        List<String> choices = new ArrayList<>();;
+         * python files. */
+        List<String> choices = new ArrayList<>();
+        ;
 
         // add the names of each file to the list
         for (File f : assignment.assignmentFiles) {
@@ -1140,8 +1264,8 @@ public class Controller implements IAGConstant {
         }
 
         /* Create a standard ChoiceDialog object.  We will customize this
-        * dialog box by replacing its two 'Ok' and 'Cancel' buttons with
-        * custom buttons. */
+         * dialog box by replacing its two 'Ok' and 'Cancel' buttons with
+         * custom buttons. */
         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
 
         /* Setup the different messaging texts for the dialog box. */
@@ -1153,11 +1277,11 @@ public class Controller implements IAGConstant {
         dialog.setContentText("Primary source:");
 
         /* The dialog box will offer the user 3 options when multiple python files are
-        * are found.  First, the user may simply ignore the problem, in which case the
-        * submission is not graded.  Second, the user can select among the different
-        * files which is the primary.  Third, the user can select the primary and specify
-        * that the file identified as primary will be the same for future submissions.
-        * Here, we create 3 custom buttons corresponding to these 3 choices. */
+         * are found.  First, the user may simply ignore the problem, in which case the
+         * submission is not graded.  Second, the user can select among the different
+         * files which is the primary.  Third, the user can select the primary and specify
+         * that the file identified as primary will be the same for future submissions.
+         * Here, we create 3 custom buttons corresponding to these 3 choices. */
         ButtonType UseSelected = new ButtonType("Applies For This Submission Only", ButtonBar.ButtonData.OK_DONE);
         ButtonType UseForAllButtonType = new ButtonType("Applies For All Submissions", ButtonBar.ButtonData.OK_DONE);
         ButtonType SkipSubmission = new ButtonType("Do Not Grade This Submission", ButtonBar.ButtonData.OK_DONE);
@@ -1168,11 +1292,11 @@ public class Controller implements IAGConstant {
 
         //add our 3 custom buttons
         dialog.getDialogPane().getButtonTypes().add(SkipSubmission);
-        dialog.getDialogPane().getButtonTypes().add(UseSelected );
-        dialog.getDialogPane().getButtonTypes().add(UseForAllButtonType );
+        dialog.getDialogPane().getButtonTypes().add(UseSelected);
+        dialog.getDialogPane().getButtonTypes().add(UseForAllButtonType);
 
         /* Rather than returning the selected item from the choice list, we want to
-        * return the button the user selected. */
+         * return the button the user selected. */
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == UseSelected) {
                 //user selected "use selected file only for current submission"
@@ -1189,28 +1313,27 @@ public class Controller implements IAGConstant {
         });
 
         /* present the dialog box and wait for the user's choice
-        * which will be a String assigned to result. */
+         * which will be a String assigned to result. */
         String result = dialog.showAndWait().get();
 
         /* We have to consider all 3 possible outcomes: User canceled,
-        * user selected "for this assignment only" or user selected
-        * "use for all assignments". */
+         * user selected "for this assignment only" or user selected
+         * "use for all assignments". */
         if (result.equals("SkipSubmission")) {
             //user opted to skip the assignment.  Indicate that there
             //is no primary assignment file for this submission.
             //The submission cannot be graded.
             assignment.primaryAssignmentFile = null;
             console("Skipping submission for " + assignment.studentName + ".");
-        }
-        else {
+        } else {
             /* Here, the user did NOT opt to skip the assignment.  Either
-            * the primary python file was selected for the current submission
-            * for for the current and all future submissions.
-            * The drop-down list box on the choice dialog contains only
-            * the file name of the python files, not the full path name.
-            * We need to assign the full path name to the primaryAssignmentFile
-            * member of 'assignment'.  We search every filename for a match,
-            * then store the corresponding full pathname. */
+             * the primary python file was selected for the current submission
+             * for for the current and all future submissions.
+             * The drop-down list box on the choice dialog contains only
+             * the file name of the python files, not the full path name.
+             * We need to assign the full path name to the primaryAssignmentFile
+             * member of 'assignment'.  We search every filename for a match,
+             * then store the corresponding full pathname. */
             for (File f : assignment.assignmentFiles) {     //go through every file in the assignment
                 //compare the select filename with each filename in assignment
                 if (dialog.getSelectedItem().equals(f.getName())) {
@@ -1259,8 +1382,7 @@ public class Controller implements IAGConstant {
 
             //select the first name on the student name list by default
             cbName.getSelectionModel().selectFirst();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             console("populateStudentNameChoiceBox(): " + e.toString());
         }
     }
@@ -1329,18 +1451,17 @@ public class Controller implements IAGConstant {
             String content = readFromFile(filename);
 
             //search for test case separators
-            String [] subCases = content.split(IAGConstant.TEST_CASE_SEPARATOR);
+            String[] subCases = content.split(IAGConstant.TEST_CASE_SEPARATOR);
 
             //if none are found, the length of subCases array will be 1.
             //In that case, add the test files from the 'ListTestData' to the testFiles list
             if (subCases.length == 1) {
                 testFiles.add(new File(filename));
-            }
-            else {
+            } else {
                 //create temporary files in the output directory for each sub-case
-                for (int counter=1; counter <= subCases.length; counter++) {
+                for (int counter = 1; counter <= subCases.length; counter++) {
                     String testDataFileName = outputDirectory.getAbsolutePath() + "/" + fileNameFromPathName(filename) + "-" + counter;
-                    writeToFile(testDataFileName, subCases[counter-1]);
+                    writeToFile(testDataFileName, subCases[counter - 1]);
                     testFiles.add(new File(testDataFileName));
                     console("creating sub-test case file " + testDataFileName);
                 }
@@ -1364,8 +1485,8 @@ public class Controller implements IAGConstant {
 
         //---------- null the documentFileName ----------
         /* setting documentFileName to null tells us that the document has not
-        * been saved (has not been named).  This will also determine the
-        * enable/disable status of the "Save As" menu option. */
+         * been saved (has not been named).  This will also determine the
+         * enable/disable status of the "Save As" menu option. */
         setDocumentFileName(null);
 
         //---------- Reset the primaryPythonFile list to the default value ----------
@@ -1377,41 +1498,60 @@ public class Controller implements IAGConstant {
 
         // The pre-processor extracts assignment files and student names
         // from the downloaded and uncompressed Moodle submissions download.
-        autoGrader.getAgDocument().moodleDirectory = new File (txtSourceDirectory.getText());
+        autoGrader.getAgDocument().moodleDirectory = new File(txtSourceDirectory.getText());
         MoodlePreprocessor mpp = new MoodlePreprocessor(autoGrader.getAgDocument().moodleDirectory.getAbsolutePath(),
                 autoGrader.getConfiguration(AG_CONFIG.LANGUAGE),
                 autoGrader.getConfiguration(AG_CONFIG.AUTO_UNCOMPRESS).equals(YES));
 
         //---------- xfer to MOSS server to begin immediate background processing ----------
-        //MossClient mossClient = new MossClient(autoGrader.getConfiguration(AG_CONFIG.MOSS_USERID));
-        MossClient mossClient = new MossClient("456234332");  //******* TEMP *******
-        mossClient.setLanguage("python");
-        mossClient.setCommentString("AutoGrader 2");
-        mossClient.setDirectoryMode("1");   //submitted files are in individual submission directories
+        //set the default output of MOSS to an empty URL
+        mossUrl = "";
+        /* first, check that "use MOSS" is checked.  */
+        if ((autoGrader.getConfiguration(AG_CONFIG.ENABLE_MOSS)).equals(ENABLED)
+                && autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS).equals(YES)) {
+            MossClient mossClient = new MossClient(autoGrader.getConfiguration(AG_CONFIG.MOSS_USERID));
+            //MossClient mossClient = new MossClient("456234332");  //******* TEMP *******
 
-        mossClient.addBaseFile("/Users/jvolcy/Desktop/moss_test/P1021-common.py");
-        //add user files
-        for (Assignment assignment : mpp.getAssignments()) {
-            //mossClient.addFiles((String[]) assignment.assignmentFiles.toArray());
-            for (File file : assignment.assignmentFiles ) {
-                mossClient.addFile(file.getAbsolutePath());
+            /* Now, verify that a suitable language is selected.  "Auto" will not work. */
+            if (autoGrader.getConfiguration(AG_CONFIG.LANGUAGE).equals(LANGUAGE_PYTHON3)) {
+                mossClient.setLanguage("python");
+            } else if (autoGrader.getConfiguration(AG_CONFIG.LANGUAGE).equals(LANGUAGE_CPP)) {
+                mossClient.setLanguage("cc");
+            } else {
+                mossClient.setLanguage("");
+                console("Use of auto-language detection is not compatible with MOSS.");
+                console("Please specify a language in order to enable MOSS.");
             }
-        }
 
-        //****** TO DO ****** add base files
+            /* Now, we are ready to run MOSS */
+            if (!mossClient.getLanguage().isEmpty()) {
+                mossClient.setDirectoryMode("1");   //submitted files are in individual submission directories
 
-        //****** TO DO ******  This needs to happen in the background
-        //execute send() in the background
-        try {
-            mossUrl = mossClient.send();
-        }
-        catch (Exception e) {
-            console("mossClient.send(): " + e.toString());
+                //add base files
+                mossClient.addBaseFile("/Users/jvolcy/Desktop/moss_test/P1021-common.py");
+                //add user files
+                for (Assignment assignment : mpp.getAssignments()) {
+                    //mossClient.addFiles((String[]) assignment.assignmentFiles.toArray());
+                    for (File file : assignment.assignmentFiles) {
+                        mossClient.addFile(file.getAbsolutePath());
+                    }
+                }
+
+                //****** TO DO ******  This needs to happen in the background
+                //execute send() in the background
+                try {
+                    mossUrl = mossClient.send();
+                } catch (Exception e) {
+                    console("mossClient.send(): " + e.toString());
+                    mossUrl = "";
+                }
+            }  //if (!mossClient.getLanguage().isEmpty())
+
+        } else {      //MOSS_USE_MOSS = No or MOSS_ENABLE = Disable
             mossUrl = "";
-        }
+        }  //if ( autoGrader.getConfiguration(AG_CONFIG.MOSS_USE_MOSS).equals(YES) )
 
         console("MOSS URL = " + mossUrl);
-
 
         //---------- handle multiple Python files ----------
         /* for Python files, if there are more than 1 source files, the user must
@@ -1434,6 +1574,7 @@ public class Controller implements IAGConstant {
                 }
             }
         }
+
         //---------- Xfer Assignments to the Grading Engine ----------
         /* The Moodle pre-preocessor creates the Assignments files
          * array.  It also populates the student name and possibly

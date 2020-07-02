@@ -179,6 +179,13 @@ public class MossClient {
     }
 
     /* ======================================================================
+     * Returns the current language option.
+     * ===================================================================== */
+    public String getLanguage() {
+        return options.get("l");
+    }
+
+    /* ======================================================================
     # The -m option sets the maximum number of times a given passage may appear
     # before it is ignored.  A passage of code that appears in many programs
     # is probably legitimate sharing and not the result of plagiarism.  With -m N,

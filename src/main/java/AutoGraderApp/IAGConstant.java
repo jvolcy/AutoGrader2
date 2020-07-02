@@ -46,8 +46,8 @@ public interface IAGConstant {
         public static final String SHELL = "SHELL";
         public static final String ENABLE_MOSS = "ENABLE_MOSS";
         public static final String MOSS_USERID = "MOSS_USERID";
-        public static final String MOSS_MAX_MATCHES = "MOSS_MAX_MATCHES";
-        public static final String MOSS_NUM_MATCH_FILES = "MOSS_NUM_MATCH_FILES";
+        public static final String MOSS_MAX_MATCHES = "MOSS_MAX_MATCHES";           //-m
+        public static final String MOSS_NUM_MATCH_FILES = "MOSS_NUM_MATCH_FILES";   //-n
         public static final String MOSS_USE_MOSS = "MOSS_USE_MOSS";
         public static final String MOSS_SERVER = "MOSS_SERVER";
         public static final String MOSS_PORT = "MOSS_PORT";

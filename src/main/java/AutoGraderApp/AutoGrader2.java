@@ -257,7 +257,7 @@ public class AutoGrader2 implements IAGConstant {
         ag_config.put(AG_CONFIG.PYTHON3_INTERPRETER, python3Path);
         ag_config.put(AG_CONFIG.CPP_COMPILER, cppPath);
         ag_config.put(AG_CONFIG.SHELL, shellPath);
-        ag_config.put(AG_CONFIG.ENABLE_MOSS, NO);
+        ag_config.put(AG_CONFIG.ENABLE_MOSS, DISABLED);
         ag_config.put(AG_CONFIG.MOSS_USERID, "");
         ag_config.put(AG_CONFIG.MOSS_MAX_MATCHES, "10");
         ag_config.put(AG_CONFIG.MOSS_NUM_MATCH_FILES, "250");
@@ -296,6 +296,7 @@ public class AutoGrader2 implements IAGConstant {
                 //also, if the key's value is null, use the default.
                 if (jo.containsKey(key) && (jo.get(key) != ""))
                     ag_config.put(key, (String)jo.get(key));
+                    console("ag_config("+key+") = " + ag_config.get(key));
             }
             /*
             ag_config.put(AG_CONFIG.LANGUAGE, (String) jo.get(AG_CONFIG.LANGUAGE));

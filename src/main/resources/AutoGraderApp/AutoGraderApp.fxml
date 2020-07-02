@@ -418,7 +418,7 @@
                                           <Insets bottom="40.0" />
                                        </padding>
                                     </Label>
-                                    <CheckBox fx:id="chkBoxUseMoss" layoutX="348.0" layoutY="97.0" mnemonicParsing="false" text="Use Moss" textFill="#257c32" />
+                                    <CheckBox fx:id="chkBoxUseMoss" layoutX="348.0" layoutY="97.0" mnemonicParsing="false" onAction="#configChanged" text="Use Moss" textFill="#257c32" />
                                     <Separator layoutX="40.0" layoutY="353.0" prefWidth="500.0">
                                        <effect>
                                           <InnerShadow />
